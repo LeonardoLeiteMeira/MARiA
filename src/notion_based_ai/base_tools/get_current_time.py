@@ -18,3 +18,9 @@ class GetCurrentTime(BaseTool):
         now = datetime.now()
         current_time = now.strftime("%I:%M %p, %B, %Y")
         return current_time
+    
+    async def _arun(self, *args, **kwargs) -> str:
+        from datetime import datetime
+        now = datetime.now()
+        current_time = now.strftime("%I:%M %p, %B, %Y")
+        return current_time

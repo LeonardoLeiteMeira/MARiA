@@ -21,54 +21,6 @@ class SearchTransactions(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         """Returns a list of more recent transactions."""
-        return [
-            {
-                'name': 'uber',
-                'amount': 20.00,
-                'date': '2022-01-01',
-                'card': 'Nubanck credit card',
-                'category': 'Transporte'
-            },
-            {
-                'name': 'starbucks',
-                'amount': 5.75,
-                'date': '2022-01-02',
-                'card': 'Nubanck debit card',
-                'category': 'Alimentação'
-            },
-            {
-                'name': 'amazon',
-                'amount': 50.00,
-                'date': '2022-01-03',
-                'card': 'Nubanck credit card',
-                'category': 'Diversos'
-            },
-            {
-                'name': 'netflix',
-                'amount': 15.99,
-                'date': '2022-01-04',
-                'card': 'Nubanck credit card',
-                'category': 'Lazer'
-            },
-            {
-                'name': 'grocery store',
-                'amount': 100.00,
-                'date': '2022-01-05',
-                'card': 'Nubanck debit card',
-                'category': 'Alimentação'
-            },
-            {
-                'name': 'gym membership',
-                'amount': 45.00,
-                'date': '2022-01-06',
-                'card': 'Nubanck credit card',
-                'category': 'Saúde'
-            },
-            {
-                'name': "My girl's friend gift",
-                'amount': 100.00,
-                'date': '2025-02-06',
-                'card': 'XP inc debit card',
-                'category': 'Diversos'
-            }
-        ]
+        from ..notion_repository import notion_transactio_repository
+        return notion_transactio_repository.get_transactions()
+        

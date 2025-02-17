@@ -56,13 +56,13 @@ while True:
         print(memory.model_dump_json())
         break
 
-    # Add the user's message to the conversation memory
     memory.chat_memory.add_message(HumanMessage(content=user_input))
 
-    # Invoke the agent with the user input and the current chat history
     response = agent_executor.invoke({"input": user_input})
     print("Bot:", response["output"])
 
-    # Add the agent's response to the conversation memory
     memory.chat_memory.add_message(AIMessage(content=response["output"]))
 
+
+# TODO Pesquisar sobre e implementar uma cache no redis para as chamadas de tools
+# Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas
