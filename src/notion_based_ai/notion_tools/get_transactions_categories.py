@@ -22,14 +22,5 @@ class GetTransactionsCategories(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         """Returns a list of all possible categories for transactions."""
-        return [
-            {'id': 1, 'category': 'Alimentação'},
-            {'id': 2, 'category': 'Transporte'},
-            {'id': 3, 'category': 'Saúde'},
-            {'id': 4, 'category': 'Educação'},
-            {'id': 5, 'category': 'Entretenimento'},
-            {'id': 6, 'category': 'Compras'},
-            {'id': 7, 'category': 'Serviços'},
-            {'id': 8, 'category': 'Investimento'},
-            {'id': 9, 'category': 'Outros'}
-        ]
+        from ..notion_repository import notion_transactio_repository
+        return notion_transactio_repository.get_categories()

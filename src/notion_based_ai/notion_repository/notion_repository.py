@@ -14,25 +14,19 @@ class NotionRepository:
         start_cursor: dict = None,
         page_size: int = 10,
     ) -> dict:
-        data = self.notion_client.databases.query(
-            **{
-                "database_id": database_id,
-                # 'filter_properties': filter_properties,
-                # "filter": filter,
-                "sorts": sorts,
-                "start_cursor": start_cursor,
-                "page_size": page_size
-            }
-        )
-        # registers = []
-        # for item in data['results']:
-        #     row = {}
-        #     for key, value in item['properties'].items():
-        #         property = BasicProperty(key, value)
-        #         row[property.name] = property.value
-        #     registers.append(row)
-        # return registers
+        query = {
+            "database_id": database_id,
+            "sorts": sorts,
+            "start_cursor": start_cursor,
+            "page_size": page_size
+        }
 
+        if filter_properties:
+            query["filter_properties"] = filter_properties
+        if filter:
+            query["filter"] = filter
+
+        data = self.notion_client.databases.query(**query)
         return data
 
     def get_page(self, page_id: str) -> dict:
@@ -42,10 +36,9 @@ class NotionRepository:
             }
         )
         return data
-
-    # def get_pages(self, database_id: str) -> List[NotionPage]:
-    #     response = self.notion_client.get_pages(database_id)
-    #     return [NotionPage(page) for page in response]
+    
+    def retrieve_databse(self, databse_id: str) -> dict:
+        return self.notion_client.databases.retrieve(databse_id)
 
     # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.create_page(database_id, properties)

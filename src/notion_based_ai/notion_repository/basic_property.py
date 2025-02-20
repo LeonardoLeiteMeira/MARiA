@@ -1,7 +1,7 @@
 
 # TODO falta usar essa estrutura para armazenar as transacoes de maneira mais simples
 class BasicProperty:
-    BASIC_PROPERTIES = ['number', 'relation', 'date']
+    BASIC_PROPERTIES = ['number', 'relation', 'date', 'created_time']
 
     def __init__(self, name: str, propety: dict):
         self.name = name
