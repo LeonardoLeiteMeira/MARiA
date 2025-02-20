@@ -1,87 +1,77 @@
+from notion_based_ai.notion_types import Database
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 
 class NotionTransaction:
     def __init__(self, notion_repository: NotionRepository):
         self.notion_repository = notion_repository
-        self.databases = [
-            {
-                "name": "transactions",
+        self.databases = {
+            Database.TRANSACTIONS: {
                 "id": "97c5aad2c46d46a49c3b78e83473ae52"
             },
-            {
-                "name": "categories",
+            Database.CATEGORIES : {
                 "id": "38236d860412473fa9f8d3a0f1e4b0e1"
             },
-            {
-                "name": "months",
+            Database.MONTHS : {
                 "id": "d91b81e32555418a8bb62a76d7c69ac7"
+            },
+            Database.CARDS: {
+                "id" : "d1f6611fa1c046eb8cdf87ba3c757f6b"
+            },
+            Database.TYPES: {
+                'id': '6852342492704ecf8205c6ac953cf3a2'
             }
-        ]
+        }
         self.cache = {}
         self.load_database_schema()
 
     def load_database_schema(self) -> dict:
-        for database in self.databases:
-            data = self.notion_repository.retrieve_databse(database['id'])
-            database['properties'] = data['properties']
+        for key, value in self.databases.items():
+            data = self.notion_repository.retrieve_databse(value['id'])
+            value['properties'] = data['properties']
         return data
 
     def get_transactions(self) -> dict:
-        data = self.notion_repository.get_database(self.databases[0]['id'])
+        data = self.notion_repository.get_database(self.databases[Database.TRANSACTIONS]['id'])
         return self.__process_database_registers(data)
     
     def get_full_categories(self) -> dict:
-        data = self.notion_repository.get_database(self.databases[1]['id'])
+        data = self.notion_repository.get_database(self.databases[Database.CATEGORIES]['id'])
         return self.__process_database_registers(data)
-    
-    def get_simple_categories(self) -> dict:
-        title_property_id = ""
-        for key, value in self.databases[1]['properties'].items():
-            if value['type'] == 'title':
-                title_property_id = value['id']
-                break
-        data = self.notion_repository.get_database(self.databases[1]['id'], filter_properties=[title_property_id])
+
+    def get_simple_data(self, database:Database):
+        title_property_id = self.__get_title_property_from_schema(self.databases[database]['properties'])
+        data = self.notion_repository.get_database(self.databases[database]['id'], filter_properties=[title_property_id])
         return self.__process_database_registers(data)
     
     def get_current_month(self) -> dict:
         data = self.notion_repository.get_database(
-            self.databases[2]['id'],
+            self.databases[Database.MONTHS]['id'],
             filter={
-                'and': [
-                    {
-                        'property': 'isMesAtual',
-                        'formula': {
-                            'checkbox': {
-                                'equals': True
-                            }
-                        }
-                    }
-                ]
+                'and': [{
+                'property': 'isMesAtual',
+                'formula': {
+                    'checkbox': {
+                        'equals': True
+                }}}]
             }    
         )
         return self.__process_database_registers(data)
     
     def get_months(self) -> dict:
         data = self.notion_repository.get_database(
-            self.databases[2]['id'],
+            self.databases[Database.MONTHS]['id'],
             filter={
-                'and': [
+                'and': [{
+                    'property': 'title',
+                    'title': {
+                        'contains': 'fev'
+                    }},
                     {
-                        'property': 'title',
-                        'title': {
-                            'contains': 'fev'
-                        }
-                    },
-                    {
-                        'property': 'title',
-                        'title': {
-                            'contains': '2025'
-                        }
-                    }
-                ]
-            }    
-        )
+                    'property': 'title',
+                    'title': {
+                        'contains': '2025'
+                    }}]})
         return self.__process_database_registers(data)
 
     def __process_database_registers(self, data) -> dict:
@@ -111,3 +101,9 @@ class NotionTransaction:
                 name = value['title'][0]['plain_text']
                 self.cache[page_id] = name
         return name
+
+    def __get_title_property_from_schema(self, schema:dict) -> str:
+        for key, value in schema.items():
+            if value['type'] == 'title':
+                return value['id']
+        return None

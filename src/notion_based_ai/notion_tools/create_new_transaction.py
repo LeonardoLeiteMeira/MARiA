@@ -7,8 +7,10 @@ class CreateNewTransactionInput(BaseModel):
     name: str = Field(description="Name choosen by the user to identify the transaction")
     amount: float = Field(description="Amount of the transaction")
     date: str = Field(description="Date of the transaction")
-    card: str = Field(description="Card used for the transaction")
-    category: str = Field(description="Valid categotry to classify the transaction")
+    card: str = Field(description="Id of a Card used for the transaction")
+    category: str = Field(description="Id of a valid Categotry to classify the transaction")
+    month: str = Field(description="Id of a Valid Month to classify the transaction")
+    type: str = Field(description="Id of a valid Type to classify the transaction")
 
 
 class CreateNewTransaction(BaseTool):

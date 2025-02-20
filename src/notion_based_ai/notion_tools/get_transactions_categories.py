@@ -3,6 +3,8 @@ from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
 
+from notion_based_ai.notion_types import Database
+
 class GetTransactionsCategoriesInput(BaseModel):
     # query: str = Field(description="should be a search query")
     pass
@@ -23,4 +25,4 @@ class GetTransactionsCategories(BaseTool):
     ) -> list[dict]:
         """Returns a list of all possible categories for transactions."""
         from ..notion_repository import notion_transactio_repository
-        return notion_transactio_repository.get_categories()
+        return notion_transactio_repository.get_simple_data(Database.CATEGORIES)
