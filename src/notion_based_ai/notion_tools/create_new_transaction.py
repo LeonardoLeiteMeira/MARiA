@@ -3,6 +3,8 @@ from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
 
+from notion_based_ai.notion_types import Database
+
 class CreateNewTransactionInput(BaseModel):
     name: str = Field(description="Name choosen by the user to identify the transaction")
     amount: float = Field(description="Amount of the transaction")
@@ -15,7 +17,7 @@ class CreateNewTransactionInput(BaseModel):
 
 class CreateNewTransaction(BaseTool):
     name: str = "create_new_transaction"
-    description: str = "Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask."
+    description: str = "Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask. Is necessary to verify the database structure."
     args_schema: Type[BaseModel] = CreateNewTransactionInput
 
     def _run(
@@ -25,15 +27,19 @@ class CreateNewTransaction(BaseTool):
         date: str,
         card: str,
         category: str,
+        month: str,
+        type: str,
         *args, **kwargs
     ) -> list[dict]:
-        """Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask."""
+        """Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask. Is necessary to verify the database structure."""
         return asyncio.run(self._arun(
             name,
             amount,
             date,
             card,
-            category
+            category,
+            month,
+            type
         ))
 
     async def _arun(
@@ -43,13 +49,19 @@ class CreateNewTransaction(BaseTool):
         date: str,
         card: str,
         category: str,
+        month,
+        type,
         *args, **kwargs
     ) -> list[dict]:
-        """Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask."""
+        """Creates a new transaction with the given data - If user does not provide any parameter, it's necessary to ask. Is necessary to verify the database structure."""
         print({
             'name': name,
             'amount': amount,
             'date': date,
             'card': card,
-            'category': category
+            'category': category,
+            'month': month,
+            'type': type
         })
+        from ..notion_repository import notion_transactio_repository
+        # return notion_transactio_repository.

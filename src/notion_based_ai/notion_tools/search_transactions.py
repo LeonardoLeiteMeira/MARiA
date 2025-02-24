@@ -10,7 +10,7 @@ class SearchTransactionsInput(BaseModel):
 
 class SearchTransactions(BaseTool):
     name: str = "search_transactions"
-    description: str = "Usufull when tou need to search for the latest transactions"
+    description: str = "Usefull when tou need to search for the latest transactions"
     args_schema: Type[BaseModel] = SearchTransactionsInput
 
     def _run(self, *args, **kwargs) -> list[dict]:

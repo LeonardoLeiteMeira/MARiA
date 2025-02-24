@@ -11,7 +11,7 @@ class GetUserCardsInput(BaseModel):
 
 
 class GetUserCards(BaseTool):
-    name: str = "get_user_categories"
+    name: str = "get_user_cards"
     description: str = "List all possible cards for transactions"
     args_schema: Type[BaseModel] = GetUserCardsInput
 

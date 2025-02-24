@@ -6,47 +6,62 @@ class NotionTransaction:
     def __init__(self, notion_repository: NotionRepository):
         self.notion_repository = notion_repository
         self.databases = {
-            Database.TRANSACTIONS: {
+            Database.TRANSACTIONS.value: {
                 "id": "97c5aad2c46d46a49c3b78e83473ae52"
             },
-            Database.CATEGORIES : {
+            Database.CATEGORIES.value : {
                 "id": "38236d860412473fa9f8d3a0f1e4b0e1"
             },
-            Database.MONTHS : {
+            Database.MONTHS.value : {
                 "id": "d91b81e32555418a8bb62a76d7c69ac7"
             },
-            Database.CARDS: {
+            Database.CARDS.value: {
                 "id" : "d1f6611fa1c046eb8cdf87ba3c757f6b"
             },
-            Database.TYPES: {
+            Database.TYPES.value: {
                 'id': '6852342492704ecf8205c6ac953cf3a2'
             }
         }
         self.cache = {}
-        self.load_database_schema()
+        self.__load_database_schema()
 
-    def load_database_schema(self) -> dict:
+    def __load_database_schema(self) -> dict:
         for key, value in self.databases.items():
             data = self.notion_repository.retrieve_databse(value['id'])
             value['properties'] = data['properties']
-        return data
 
     def get_transactions(self) -> dict:
-        data = self.notion_repository.get_database(self.databases[Database.TRANSACTIONS]['id'])
+        data = self.notion_repository.get_database(self.databases[Database.TRANSACTIONS.value]['id'])
         return self.__process_database_registers(data)
     
     def get_full_categories(self) -> dict:
-        data = self.notion_repository.get_database(self.databases[Database.CATEGORIES]['id'])
+        data = self.notion_repository.get_database(self.databases[Database.CATEGORIES.value]['id'])
+        return self.__process_database_registers(data)
+    
+    def get_months_by_year(self, year:int, property_ids: list[str] = []) -> dict:
+        title_property_id = self.__get_title_property_from_schema(self.databases[Database.MONTHS.value]['properties'])
+        data = self.notion_repository.get_database(
+            self.databases[Database.MONTHS.value]['id'],
+            filter_properties=[title_property_id, *property_ids],
+            filter={
+                'and':[{
+                    'property': 'MesData',
+                        'date': {'on_or_after': f"{year}"},
+                    }]}        
+            )
         return self.__process_database_registers(data)
 
     def get_simple_data(self, database:Database):
-        title_property_id = self.__get_title_property_from_schema(self.databases[database]['properties'])
-        data = self.notion_repository.get_database(self.databases[database]['id'], filter_properties=[title_property_id])
+        title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
+        data = self.notion_repository.get_database(self.databases[database.value]['id'], filter_properties=[title_property_id])
         return self.__process_database_registers(data)
+
+    def get_properties(self, database: str) -> dict:
+        return self.databases[database]['properties']
     
     def get_current_month(self) -> dict:
         data = self.notion_repository.get_database(
-            self.databases[Database.MONTHS]['id'],
+            self.databases[Database.MONTHS.value]['id'],
             filter={
                 'and': [{
                 'property': 'isMesAtual',
@@ -58,21 +73,12 @@ class NotionTransaction:
         )
         return self.__process_database_registers(data)
     
-    def get_months(self) -> dict:
-        data = self.notion_repository.get_database(
-            self.databases[Database.MONTHS]['id'],
-            filter={
-                'and': [{
-                    'property': 'title',
-                    'title': {
-                        'contains': 'fev'
-                    }},
-                    {
-                    'property': 'title',
-                    'title': {
-                        'contains': '2025'
-                    }}]})
-        return self.__process_database_registers(data)
+    def create_out_transaction(self, data: dict):
+        for key, value in data.items():
+            pass
+        properties = self.databases[Database.TRANSACTIONS.value]['properties']
+        for key, value in properties.items():
+            print(key, value)
 
     def __process_database_registers(self, data) -> dict:
         registers = []

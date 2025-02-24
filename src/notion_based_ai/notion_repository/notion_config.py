@@ -14,6 +14,5 @@ repo = NotionRepository(notion)
 notion_transactio_repository = NotionTransaction(repo)
 
 #TODO proximo passo sera criar uma transacao no notion
-
-data = notion_transactio_repository.get_simple_data(Database.CARDS)
-print(data)
+# data = notion_transactio_repository.get_months_by_year(2025, ['OzoZ'])
+# print(data)
