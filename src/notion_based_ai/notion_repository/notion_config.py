@@ -13,6 +13,8 @@ notion = Client(auth=api_key)
 repo = NotionRepository(notion)
 notion_transactio_repository = NotionTransaction(repo)
 
+
 #TODO proximo passo sera criar uma transacao no notion
-# data = notion_transactio_repository.get_months_by_year(2025, ['OzoZ'])
-# print(data)
+if __name__ == '__main__':
+    data = notion_transactio_repository.get_months_by_year(2025, ['OzoZ'])
+    print(data)

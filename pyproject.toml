@@ -11,7 +11,10 @@ dependencies = [
     "python-dotenv (>=1.0.1,<2.0.0)",
     "langchain (>=0.3.18,<0.4.0)",
     "langchain-openai (>=0.3.6,<0.4.0)",
-    "notion-client (>=2.3.0,<3.0.0)"
+    "notion-client (>=2.3.0,<3.0.0)",
+    "websocket-client (>=1.8.0,<2.0.0)",
+    "python-socketio (>=5.12.1,<6.0.0)",
+    "fastapi[standard] (>=0.115.11,<0.116.0)"
 ]
 
 [tool.poetry]

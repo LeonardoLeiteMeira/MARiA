@@ -6,23 +6,20 @@ import asyncio
 from notion_based_ai.notion_types import Database
 
 class GetUserCardsInput(BaseModel):
-    # query: str = Field(description="should be a search query")
     pass
 
 
 class GetUserCards(BaseTool):
-    name: str = "get_user_cards"
-    description: str = "List all possible cards for transactions"
+    name: str = "buscar_contas_e_cartoes"
+    description: str = "Listar todas as possíveis contas e cartões que podem ser usadas para uma transação"
     args_schema: Type[BaseModel] = GetUserCardsInput
 
     def _run(self, *args, **kwargs) -> list[dict]:
-        """Returns a list of all cards for transactions."""
         return asyncio.run(self._arun())
 
     async def _arun(
         self,
         *args, **kwargs
     ) -> list[dict]:
-        """Returns a list of all cards for transactions."""
         from ..notion_repository import notion_transactio_repository
         return notion_transactio_repository.get_simple_data(Database.CARDS)

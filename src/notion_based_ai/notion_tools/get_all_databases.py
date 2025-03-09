@@ -10,8 +10,8 @@ class GeAllDatabasesInput(BaseModel):
 
 
 class GeAllDatabases(BaseTool):
-    name: str = "get_all_databases"
-    description: str = "List all possible databases"
+    name: str = "buscar_todos_databases"
+    description: str = "Listar todas as possíveis bases de dados"
     args_schema: Type[BaseModel] = GeAllDatabasesInput
 
     def _run(self, *args, **kwargs) -> list[str]:

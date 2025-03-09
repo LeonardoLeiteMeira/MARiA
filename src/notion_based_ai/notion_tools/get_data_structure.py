@@ -6,12 +6,12 @@ import asyncio
 from notion_based_ai.notion_types import Database
 
 class GetDataStructureInput(BaseModel):
-    database_name: str = Field(description="Name of the database to get the data structure from")
+    database_name: str = Field(description="Nome da base dade dados para busca a estrutura")
 
 
 class GetDataStructure(BaseTool):
-    name: str = "get_data_sctructure"
-    description: str = "Use this tool to understand the structures before choose another tool. Usefull to get properties IDs and undestand the data structure of a database. Properties IDs can be used to filter data."
+    name: str = "buscar_estrutura_base_de_dados"
+    description: str = "Use this tool to understand the structures before choosing another tool. Useful for obtaining property IDs and understanding the data structure of a database. Property IDs can be used to filter data."
     args_schema: Type[BaseModel] = GetDataStructureInput
 
     def _run(self, database_name: str, *args, **kwargs) -> list[dict]:
@@ -25,5 +25,5 @@ class GetDataStructure(BaseTool):
         from ..notion_repository import notion_transactio_repository
         valid_databases = [x.value for x in Database]
         if database not in valid_databases:
-            return ['This is not a valid database name. Check the list of valid databases!']
+            return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
         return notion_transactio_repository.get_properties(database)

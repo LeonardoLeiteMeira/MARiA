@@ -6,23 +6,20 @@ import asyncio
 from notion_based_ai.notion_types import Database
 
 class GetTransactionsCategoriesInput(BaseModel):
-    # query: str = Field(description="should be a search query")
     pass
 
 
 class GetTransactionsCategories(BaseTool):
-    name: str = "get_transactions_categories"
-    description: str = "List all possible categories for transactions"
+    name: str = "buscar_categorias_de_transacoes"
+    description: str = "Listar todas as possíveis categorias para uma transação"
     args_schema: Type[BaseModel] = GetTransactionsCategoriesInput
 
     def _run(self, *args, **kwargs) -> list[dict]:
-        """Returns a list of all possible categories for transactions."""
         return asyncio.run(self._arun())
 
     async def _arun(
         self,
         *args, **kwargs
     ) -> list[dict]:
-        """Returns a list of all possible categories for transactions."""
         from ..notion_repository import notion_transactio_repository
         return notion_transactio_repository.get_simple_data(Database.CATEGORIES)

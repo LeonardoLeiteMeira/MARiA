@@ -23,15 +23,15 @@ from notion_based_ai.notion_tools import (
 load_dotenv()
 
 tools = [
-    GetCurrentTime(),
-    SearchTransactions(),
-    GetTransactionsCategories(),
-    GetTransactionTypes(),
-    GetMonths(),
-    GetUserCards(),
-    CreateNewTransaction(),
-    GetDataStructure(),
-    GeAllDatabases()
+    GetCurrentTime(), 
+    SearchTransactions(), 
+    GetTransactionsCategories(), 
+    GetTransactionTypes(), 
+    GetMonths(), 
+    GetUserCards(), 
+    CreateNewTransaction(), 
+    GetDataStructure(), 
+    GeAllDatabases() 
 ]
 
 prompt = hub.pull('hwchase17/openai-tools-agent')
@@ -44,7 +44,14 @@ agent = create_tool_calling_agent(
     prompt=prompt,
 )
 
-initial_system_message = 'You are a helpefull assistent equipped with tools to help user to manage their finances.'
+initial_message = [
+ "Você é um assistente financeiro equipado com ferramentas para ajudar o usuário a gerenciar as finanças.",
+ "Antes de fazer algum calculo verifique se o valor que está buscando já não esta calculado, pois muitas informações já estão prontas e precisam apenas ser buscas.",
+ "Por exemplo, se o usuário pedir quanto ele já gastou esse mês, essa valor já está calculado e é uma coluna na tabela de meses.",
+ "Antes de responder interagir, entenda as estruturas de dados disponiveis."
+]
+
+initial_system_message = " ".join(initial_message)
 memory = ConversationBufferMemory(
     memory_key="chat_history", return_messages=True)
 
@@ -59,7 +66,6 @@ agent_executor = AgentExecutor.from_agent_and_tools(
     handle_parsing_errors=True,
     memory=memory
 )
-
 
 while True:
     user_input = input("User: ")
