@@ -39,6 +39,19 @@ class NotionRepository:
     
     def retrieve_databse(self, databse_id: str) -> dict:
         return self.notion_client.databases.retrieve(databse_id)
+    
+    def create_page(self, page: dict):
+        page["children"] = [{
+                "object": "block",
+                "heading_1": {
+                    "rich_text": [
+                        {
+                            "text": {
+                                "content": "Pagina criada por MARiA"
+                            }
+                        }]}},]
+        response = self.notion_client.pages.create(**page)
+        print(response)
 
     # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.create_page(database_id, properties)

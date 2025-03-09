@@ -87,12 +87,61 @@ class NotionTransaction:
         )
         return self.__process_database_registers(data)
     
-    def create_out_transaction(self, data: dict):
-        for key, value in data.items():
-            pass
-        properties = self.databases[Database.TRANSACTIONS.value]['properties']
-        for key, value in properties.items():
-            print(key, value)
+    #TODO Simplficar esse metodo
+    def create_out_transaction(self, name, month, amount,date,card,category,type):
+        page = {
+            "parent": {
+                "type": "database_id",
+                "database_id": self.databases[Database.TRANSACTIONS.value]['id']
+            },
+            "properties": {
+                "Name": {
+                    "title": [
+                        {
+                            "text": {
+                                "content": name
+                            }
+                        }
+                    ]
+                },
+                "Categoria": {
+                    "relation": [
+                        {"id": category}
+                    ]
+                },
+                "Mês": {
+                    "relation": [
+                        {"id": month}
+                    ]
+                },
+                "Saida de": {
+                    "relation": [
+                        {"id": card}
+                    ]
+                },
+                "Tipo Saida": {
+                    "relation": [
+                        {"id": type}
+                    ]
+                },
+                "Valor": {
+                    "number": amount
+                },
+                "Criado em": {
+                    "date":{
+                        "start": date
+                    }
+                },
+                "Tipo Transação":{
+                    "select":{
+                        "name":"Saida",
+                    }
+                },
+            },
+        }
+
+        self.notion_repository.create_page(page)
+
 
     def __process_database_registers(self, data) -> dict:
         registers = []
