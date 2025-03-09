@@ -1,6 +1,7 @@
 from notion_based_ai.notion_types import Database
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
+import urllib.parse
 
 class NotionTransaction:
     def __init__(self, notion_repository: NotionRepository):
@@ -39,17 +40,21 @@ class NotionTransaction:
         return self.__process_database_registers(data)
     
     def get_months_by_year(self, year:int, property_ids: list[str] = []) -> dict:
-        title_property_id = self.__get_title_property_from_schema(self.databases[Database.MONTHS.value]['properties'])
-        data = self.notion_repository.get_database(
-            self.databases[Database.MONTHS.value]['id'],
-            filter_properties=[title_property_id, *property_ids],
-            filter={
-                'and':[{
-                    'property': 'MesData',
-                        'date': {'on_or_after': f"{year}"},
-                    }]}        
-            )
-        return self.__process_database_registers(data)
+        try:
+            title_property_id = self.__get_title_property_from_schema(self.databases[Database.MONTHS.value]['properties'])
+            property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
+            data = self.notion_repository.get_database(
+                self.databases[Database.MONTHS.value]['id'],
+                filter_properties=[title_property_id, *property_ids_parsed],
+                filter={
+                    'and':[{
+                        'property': 'MesData',
+                            'date': {'on_or_after': f"{year}"},
+                        }]}        
+                )
+            return self.__process_database_registers(data)
+        except Exception as e:
+            print(e)
 
     def get_simple_data(self, database:Database):
         title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
@@ -57,7 +62,16 @@ class NotionTransaction:
         return self.__process_database_registers(data)
 
     def get_properties(self, database: str) -> dict:
-        return self.databases[database]['properties']
+        full_properties = self.databases[database]['properties']
+        properties = {}
+        for key, value in full_properties.items():
+            properties[key] = {
+                "id":value["id"],
+                "name":value["name"],
+                "type":value["type"],
+                "description":value.get("description", ""),
+            }   
+        return properties
     
     def get_current_month(self) -> dict:
         data = self.notion_repository.get_database(

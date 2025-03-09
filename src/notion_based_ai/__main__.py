@@ -44,11 +44,14 @@ agent = create_tool_calling_agent(
     prompt=prompt,
 )
 
+initial_data_bases = GeAllDatabases()._run()
 initial_message = [
  "Você é um assistente financeiro equipado com ferramentas para ajudar o usuário a gerenciar as finanças.",
  "Antes de fazer algum calculo verifique se o valor que está buscando já não esta calculado, pois muitas informações já estão prontas e precisam apenas ser buscas.",
  "Por exemplo, se o usuário pedir quanto ele já gastou esse mês, essa valor já está calculado e é uma coluna na tabela de meses.",
- "Antes de responder interagir, entenda as estruturas de dados disponiveis."
+ "Antes de responder interagir, entenda as estruturas de dados disponiveis.",
+ "As bases de dados disponiveis são: ",
+ ", ".join(initial_data_bases)
 ]
 
 initial_system_message = " ".join(initial_message)
@@ -72,14 +75,10 @@ while True:
     if user_input.lower() == "exit":
         print(memory.model_dump_json())
         break
-
-    memory.chat_memory.add_message(HumanMessage(content=user_input))
-
     response = agent_executor.invoke({"input": user_input})
     print("Bot:", response["output"])
 
-    memory.chat_memory.add_message(AIMessage(content=response["output"]))
-
+# memory.chat_memory.add_message(HumanMessage(content=user_input))
 
 # TODO Pesquisar sobre e implementar uma cache no redis para as chamadas de tools
 # Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas
