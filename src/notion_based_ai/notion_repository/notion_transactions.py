@@ -3,6 +3,9 @@ from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
 
+
+notion_cache = None
+
 class NotionTransaction:
     def __init__(self, notion_repository: NotionRepository):
         self.notion_repository = notion_repository
@@ -27,9 +30,16 @@ class NotionTransaction:
         self.__load_database_schema()
 
     def __load_database_schema(self) -> dict:
+        global notion_cache
+        if notion_cache != None:
+            for key, value in self.databases.items():
+                value['properties'] = notion_cache[value['id']]
+
+        notion_cache = {}
         for key, value in self.databases.items():
             data = self.notion_repository.retrieve_databse(value['id'])
             value['properties'] = data['properties']
+            notion_cache[value['id']] = value['properties']
 
     def get_transactions(self) -> dict:
         data = self.notion_repository.get_database(self.databases[Database.TRANSACTIONS.value]['id'])
@@ -50,7 +60,7 @@ class NotionTransaction:
                     'and':[{
                         'property': 'MesData',
                             'date': {'on_or_after': f"{year}"},
-                        }]}        
+                        }]}
                 )
             return self.__process_database_registers(data)
         except Exception as e:
