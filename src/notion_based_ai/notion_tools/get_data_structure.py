@@ -23,7 +23,10 @@ class GetDataStructure(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         from ..notion_repository import notion_transactio_repository
-        valid_databases = [x.value for x in Database]
-        if database not in valid_databases:
-            return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
-        return notion_transactio_repository.get_properties(database)
+        try:
+            valid_databases = [x.value for x in Database]
+            if database not in valid_databases:
+                return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
+            return notion_transactio_repository.get_properties(database)
+        except Exception as e:
+            return str(e)

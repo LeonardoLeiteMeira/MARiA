@@ -20,5 +20,8 @@ class SearchTransactions(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         from ..notion_repository import notion_transactio_repository
-        return notion_transactio_repository.get_transactions()
+        try:
+            return notion_transactio_repository.get_transactions()
+        except Exception as e:
+            return str(e)
         

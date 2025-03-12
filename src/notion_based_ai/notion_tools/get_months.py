@@ -29,4 +29,7 @@ class GetMonths(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         from ..notion_repository import notion_transactio_repository
-        return notion_transactio_repository.get_months_by_year(year, property_ids)
+        try:
+            return notion_transactio_repository.get_months_by_year(year, property_ids)
+        except Exception as e:
+            return str(e)

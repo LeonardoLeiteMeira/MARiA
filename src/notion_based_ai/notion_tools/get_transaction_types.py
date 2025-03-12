@@ -22,4 +22,7 @@ class GetTransactionTypes(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         from ..notion_repository import notion_transactio_repository
-        return notion_transactio_repository.get_simple_data(Database.TYPES)
+        try:
+            return notion_transactio_repository.get_simple_data(Database.TYPES)
+        except Exception as e:
+            return str(e)

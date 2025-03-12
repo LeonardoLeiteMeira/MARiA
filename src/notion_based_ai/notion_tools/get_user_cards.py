@@ -22,4 +22,7 @@ class GetUserCards(BaseTool):
         *args, **kwargs
     ) -> list[dict]:
         from ..notion_repository import notion_transactio_repository
-        return notion_transactio_repository.get_simple_data(Database.CARDS)
+        try:
+            return notion_transactio_repository.get_simple_data(Database.CARDS)
+        except Exception as e:
+            return str(e)

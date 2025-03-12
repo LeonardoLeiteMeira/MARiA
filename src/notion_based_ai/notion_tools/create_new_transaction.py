@@ -46,14 +46,17 @@ class CreateNewTransaction(BaseTool):
             'type': type
         })
         from ..notion_repository import notion_transactio_repository
-        notion_transactio_repository.create_out_transaction(
-            name,
-            month,
-            amount,
-            date,
-            card,
-            category,
-            type
-        )
+        try:
+            notion_transactio_repository.create_out_transaction(
+                name,
+                month,
+                amount,
+                date,
+                card,
+                category,
+                type
+            )
+        except Exception as e:
+            return str(e)
 
 

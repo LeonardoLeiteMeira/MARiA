@@ -21,4 +21,7 @@ class GeAllDatabases(BaseTool):
         self,
         *args, **kwargs
     ) -> list[str]:
-        return [x.value for x in Database]
+        try:
+            return [x.value for x in Database]
+        except Exception as e:
+            return str(e)

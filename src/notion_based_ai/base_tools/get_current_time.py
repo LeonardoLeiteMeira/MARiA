@@ -15,6 +15,9 @@ class GetCurrentTime(BaseTool):
 
     def _run(self, *args, **kwargs) -> str:
         from datetime import datetime
-        now = datetime.now()
-        current_time = now.strftime("%I:%M %p, %B %d, %Y")
-        return current_time
+        try:
+            now = datetime.now()
+            current_time = now.strftime("%I:%M %p, %B %d, %Y")
+            return current_time
+        except Exception as e:
+            return str(e)
