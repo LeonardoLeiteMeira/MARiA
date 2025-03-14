@@ -88,19 +88,3 @@ while True:
     print("Bot:", response["output"])
 
 # memory.chat_memory.add_message(HumanMessage(content=user_input))
-
-
-# TODO real
-# 1. Fazer query de planejamento
-# 2. Modificar busca dos dados: Ao busca categorias não esta listando todas pois esta limitado em 10
-# devo mexer para que a AI saiba disso e possa buscar mais (mas deixar mais de 10 o default pode ser uma boa)
-# 3. Fazer queries em transações
-# 4. Conectar no whatsapp
-# 5. Lista todas as funcoes e testes que quero levar para o web summit
-# 6. Update de informação (se conseguir antes do web summit seria top)
-# 7. Fazer um planejamento (Multi agente?)
-
-
-
-# TODO futuro Pesquisar sobre e implementar uma cache no redis para as chamadas de tools
-# Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas

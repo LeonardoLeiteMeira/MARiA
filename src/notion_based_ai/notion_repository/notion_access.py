@@ -3,7 +3,6 @@ from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
 
-
 notion_cache = None
 
 class NotionAccess:
