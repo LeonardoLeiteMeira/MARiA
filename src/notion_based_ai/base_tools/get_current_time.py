@@ -4,7 +4,6 @@ from typing import Type
 import asyncio
 
 class GetCurrentTimeInput(BaseModel):
-    # query: str = Field(description="should be a search query")
     pass
 
 
