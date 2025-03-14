@@ -45,9 +45,9 @@ class CreateNewTransaction(BaseTool):
             'month': month,
             'type': type
         })
-        from ..notion_repository import notion_transactio_repository
+        from ..notion_repository import notion_access
         try:
-            notion_transactio_repository.create_out_transaction(
+            notion_access.create_out_transaction(
                 name,
                 month,
                 amount,

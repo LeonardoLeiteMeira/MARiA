@@ -17,7 +17,8 @@ from notion_based_ai.notion_tools import (
     GetTransactionTypes,
     GetUserCards,
     GetDataStructure,
-    GeAllDatabases
+    GeAllDatabases,
+    GetMonthPlanning
 )
 
 load_dotenv()
@@ -31,7 +32,8 @@ tools = [
     GetUserCards(), 
     CreateNewTransaction(), 
     GetDataStructure(), 
-    GeAllDatabases() 
+    GeAllDatabases(),
+    GetMonthPlanning()
 ]
 
 prompt = hub.pull('hwchase17/openai-tools-agent')
@@ -56,6 +58,7 @@ initial_message = [
  ", ".join(initial_data_bases),
  "Em relação a criação de informação",
  "Antes de criar qualquer informação é necessário entender quais dados são obrigatorios para essa criação, e pedir ao usuário os dados faltantes!",
+ "Sempre que for retornar informações para o usuário, monte um pequeno paragrafo com uma anlise dessas informações",
 #  "Antes de criar qualquer informação é necessário consumir os metadados daquela inserção, pois ele irá dizer quais são os campos obrigatórios.",
 #  "Por exemplo, antes de criar uma transação é necessário entender quais os campos necessário para que uma transação seja criada!"
 ]
@@ -86,5 +89,18 @@ while True:
 
 # memory.chat_memory.add_message(HumanMessage(content=user_input))
 
-# TODO Pesquisar sobre e implementar uma cache no redis para as chamadas de tools
+
+# TODO real
+# 1. Fazer query de planejamento
+# 2. Modificar busca dos dados: Ao busca categorias não esta listando todas pois esta limitado em 10
+# devo mexer para que a AI saiba disso e possa buscar mais (mas deixar mais de 10 o default pode ser uma boa)
+# 3. Fazer queries em transações
+# 4. Conectar no whatsapp
+# 5. Lista todas as funcoes e testes que quero levar para o web summit
+# 6. Update de informação (se conseguir antes do web summit seria top)
+# 7. Fazer um planejamento (Multi agente?)
+
+
+
+# TODO futuro Pesquisar sobre e implementar uma cache no redis para as chamadas de tools
 # Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas

@@ -1,1 +1,1 @@
-from .notion_config import notion_transactio_repository
+from .notion_config import notion_access

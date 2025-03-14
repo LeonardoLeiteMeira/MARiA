@@ -6,6 +6,7 @@ class Database(Enum):
     MONTHS = "months"
     CARDS = "cards"
     TYPES = "types"
+    PLANNING = "planning"
 
 
 # TODO 1  Criar estrutura que tenha a descricao do banco de dados

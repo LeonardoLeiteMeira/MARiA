@@ -6,7 +6,7 @@ import urllib.parse
 
 notion_cache = None
 
-class NotionTransaction:
+class NotionAccess:
     def __init__(self, notion_repository: NotionRepository):
         self.notion_repository = notion_repository
         self.databases = {
@@ -24,6 +24,9 @@ class NotionTransaction:
             },
             Database.TYPES.value: {
                 'id': '6852342492704ecf8205c6ac953cf3a2'
+            },
+            Database.PLANNING.value: {
+                'id': 'e1bb24b27a5b41c6879b7ff51d18673c'
             }
         }
         self.cache = {}
@@ -151,6 +154,18 @@ class NotionTransaction:
         }
 
         self.notion_repository.create_page(page)
+
+    def get_planning_by_month(self, month_id) -> dict:
+        database_id = self.databases[Database.PLANNING.value]['id']
+        data = self.notion_repository.get_database(
+            database_id,
+            filter={
+                'and': [{
+                'property': 'Mes',
+                'relation': {'contains':month_id}}]
+            }    
+        )
+        return self.__process_database_registers(data)
 
 
     def __process_database_registers(self, data) -> dict:
