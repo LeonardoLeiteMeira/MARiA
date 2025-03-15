@@ -2,7 +2,6 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
-# from notion_based_ai.notion_types import Database
 
 class GetMonthsInput(BaseModel):
     year: int = Field(description="O ano do mês que deve ser listado")
