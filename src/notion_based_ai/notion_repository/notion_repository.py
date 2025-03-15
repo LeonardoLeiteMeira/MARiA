@@ -11,8 +11,8 @@ class NotionRepository:
         filter_properties: dict = None,
         filter: dict = None,
         sorts: list = [],
-        start_cursor: dict = None,
-        page_size: int = 20,
+        start_cursor: str = None,
+        page_size: int = 10,
     ) -> dict:
         query = {
             "database_id": database_id,

@@ -43,11 +43,15 @@ class NotionAccess:
             value['properties'] = data['properties']
             notion_cache[value['id']] = value['properties']
 
-    def get_transactions(self) -> dict:
-        data = self.notion_repository.get_database(self.databases[Database.TRANSACTIONS.value]['id'])
+    def get_transactions(self, cursor: str = None) -> dict:
+        data = self.notion_repository.get_database(
+            self.databases[Database.TRANSACTIONS.value]['id'],
+            start_cursor=cursor
+        )
         return self.__process_database_registers(data)
     
     def get_full_categories(self) -> dict:
+        '''It's lazy because load a lot of data'''
         data = self.notion_repository.get_database(self.databases[Database.CATEGORIES.value]['id'])
         return self.__process_database_registers(data)
     
@@ -68,9 +72,13 @@ class NotionAccess:
         except Exception as e:
             print(e)
 
-    def get_simple_data(self, database:Database):
+    def get_simple_data(self, database:Database, cursor: str = None):
         title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
-        data = self.notion_repository.get_database(self.databases[database.value]['id'], filter_properties=[title_property_id])
+        data = self.notion_repository.get_database(
+            self.databases[database.value]['id'], 
+            filter_properties=[title_property_id],
+            start_cursor=cursor
+        )
         return self.__process_database_registers(data)
 
     def get_properties(self, database: str) -> dict:
@@ -168,6 +176,10 @@ class NotionAccess:
 
 
     def __process_database_registers(self, data) -> dict:
+        full_data = {
+            'has_more': data['has_more'],
+            'next_cursor': data['next_cursor']
+        }
         registers = []
         self.cache = {}
         for item in data['results']:
@@ -180,7 +192,8 @@ class NotionAccess:
                     row[property.name] = [self.__get_page_name(page_id['id']) for page_id in property.value]
             registers.append(row)
         self.cache = {}
-        return registers
+        full_data['data'] = registers
+        return full_data
     
     def __get_page_name(self, page_id: str) -> str:
         if page_id in self.cache:

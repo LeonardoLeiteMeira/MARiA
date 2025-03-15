@@ -15,9 +15,8 @@ notion = Client(auth=api_key)
 repo = NotionRepository(notion)
 notion_access = NotionAccess(repo)
 
-
 #TODO proximo passo sera criar uma transacao no notion
 
 if __name__ == '__main__':
-    data = notion_access.get_planning_by_month('1ad14f69-1c83-80ea-aeb6-e5db9ed427a2')
+    data = notion_access.get_simple_data(Database.CATEGORIES)
     print(data)
