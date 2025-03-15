@@ -22,6 +22,7 @@ She can create new transactions and read diferents notion databases.
 - [ ] Lista todas as funcoes e testes que quero levar para o web summit
 - [ ] Update de informação (se conseguir antes do web summit seria top)
 - [ ] Fazer um planejamento (Multi agente?)
+    - [ ] Agente apenas para busca. Ler os dados -> Entender a Query -> Executar -> Check
 
 
 
