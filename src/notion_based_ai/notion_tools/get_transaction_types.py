@@ -6,7 +6,7 @@ import asyncio
 from notion_based_ai.notion_types import Database
 
 class GetTransactionTypesInput(BaseModel):
-    cursor: str = Field(description="Usado para buscar os dados paginados. Deve ser informado apenas quando é necessário busca mais de uma página, e a busca anterior retornou o 'has_more' como true.")
+    cursor: str | None = Field(description="Usado para buscar os dados paginados. Deve ser informado apenas quando é necessário busca mais de uma página, e a busca anterior retornou o 'has_more' como true.")
 
 
 class GetTransactionTypes(BaseTool):

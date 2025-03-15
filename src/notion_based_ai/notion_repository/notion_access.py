@@ -43,10 +43,16 @@ class NotionAccess:
             value['properties'] = data['properties']
             notion_cache[value['id']] = value['properties']
 
-    def get_transactions(self, cursor: str = None) -> dict:
+    def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
+        if properties!= None:
+            properties = [urllib.parse.unquote(id) for id in properties]
         data = self.notion_repository.get_database(
             self.databases[Database.TRANSACTIONS.value]['id'],
-            start_cursor=cursor
+            start_cursor=cursor,
+            page_size=page_size,
+            filter=filter,
+            filter_properties=properties
+            # TODO sorts=[]
         )
         return self.__process_database_registers(data)
     

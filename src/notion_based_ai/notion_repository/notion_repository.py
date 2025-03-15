@@ -1,5 +1,4 @@
 from notion_client import Client
-from .basic_property import BasicProperty
 
 class NotionRepository:
     def __init__(self, notion_client: Client):
@@ -8,7 +7,7 @@ class NotionRepository:
     def get_database(
         self,
         database_id: str,
-        filter_properties: dict = None,
+        filter_properties: list = None,
         filter: dict = None,
         sorts: list = [],
         start_cursor: str = None,
