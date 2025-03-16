@@ -13,16 +13,8 @@ class GetMonthPlanning(BaseTool):
     args_schema: Type[BaseModel] = GetMonthPlanningInput
 
     def _run(self, month_id: str, *args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(month_id))
-
-    async def _arun(
-        self,
-        month_id: str,
-        *args, **kwargs
-    ) -> list[dict]:
         from ..notion_repository import notion_access
         try:
             return notion_access.get_planning_by_month(month_id)
         except Exception as e:
             return str(e)
-        

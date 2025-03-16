@@ -25,38 +25,16 @@ class CreateNewTransaction(BaseTool):
     args_schema: Type[BaseModel] = CreateNewTransactionInput
 
     def _run(self, name: str,amount: float,date: str,cardId: str,categoryId: str,monthId: str,typeId: str, *args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(
-            name,
-            amount,
-            date,
-            cardId,
-            categoryId,
-            monthId,
-            typeId
-        ))
-
-    async def _arun(self,name: str,amount: float,date: str,card: str,category: str,month,type,*args, **kwargs) -> list[dict]:
-        print({
-            'name': name,
-            'amount': amount,
-            'date': date,
-            'card': card,
-            'category': category,
-            'month': month,
-            'type': type
-        })
         from ..notion_repository import notion_access
         try:
             notion_access.create_out_transaction(
                 name,
-                month,
+                monthId,
                 amount,
                 date,
-                card,
-                category,
+                cardId,
+                categoryId,
                 type
             )
         except Exception as e:
             return str(e)
-
-

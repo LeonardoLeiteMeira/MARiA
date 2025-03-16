@@ -49,19 +49,8 @@ class SearchTransactions(BaseTool):
             filter: dict = None,
             properties: list = None,
             *args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(cursor,page_size, filter, properties))
-
-    async def _arun(
-        self,
-        cursor: str = None,
-        page_size: int = None,
-        filter: dict = None,
-        properties: list = None,
-        *args, **kwargs
-    ) -> list[dict]:
         from ..notion_repository import notion_access
         try:
             return notion_access.get_transactions(cursor, page_size, filter, properties)
         except Exception as e:
             return str(e)
-        

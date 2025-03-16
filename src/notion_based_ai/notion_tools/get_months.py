@@ -19,14 +19,6 @@ class GetMonths(BaseTool):
     args_schema: Type[BaseModel] = GetMonthsInput
 
     def _run(self, year:int, property_ids: list[str] = [],*args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(year, property_ids))
-
-    async def _arun(
-        self,
-        year:int,
-        property_ids: list[str] = [],
-        *args, **kwargs
-    ) -> list[dict]:
         from ..notion_repository import notion_access
         try:
             return notion_access.get_months_by_year(year, property_ids)

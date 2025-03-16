@@ -15,18 +15,11 @@ class GetDataStructure(BaseTool):
     args_schema: Type[BaseModel] = GetDataStructureInput
 
     def _run(self, database_name: str, *args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(database_name))
-
-    async def _arun(
-        self,
-        database: str,
-        *args, **kwargs
-    ) -> list[dict]:
         from ..notion_repository import notion_access
         try:
             valid_databases = [x.value for x in Database]
-            if database not in valid_databases:
+            if database_name not in valid_databases:
                 return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
-            return notion_access.get_properties(database)
+            return notion_access.get_properties(database_name)
         except Exception as e:
             return str(e)

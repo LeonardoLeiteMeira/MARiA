@@ -15,12 +15,6 @@ class GeAllDatabases(BaseTool):
     args_schema: Type[BaseModel] = GeAllDatabasesInput
 
     def _run(self, *args, **kwargs) -> list[str]:
-        return asyncio.run(self._arun())
-
-    async def _arun(
-        self,
-        *args, **kwargs
-    ) -> list[str]:
         try:
             return [x.value for x in Database]
         except Exception as e:

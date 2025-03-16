@@ -15,13 +15,6 @@ class GetUserCards(BaseTool):
     args_schema: Type[BaseModel] = GetUserCardsInput
 
     def _run(self, cursor: str = None, *args, **kwargs) -> list[dict]:
-        return asyncio.run(self._arun(cursor))
-
-    async def _arun(
-        self,
-        cursor: str = None,
-        *args, **kwargs
-    ) -> list[dict]:
         from ..notion_repository import notion_access
         try:
             return notion_access.get_simple_data(Database.CARDS, cursor)
