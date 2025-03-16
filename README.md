@@ -15,10 +15,10 @@ She can create new transactions and read diferents notion databases.
 ## To do List
 - [x] Fazer query de planejamento
 - [x] Modificar busca dos dados: Ao busca categorias não esta listando todas pois esta limitado em 10. Devo mexer para que a AI saiba disso e possa buscar mais (mas deixar mais de 10 o default pode ser uma boa)
-- [ ] Fazer queries em transações
+- [x] Fazer queries em transações
     - [x] Query de dados com filter, properties, cursor e page_size
-    - [ ] Sort
-    - [ ] Melhorar nomeclatura das colunas
+    - [x] Sort
+    - [x] Melhorar nomeclatura das colunas
 - [ ] Conectar no whatsapp
 - [ ] Lista todas as funcoes e testes que quero levar para o web summit
 - [ ] Update de informação (se conseguir antes do web summit seria top)
