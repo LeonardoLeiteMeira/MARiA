@@ -51,8 +51,13 @@ class NotionAccess:
             start_cursor=cursor,
             page_size=page_size,
             filter=filter,
-            filter_properties=properties
-            # TODO sorts=[]
+            filter_properties=properties,
+            sorts=[
+                {
+                    "property": "Criado em",
+                    "direction": "descending"
+                }
+            ]
         )
         return self.__process_database_registers(data)
     
