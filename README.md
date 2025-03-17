@@ -20,6 +20,9 @@ She can create new transactions and read diferents notion databases.
     - [x] Sort
     - [x] Melhorar nomeclatura das colunas
 - [ ] Conectar no whatsapp
+    - [ ] Simples
+    - [ ] Diferenciar numeros controlando acessos
+    - [ ] Mover docker compose para esse repositorio 
 - [ ] Lista todas as funcoes e testes que quero levar para o web summit
 - [ ] Update de informação (se conseguir antes do web summit seria top)
 - [ ] Fazer um planejamento (Multi agente?)
