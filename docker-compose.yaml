@@ -1,0 +1,30 @@
+services:
+  evolution-api:
+    container_name: evolution_api
+    image: atendai/evolution-api
+    restart: always
+    ports:
+      - "8080:8080"
+    env_file:
+      - compose.env
+    volumes:
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
+    depends_on:
+      - database
+  database:
+    container_name: postgres_db
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - compose.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  evolution_store:
+  evolution_instances:
+  postgres_data:
+    driver: local
