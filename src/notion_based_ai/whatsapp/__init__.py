@@ -9,7 +9,7 @@ from notion_based_ai.MARiA import send_message
 
 load_dotenv()
 
-evolution_api_key = os.getenv("EVOLUTION_API_KEY")
+evolution_api_key = os.getenv("AUTHENTICATION_API_KEY")
 app = FastAPI()
 
 def get_maria_response(user_message: str):

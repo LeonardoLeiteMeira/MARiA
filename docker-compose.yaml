@@ -6,7 +6,7 @@ services:
     ports:
       - "8080:8080"
     env_file:
-      - compose.env
+      - .env
     volumes:
       - evolution_store:/evolution/store
       - evolution_instances:/evolution/instances
@@ -19,7 +19,7 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - compose.env
+      - .env
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
