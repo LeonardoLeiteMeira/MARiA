@@ -4,10 +4,12 @@ from fastapi import FastAPI
 import httpx
 from dotenv import load_dotenv
 
+from notion_based_ai.whatsapp.message_repository import MessageRepository
 from notion_based_ai.MARiA import send_message
 
-
 load_dotenv()
+
+message_repository = MessageRepository()
 
 evolution_api_key = os.getenv("AUTHENTICATION_API_KEY")
 app = FastAPI()
@@ -40,10 +42,11 @@ async def send_whatsapp_message(to:str, message: str):
 
 @app.post('/whatsapp')
 async def root(data: dict):
-    print(data)
+    # print(data)
     if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
         to = data['data']['key']['remoteJid']
-        message_text = get_maria_response(data['data']['message']['conversation'])
-        await send_whatsapp_message(to, message_text)
+        await message_repository.get_last_messages(to)
+        # message_text = get_maria_response(data['data']['message']['conversation'])
+        # await send_whatsapp_message(to, message_text)
 
     return {'hello':'world'}
