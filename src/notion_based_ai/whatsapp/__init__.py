@@ -46,7 +46,7 @@ async def root(data: dict):
     if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
         to = data['data']['key']['remoteJid']
         await message_repository.get_last_messages(to)
-        # message_text = get_maria_response(data['data']['message']['conversation'])
-        # await send_whatsapp_message(to, message_text)
+        message_text = get_maria_response(data['data']['message']['conversation'])
+        await send_whatsapp_message(to, message_text)
 
     return {'hello':'world'}

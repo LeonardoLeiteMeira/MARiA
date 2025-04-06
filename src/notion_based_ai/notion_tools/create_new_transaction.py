@@ -38,3 +38,4 @@ class CreateNewTransaction(BaseTool):
             )
         except Exception as e:
             return str(e)
+
