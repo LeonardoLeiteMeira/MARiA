@@ -1,3 +1,4 @@
+# poetry run python3 -m MARiA
 from .single_agent import memory, agent_executor
 
 if __name__ == '__main__':

@@ -19,7 +19,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "notion_based_ai", from = "src"}]
+packages = [{include = "", from = "src"}]
 
 
 [build-system]

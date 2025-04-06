@@ -1,11 +1,11 @@
-# poetry run uvicorn notion_based_ai.whatsapp:app --reload
+# poetry run uvicorn whatsapp:app --reload
 import os
 from fastapi import FastAPI
 import httpx
 from dotenv import load_dotenv
 
-from notion_based_ai.whatsapp.message_repository import MessageRepository
-from notion_based_ai.MARiA import send_message
+from whatsapp.message_repository import MessageRepository
+from MARiA import send_message
 
 load_dotenv()
 

@@ -1,4 +1,4 @@
-from notion_based_ai.notion_types import Database
+from MARiA.notion_types import Database
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse

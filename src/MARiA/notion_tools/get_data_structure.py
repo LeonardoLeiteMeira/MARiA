@@ -1,9 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from typing import Type
-import asyncio
 
-from notion_based_ai.notion_types import Database
+from MARiA.notion_types import Database
 
 class GetDataStructureInput(BaseModel):
     database_name: str = Field(description="Nome da base dade dados para busca a estrutura")

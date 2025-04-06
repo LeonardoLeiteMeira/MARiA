@@ -1,4 +1,4 @@
-# poetry run python3 -m notion_based_ai
+
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from langchain import hub
@@ -8,8 +8,8 @@ from langchain.agents import (
     AgentExecutor, 
     create_tool_calling_agent
 )
-from notion_based_ai.base_tools import GetCurrentTime
-from notion_based_ai.notion_tools import (
+from .base_tools import GetCurrentTime
+from MARiA.notion_tools import (
     SearchTransactions,
     GetTransactionsCategories,
     CreateNewTransaction,

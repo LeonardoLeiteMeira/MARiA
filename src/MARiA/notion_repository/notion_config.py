@@ -1,9 +1,9 @@
 import os
 from notion_client import Client
 from dotenv import load_dotenv
-from notion_based_ai.notion_repository.notion_repository import NotionRepository
-from notion_based_ai.notion_repository.notion_access import NotionAccess
-from notion_based_ai.notion_types import Database
+from MARiA.notion_repository.notion_repository import NotionRepository
+from MARiA.notion_repository.notion_access import NotionAccess
+from MARiA.notion_types import Database
 from datetime import datetime
 
 load_dotenv()
