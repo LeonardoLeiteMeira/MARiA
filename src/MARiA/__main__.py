@@ -1,12 +1,10 @@
 # poetry run python3 -m MARiA
-from .single_agent import memory, agent_executor
+from .single_agent import send_message
 
 if __name__ == '__main__':
     while True:
         user_input = input("User: ")
-        if user_input.lower() == "exit":
-            print(memory.model_dump_json())
+        if user_input.lower() in ["quit", "exit", "q"]:
+            print("\nBye!\n")
             break
-        response = agent_executor.invoke({"input": user_input})
-        print("Bot:", response["output"])
-        # memory.chat_memory.add_message(HumanMessage(content=user_input))
+        response = send_message(user_input)
