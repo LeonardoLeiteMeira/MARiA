@@ -7,3 +7,15 @@ from .get_user_cards import GetUserCards
 from .get_data_structure import GetDataStructure
 from .get_all_databases import GeAllDatabases
 from .get_month_planning import GetMonthPlanning
+
+tools = [
+    SearchTransactions(), 
+    GetTransactionsCategories(), 
+    GetTransactionTypes(), 
+    GetMonths(), 
+    GetUserCards(), 
+    CreateNewTransaction(), 
+    GetDataStructure(), 
+    GeAllDatabases(),
+    GetMonthPlanning()
+]
