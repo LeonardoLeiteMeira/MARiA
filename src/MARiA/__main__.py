@@ -1,10 +1,15 @@
 # poetry run python3 -m MARiA
 from .single_agent import send_message
+import asyncio 
 
-if __name__ == '__main__':
+
+async def main():
     while True:
         user_input = input("User: ")
         if user_input.lower() in ["quit", "exit", "q"]:
             print("\nBye!\n")
             break
-        response = send_message(user_input)
+        response = await send_message(user_input)
+
+if __name__ == '__main__':
+    asyncio.run(main())

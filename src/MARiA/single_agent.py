@@ -28,24 +28,24 @@ agent = create_react_agent(
 
 memory = MemorySaver()
 
-def chatbot(state: State):
+async def chatbot(state: State):
     print("** Entrou no chatbot **")
     messages = state["messages"]
-    result = agent.ainvoke({"messages": messages})
+    result = await agent.ainvoke({"messages": messages})
     return result
 
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.set_entry_point("chatbot")
 graph = graph_builder.compile(checkpointer=memory)
 
-def send_message(user_input: str):
+async def send_message(user_input: str):
     config = {"configurable": {"thread_id": "1"}}
-    graph_strem = graph.stream(
+    graph_strem = graph.astream(
         {"messages": [{"role": "user", "content": user_input}]},
         config,
         stream_mode="values",
     )
 
-    for event in graph_strem:
+    async for event in graph_strem:
         print(event["messages"][-1].pretty_print())
 
