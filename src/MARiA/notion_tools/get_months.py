@@ -9,7 +9,7 @@ class GetMonthsInput(BaseModel):
         description="""
             "Uma lista de IDs de propriedades a serem retornadas.
             Por padrão, o ID do 'title' já está incluído, mas se você desejar propriedades adicionais, 
-            é necessário ler a estrutura e especificar os IDs aqui.
+            é necessário ler a estrutura e especificar os IDs aqui, ou seja, e necessario ler a estrutura da tabela antes.
             """)
 
 

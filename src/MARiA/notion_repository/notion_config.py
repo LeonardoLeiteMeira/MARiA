@@ -20,7 +20,7 @@ notion_access = NotionAccess(repo)
 if __name__ == '__main__':
     data = notion_access.get_transactions(
         cursor=None,
-        page_size=10,
+        page_size=30,
         filter={
             "and":[
                 {

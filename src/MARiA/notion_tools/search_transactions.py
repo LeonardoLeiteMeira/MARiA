@@ -5,7 +5,7 @@ import asyncio
 
 class SearchTransactionsInput(BaseModel):
     cursor: str | None = Field(description="Usado para buscar os dados paginados. Deve ser informado apenas quando é necessário busca mais de uma página, e a busca anterior retornou o 'has_more' como true.")
-    page_size: int = Field(description="Especifica a quantidade de registros por página. O valor padrão é 10 - caso não especificado, mas voce pode escolher de acordo com a necessidade. Para pegar a proxima pagina é necessário usar o 'next_cursor' como 'cursor' da proxima busca.")
+    page_size: int = Field(description="Especifica a quantidade de registros por página. O valor padrão é 30 - caso não especificado, mas voce pode escolher de acordo com a necessidade. Para pegar a proxima pagina é necessário usar o 'next_cursor' como 'cursor' da proxima busca.")
     filter: dict | None = Field(
         description="""
         Usado para fazer filtros com combinações logicas usando 'and' e 'or' e os NOMES das propriedaes (não IDs como em 'properties'). 
