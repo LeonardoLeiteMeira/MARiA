@@ -1,7 +1,9 @@
 import json
-from typing import Annotated
+from typing_extensions import Annotated, TypedDict
 
 from langchain_openai import ChatOpenAI
+from langchain_core.prompts import ChatPromptTemplate
+from langchain.chat_models import init_chat_model
 from typing_extensions import TypedDict
 from langchain_core.messages import  ToolMessage
 from langgraph.graph import StateGraph
@@ -9,12 +11,67 @@ from langgraph.graph.message import add_messages
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
-from MARiA.notion_tools import tools
 
-# TODO: Separa em listas diferentes de tools e criar nodos diferentes para cada categoria de tools
-# Talvez eu tenha que repensar a maneira de organizar as tools
-# Um Nodo especifico para busca de dados? Se sim, um para busca, outro para criacao, outro para planejamentos e etc...
-#   Cada um com seu proprio fluxo e logica mais bem definida
+from MARiA.notion_tools import tools
+from MARiA.prompts import maria_initial_messages
+
+
+# 1. Identificar a tabela principal
+# 2. Identificar relacões da query
+# 3. Montar e executar a query
+
+
+class IdentifiedTable(TypedDict):
+    """"Tabela principal a ser usada na busca"""
+    table_name: Annotated[str, ..., "Nome da tabela que foi identificada como sendo a principal dessa busca"]
+
+class RelationshipTable(TypedDict):
+    """"Identificador de tabela com dado relevante para a query que esta esta sendo feita com base na estrutura da tabela principal"""
+    table_name: Annotated[str, ..., "Nome da tabela que foi identificada como relation e que seja relevante para a busca a ser feita"]
+    search_string: Annotated[str, ..., "String para começar a busca pelo item dentro da tableName"]
+
+class RelationshipsTables(TypedDict):
+    """"Lista que identifica tabelas com dados relevantes para a query que esta esta sendo feita com base na estrutura da tabela principal"""
+    all_identified_relations: Annotated[list[RelationshipTable], ..., "Todas as relações relevantes para essa busca de maneira estruturada"]
+
+
+llm = init_chat_model("gpt-4o-mini", model_provider="openai")
+structured_llm = llm.with_structured_output(RelationshipsTables)
+
+system = maria_initial_messages # TODO Adicionar um exemplo de busca - Como as que eu anotei
+
+prompt = ChatPromptTemplate.from_messages([("system", system), ("human", "{input}")])
+
+few_shot_structured_llm = prompt | structured_llm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 
 
