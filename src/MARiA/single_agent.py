@@ -7,13 +7,14 @@ from langgraph.graph.message import add_messages
 from langgraph.types import Command
 from langgraph.graph import StateGraph, START, END
 from typing_extensions import TypedDict
-from MARiA.prompts import maria_initial_messages
+from langchain_core.messages import SystemMessage, HumanMessage
+from MARiA.prompts import maria_initial_messages, prompt_email_collection, prompt_resume_messsages
 from MARiA.notion_tools import tools, websummitTools
 
 load_dotenv()
 class State(TypedDict):
     messages: Annotated[list, add_messages]
-    final_Trial: Annotated[list, add_messages]
+    final_Trial_messages: Annotated[list, add_messages]
     is_trial: bool
 
 graph_builder = StateGraph(State)
@@ -22,7 +23,8 @@ graph_builder = StateGraph(State)
 # TODO Separet agents building to different files
 # ================
 prompt = " ".join(maria_initial_messages)
-model = ChatOpenAI(model='gpt-4.1', temperature=0)
+model = ChatOpenAI(model='gpt-4o-mini', temperature=0)
+# model = ChatOpenAI(model='gpt-4.1', temperature=0)
 model = model.bind_tools(tools)
 agent = create_react_agent(
     model,
@@ -31,31 +33,62 @@ agent = create_react_agent(
     debug=True
 )
 # ================
-prompt_email_collection = "Você é um assistente financeiro. O usuário acabou de passar pelo periodo de testes. Sua função é coletar feedback do usuário e registrar o seu email."
 model_email_collection = ChatOpenAI(model='gpt-4.1', temperature=0)
 model_email_collection = model_email_collection.bind_tools(websummitTools)
 agent_email_collection = create_react_agent(
     model_email_collection,
     tools=websummitTools,
-    prompt=prompt,
+    prompt=prompt_email_collection,
     debug=True
 )
 # ================
 
 
+# Utils
+# ================
+async def verify_feedback_state(state: State):
+    is_trial = state["is_trial"]
+    if is_trial:
+        return {}
+    
+    resume_model = ChatOpenAI(model='gpt-4.1', temperature=0)
+
+    historic_messages = state["messages"]
+    full_history_string = ""
+    for message in historic_messages:
+        origin = ""
+        if message.type == "human":
+            origin = "User: "
+        else: # TODO melhorar para pegar so a responsta final e nao as chamadas para tools
+            origin = "MARiA: "
+        full_history_string += f"{origin}{message.content}\n"
+
+    prompt_filled = prompt_resume_messsages.format(conversation=full_history_string)
+    messages = [# TODO Melhorar o prompt pois esta com textos iniciais desnecessarios
+        SystemMessage(prompt_filled),
+        HumanMessage("Restorne o resumo")
+    ]
+    result = await resume_model.ainvoke(messages)
+    #TODO pegar apenas o content do result, ta passando muita coisa
+    start_trial_message = [
+        SystemMessage(f"Segue o resumo da conversa do usuário com a MARiA:\n {result}")
+    ]
+
+    update = {
+        "is_trial": True,
+        "final_Trial_messages": start_trial_message
+    }
+    return update
+
+
+# ================
+
+
 # Separate nodes
 # ================
-async def chatbot(state: State):
-    print("** Entrou no chatbot **")
-    messages = state["messages"]
-    result = await agent.ainvoke({"messages": messages})
-    return Command(
-        goto=END,
-        update= {'messages': [result],  'is_trial': False }
-    )
 
 async def chatbot(state: State):
-    print("** Entrou no chatbot **")
+    """ Node with chatbot logic """
     messages = state["messages"]
     chain_output = await agent.ainvoke({"messages": messages})
     new_messages: list = chain_output["messages"]
@@ -63,26 +96,27 @@ async def chatbot(state: State):
         goto=END,
         update={
             "messages": new_messages,
-            "is_trial": False
         }
     )
 
 async def collect_email(state: State):
-    messages = state["final_Trial"]
+    """ Node to collect user feedback """
+    messages = state["final_Trial_messages"]
     chain_output = await agent_email_collection.ainvoke({"messages": messages})
     new_messages: list = chain_output["messages"]
     return Command(
         goto=END,
-        update= {'final_Trial': new_messages}
+        update= {'final_Trial_messages': new_messages}
     )
 
-def start_router(state: State):
+async def start_router(state: State):
+    """ Node to start graph """
     messages = state["messages"]
     human_messages = [message for message in messages if message.type == "human"]
-    update = {'is_trial': True}
     if len(human_messages) > 3:
+        update = await verify_feedback_state(state)
         return Command(goto="collect_email", update=update)
-    return Command(goto="chatbot", update=update)
+    return Command(goto="chatbot")
 # ================
 
 graph_builder.add_edge(START, "start_router")
@@ -100,13 +134,18 @@ graph = graph_builder.compile(checkpointer=memory)
 async def send_message(user_input: str):
     config = {"configurable": {"thread_id": "1"}}
     graph_strem = graph.astream(
-        {"messages": [{"role": "user", "content": user_input}]},
+        #TODO IMPORTANTE: Criar no state um user input e preencher nas mesagens do agente correto. 
+        # Nessa forma que esta hj ele cai direto em messages, mas as vezes deve cair em final_Trial_messages
+        {"messages": [{"role": "user", "content": user_input}], 'is_trial': False},
         config,
         stream_mode="values",
     )
 
     async for event in graph_strem:
-        print(event["messages"][-1].pretty_print())
+        messages = event["messages"]
+        last_message = messages[-1]
+        if last_message.type != "human":
+            print(last_message.pretty_print())
 
 async def main():
     while True:
@@ -115,6 +154,7 @@ async def main():
             print("\nBye!\n")
             break
         response = await send_message(user_input)
+        
 
 if __name__ == '__main__':
     import asyncio 
