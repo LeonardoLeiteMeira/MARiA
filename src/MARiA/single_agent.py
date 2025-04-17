@@ -16,11 +16,12 @@ class State(TypedDict):
     messages: Annotated[list, add_messages]
     final_Trial_messages: Annotated[list, add_messages]
     is_trial: bool
+    user_input: HumanMessage
 
 graph_builder = StateGraph(State)
 
 
-# TODO Separet agents building to different files
+# TODO Separete agents building to different files
 # ================
 prompt = " ".join(maria_initial_messages)
 model = ChatOpenAI(model='gpt-4o-mini', temperature=0)
@@ -47,13 +48,16 @@ agent_email_collection = create_react_agent(
 # Utils
 # ================
 async def verify_feedback_state(state: State):
-    is_trial = state["is_trial"]
+    is_trial = state.get("is_trial", False)
     if is_trial:
-        return {}
+        current_messages = state["final_Trial_messages"]
+        current_messages.append(state["user_input"])
+        return {"final_Trial_messages":current_messages}
     
     resume_model = ChatOpenAI(model='gpt-4.1', temperature=0)
 
     historic_messages = state["messages"]
+    historic_messages.append(state["user_input"])
     full_history_string = ""
     for message in historic_messages:
         origin = ""
@@ -113,10 +117,11 @@ async def start_router(state: State):
     """ Node to start graph """
     messages = state["messages"]
     human_messages = [message for message in messages if message.type == "human"]
-    if len(human_messages) > 3:
+    if len(human_messages) >= 1:
         update = await verify_feedback_state(state)
         return Command(goto="collect_email", update=update)
-    return Command(goto="chatbot")
+    messages.append(state["user_input"])
+    return Command(goto="chatbot", update={"messages":messages})
 # ================
 
 graph_builder.add_edge(START, "start_router")
@@ -134,15 +139,20 @@ graph = graph_builder.compile(checkpointer=memory)
 async def send_message(user_input: str):
     config = {"configurable": {"thread_id": "1"}}
     graph_strem = graph.astream(
-        #TODO IMPORTANTE: Criar no state um user input e preencher nas mesagens do agente correto. 
-        # Nessa forma que esta hj ele cai direto em messages, mas as vezes deve cair em final_Trial_messages
-        {"messages": [{"role": "user", "content": user_input}], 'is_trial': False},
+        {"user_input": HumanMessage(user_input)},
         config,
         stream_mode="values",
     )
 
     async for event in graph_strem:
-        messages = event["messages"]
+        is_trial = event.get("is_trial", False)
+        if is_trial:
+            messages = event["final_Trial_messages"]
+        else:
+            messages = event["messages"]
+
+        if(len(messages) == 0):
+            continue
         last_message = messages[-1]
         if last_message.type != "human":
             print(last_message.pretty_print())

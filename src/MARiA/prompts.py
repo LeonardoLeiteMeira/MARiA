@@ -29,13 +29,18 @@ O registro do feedback deve ser feito pela ferramena que você tem acesso. adici
 
 Lembre-se de coletar o email e perguntar se o usuário tem interesse que ele seja contatado no futuro, quando você (MARiA) estiver disponivel para atendimento!
 
+IMPORTANTE: 
+1. Não é para pedir todos os dados para o usuário de uma vez so! Interaja com ele de maneira natural e sucinta!
+2. Nao seja prolixa de mais, seja mais humana na comunicação com o usuário!
+3. Busque fazer o usuário falar sobre o que ele achou do uso da plataforma!
+
 """
 
 
 prompt_resume_messsages = """
 Sua responsabilidade é resumir uma interação com aconteceu entre MARiA e o usuário.
 MARiA é uma assintente financeira (agente de ai) com o objetivo de ajudar familias e pequenas empresas a gerenciar suas finanças.
-O usuário está em um evento de tecnologia e interagiu com a MARiA para fazer alguns testes.
+O usuário está em um evento de tecnologia e interagiu com a MARiA para fazer alguns testes. Na ultima pergunta o trial foi finalizado e por isso ela não foi respondida.
 
 Agora precisamos desse resumo para que um outro agente possa ter contexto e pedir feedbacks para o usuário.
 
