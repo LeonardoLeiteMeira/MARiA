@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 from typing import Annotated
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.memory import MemorySaver
+from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.message import add_messages
 from langgraph.types import Command
 from langgraph.graph import StateGraph, START, END
@@ -133,7 +133,7 @@ graph_builder.add_node("start_router", start_router)
 graph_builder.add_node("chatbot", chatbot)
 graph_builder.add_node("collect_email", collect_email)
 
-memory = MemorySaver()
+memory = InMemorySaver()
 graph = graph_builder.compile(checkpointer=memory)
 
 async def send_message(user_input: str):
