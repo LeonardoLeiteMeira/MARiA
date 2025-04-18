@@ -10,6 +10,7 @@ from typing_extensions import TypedDict
 from langchain_core.messages import SystemMessage, HumanMessage
 from MARiA.prompts import maria_initial_messages, prompt_email_collection, prompt_resume_messsages
 from MARiA.notion_tools import tools, websummitTools
+from MARiA.memory import Database
 
 load_dotenv()
 class State(TypedDict):
@@ -17,9 +18,6 @@ class State(TypedDict):
     final_Trial_messages: Annotated[list, add_messages]
     is_trial: bool
     user_input: HumanMessage
-
-graph_builder = StateGraph(State)
-
 
 # TODO Separete agents building to different files
 # ================
@@ -124,19 +122,33 @@ async def start_router(state: State):
     return Command(goto="chatbot", update={"messages":messages})
 # ================
 
-graph_builder.add_edge(START, "start_router")
 
-graph_builder.add_edge("chatbot", END)
-graph_builder.add_edge("collect_email", END)
 
-graph_builder.add_node("start_router", start_router)
-graph_builder.add_node("chatbot", chatbot)
-graph_builder.add_node("collect_email", collect_email)
+database = Database()
+async def build_graph(): #-> CompiledStateGraph:
+    graph_builder = StateGraph(State)
+    graph_builder.add_edge(START, "start_router")
 
-memory = InMemorySaver()
-graph = graph_builder.compile(checkpointer=memory)
+    graph_builder.add_edge("chatbot", END)
+    graph_builder.add_edge("collect_email", END)
 
-async def send_message(user_input: str):
+    graph_builder.add_node("start_router", start_router)
+    graph_builder.add_node("chatbot", chatbot)
+    graph_builder.add_node("collect_email", collect_email)
+
+    memory = await database.init_checkpointer()
+    graph = graph_builder.compile(checkpointer=memory)
+    return graph
+
+async def send_message(user_input: str, phone_number: str):
+    graph = await build_graph()
+    thread_ids = await database.get_thread_id_by_phone_number(phone_number)
+
+    # TODO parei aqui 
+    # Falta arrumar essa logica e testar
+    if len(thread_ids) == 0:
+        thread_id = await database.start_new_thread(user_id=phone_number)
+
     config = {"configurable": {"thread_id": "1"}}
     graph_strem = graph.astream(
         {"user_input": HumanMessage(user_input)},
@@ -158,12 +170,13 @@ async def send_message(user_input: str):
             print(last_message.pretty_print())
 
 async def main():
+    phone_number = "5531933057272"
     while True:
         user_input = input("User: ")
         if user_input.lower() in ["quit", "exit", "q"]:
             print("\nBye!\n")
             break
-        response = await send_message(user_input)
+        response = await send_message(user_input, phone_number)
         
 
 if __name__ == '__main__':
