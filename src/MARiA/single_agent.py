@@ -162,7 +162,7 @@ async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: st
 async def main():
     database = Database()
     await database.start_connection()
-    checkpoint_manager = await database.get_checkpointer_manager()
+    checkpoint_manager = database.get_checkpointer_manager()
     async with checkpoint_manager as checkpointer:
         await checkpointer.setup()
         graph_builder = build_graph()
@@ -186,7 +186,18 @@ async def main():
         except Exception as ex:
             print(ex)
         
+async def delete_user_threads_by_phone_number(phone_number: str):
+    database = Database()
+    await database.start_connection()
+    checkpoint_manager = database.get_checkpointer_manager()
+    async with checkpoint_manager as checkpointer:
+        await checkpointer.setup()
+        user_threads = await database.get_thread_id_by_phone_number(phone_number)
+        for thread_id in user_threads['threads']:
+            await checkpointer.adelete_thread(thread_id)
 
 if __name__ == '__main__':
     import asyncio 
     asyncio.run(main())
+
+    # asyncio.run(delete_user_threads_by_phone_number("5531933057272"))

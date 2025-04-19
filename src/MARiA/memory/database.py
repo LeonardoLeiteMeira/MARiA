@@ -7,6 +7,7 @@ from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 dotenv.load_dotenv()
 
+# TODO quando tiver mais estrutura, mudar o self.pool.connection() para ser criado em nivel de request 
 class Database:
     def __init__(self):
         connection_uri = os.getenv('DATABASE_CONNECTION_URI')
@@ -21,7 +22,11 @@ class Database:
     async def start_connection(self):
         await self.pool.open()
 
-    async def get_checkpointer_manager(self):
+
+    async def stop_connection(self):
+        await self.pool.close()
+
+    def get_checkpointer_manager(self):
         return AsyncPostgresSaver.from_conn_string(self.database_conn_string)
     
     async def start_new_thread(self, user_id: str) -> str:
