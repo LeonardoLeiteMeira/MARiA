@@ -1,17 +1,14 @@
 from dotenv import load_dotenv
 from typing import Annotated
-from langchain_openai import ChatOpenAI
-from langgraph.prebuilt import create_react_agent
-from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.graph import StateGraph, START, END
 from langgraph.types import Command
 from typing_extensions import TypedDict
 from langchain_core.messages import SystemMessage, HumanMessage
-from MARiA.prompts import maria_initial_messages, prompt_email_collection, prompt_resume_messsages
-from MARiA.notion_tools import tools, websummitTools
+from MARiA.agents.prompts import prompt_resume_messsages
 from MARiA.memory import Database
+from MARiA.agents import create_maria_agent, create_agent_email_collection, create_resume_model
 
 load_dotenv()
 class State(TypedDict):
@@ -20,28 +17,12 @@ class State(TypedDict):
     is_trial: bool
     user_input: HumanMessage
 
-# TODO Separete agents building to different files
-# ================
-prompt = " ".join(maria_initial_messages)
-model = ChatOpenAI(model='gpt-4.1', temperature=0)
-# model = ChatOpenAI(model='gpt-4.1', temperature=0)
-model = model.bind_tools(tools)
-agent = create_react_agent(
-    model,
-    tools=tools,
-    prompt=prompt,
-    debug=True
-)
-# ================
-model_email_collection = ChatOpenAI(model='gpt-4.1', temperature=0)
-model_email_collection = model_email_collection.bind_tools(websummitTools)
-agent_email_collection = create_react_agent(
-    model_email_collection,
-    tools=websummitTools,
-    prompt=prompt_email_collection,
-    debug=True
-)
-# ================
+TRIAL_DURATION = 5
+
+agent = create_maria_agent()
+agent_email_collection = create_agent_email_collection()
+resume_model = create_resume_model()
+
 
 
 # Utils
@@ -52,8 +33,6 @@ async def verify_feedback_state(state: State):
         current_messages = state["final_Trial_messages"]
         current_messages.append(state["user_input"])
         return {"final_Trial_messages":current_messages}
-    
-    resume_model = ChatOpenAI(model='gpt-4.1', temperature=0)
 
     historic_messages = state["messages"]
     historic_messages.append(state["user_input"])
@@ -62,7 +41,7 @@ async def verify_feedback_state(state: State):
         origin = ""
         if message.type == "human":
             origin = "User: "
-        else: # TODO melhorar para pegar so a responsta final e nao as chamadas para tools
+        else:
             origin = "MARiA: "
         full_history_string += f"{origin}{message.content}\n"
 
@@ -71,6 +50,7 @@ async def verify_feedback_state(state: State):
         SystemMessage(prompt_filled),
         HumanMessage("Restorne o resumo")
     ]
+    
     result = await resume_model.ainvoke(messages)
     start_trial_message = [
         SystemMessage(f"Segue o resumo da conversa do usuário com a MARiA:\n {result.content}")
@@ -88,6 +68,7 @@ async def verify_feedback_state(state: State):
 
 # Separate nodes
 # ================
+
 
 async def chatbot(state: State):
     """ Node with chatbot logic """
@@ -115,7 +96,7 @@ async def start_router(state: State):
     """ Node to start graph """
     messages = state["messages"]
     human_messages = [message for message in messages if message.type == "human"]
-    if len(human_messages) >= 1:
+    if len(human_messages) >= TRIAL_DURATION:
         update = await verify_feedback_state(state)
         return Command(goto="collect_email", update=update)
     messages.append(state["user_input"])
@@ -134,6 +115,8 @@ def build_graph() -> StateGraph:
     graph_builder.add_node("start_router", start_router)
     graph_builder.add_node("chatbot", chatbot)
     graph_builder.add_node("collect_email", collect_email)
+
+    # TODO adicionar nodo depois do feedback para tirar o acesso do usuario
 
     return graph_builder
 
@@ -199,5 +182,4 @@ async def delete_user_threads_by_phone_number(phone_number: str):
 if __name__ == '__main__':
     import asyncio 
     asyncio.run(main())
-
     # asyncio.run(delete_user_threads_by_phone_number("5531933057272"))

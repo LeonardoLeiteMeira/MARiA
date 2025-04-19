@@ -13,7 +13,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
 from MARiA.notion_tools import tools
-from MARiA.prompts import maria_initial_messages
+from MARiA.agents.prompts import maria_initial_messages
 
 
 # 1. Identificar a tabela principal
