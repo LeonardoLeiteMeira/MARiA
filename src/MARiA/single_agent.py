@@ -4,8 +4,9 @@ from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph.message import add_messages
-from langgraph.types import Command
+from langgraph.graph.state import CompiledStateGraph
 from langgraph.graph import StateGraph, START, END
+from langgraph.types import Command
 from typing_extensions import TypedDict
 from langchain_core.messages import SystemMessage, HumanMessage
 from MARiA.prompts import maria_initial_messages, prompt_email_collection, prompt_resume_messsages
@@ -22,7 +23,7 @@ class State(TypedDict):
 # TODO Separete agents building to different files
 # ================
 prompt = " ".join(maria_initial_messages)
-model = ChatOpenAI(model='gpt-4o-mini', temperature=0)
+model = ChatOpenAI(model='gpt-4.1', temperature=0)
 # model = ChatOpenAI(model='gpt-4.1', temperature=0)
 model = model.bind_tools(tools)
 agent = create_react_agent(
@@ -71,9 +72,8 @@ async def verify_feedback_state(state: State):
         HumanMessage("Restorne o resumo")
     ]
     result = await resume_model.ainvoke(messages)
-    #TODO pegar apenas o content do result, ta passando muita coisa
     start_trial_message = [
-        SystemMessage(f"Segue o resumo da conversa do usuário com a MARiA:\n {result}")
+        SystemMessage(f"Segue o resumo da conversa do usuário com a MARiA:\n {result.content}")
     ]
 
     update = {
@@ -124,8 +124,7 @@ async def start_router(state: State):
 
 
 
-database = Database()
-async def build_graph(): #-> CompiledStateGraph:
+def build_graph() -> StateGraph:
     graph_builder = StateGraph(State)
     graph_builder.add_edge(START, "start_router")
 
@@ -136,20 +135,11 @@ async def build_graph(): #-> CompiledStateGraph:
     graph_builder.add_node("chatbot", chatbot)
     graph_builder.add_node("collect_email", collect_email)
 
-    memory = await database.init_checkpointer()
-    graph = graph_builder.compile(checkpointer=memory)
-    return graph
+    return graph_builder
 
-async def send_message(user_input: str, phone_number: str):
-    graph = await build_graph()
-    thread_ids = await database.get_thread_id_by_phone_number(phone_number)
+async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str):
+    config = {"configurable": {"thread_id": thread_id}}
 
-    # TODO parei aqui 
-    # Falta arrumar essa logica e testar
-    if len(thread_ids) == 0:
-        thread_id = await database.start_new_thread(user_id=phone_number)
-
-    config = {"configurable": {"thread_id": "1"}}
     graph_strem = graph.astream(
         {"user_input": HumanMessage(user_input)},
         config,
@@ -170,13 +160,31 @@ async def send_message(user_input: str, phone_number: str):
             print(last_message.pretty_print())
 
 async def main():
-    phone_number = "5531933057272"
-    while True:
-        user_input = input("User: ")
-        if user_input.lower() in ["quit", "exit", "q"]:
-            print("\nBye!\n")
-            break
-        response = await send_message(user_input, phone_number)
+    database = Database()
+    await database.start_connection()
+    checkpoint_manager = await database.get_checkpointer_manager()
+    async with checkpoint_manager as checkpointer:
+        await checkpointer.setup()
+        graph_builder = build_graph()
+        graph = graph_builder.compile(checkpointer=checkpointer)
+        
+        try:
+            phone_number = "5531933057272"
+            user_threads = await database.get_thread_id_by_phone_number(phone_number)
+            if len(user_threads['threads']) > 0:
+                thread_id = user_threads['threads'][0]
+            else:
+                thread_id = await database.start_new_thread(user_id=user_threads['user_id'])
+
+            while True:
+                user_input = input("User: ")
+                # user_input = "Ola, tudo bem? O que vc faz?"
+                if user_input.lower() in ["quit", "exit", "q"]:
+                    print("\nBye!\n")
+                    break
+                await send_message(graph, user_input, thread_id)
+        except Exception as ex:
+            print(ex)
         
 
 if __name__ == '__main__':
