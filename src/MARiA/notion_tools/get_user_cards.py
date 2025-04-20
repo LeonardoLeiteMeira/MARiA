@@ -3,7 +3,7 @@ from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
 
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 
 #TODO Adicionar a busca dos valores em cada conta
 class GetUserCardsInput(BaseModel):
@@ -18,6 +18,6 @@ class GetUserCards(BaseTool):
     def _run(self, cursor: str = None, *args, **kwargs) -> list[dict]:
         from ..notion_repository import notion_access
         try:
-            return notion_access.get_simple_data(Database.CARDS, cursor)
+            return notion_access.get_simple_data(NotionDatabaseEnum.CARDS, cursor)
         except Exception as e:
             return str(e)

@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
 from typing import Type
 
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 
 class GetDataStructureInput(BaseModel):
     database_name: str = Field(description="Nome da base dade dados para busca a estrutura")
@@ -16,7 +16,7 @@ class GetDataStructure(BaseTool):
     def _run(self, database_name: str, *args, **kwargs) -> list[dict]:
         from ..notion_repository import notion_access
         try:
-            valid_databases = [x.value for x in Database]
+            valid_databases = [x.value for x in NotionDatabaseEnum]
             if database_name not in valid_databases:
                 return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
             return notion_access.get_properties(database_name)

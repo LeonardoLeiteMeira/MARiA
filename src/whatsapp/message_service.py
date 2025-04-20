@@ -15,15 +15,19 @@ class MessageService:
         self.instance = instance
         self.message_base_url = "http://localhost:8080/message/sendText"
 
-    async def get_user_thread_id(self, remoteJid: str, name: str) -> str:
-        # 5531933057272:6@s.whatsapp.net
-        first_part, _ = remoteJid.split("@")
-        phone_number = first_part.split(":")[0]
-        user_threads = await self.database.get_thread_id_by_phone_number(phone_number)
-        if user_threads == None:
-            return await self.create_user_and_get_thread_id(phone_number, name)
+    async def new_message(self, remote_jid: str, user_message: str, user_name: str = ''):
+        phone_number = self.get_phone_number_from_remote_jid(remote_jid)
+        user_with_threads = await self.database.get_thread_id_by_phone_number(phone_number)
+        if user_with_threads == None:
+            thread_id = await self.create_user_and_get_thread_id(phone_number, user_name)
+        elif user_with_threads['has_finished_test']:
+            await self.send_whatsapp_message(remote_jid, "Olá! Você já concluiu seu periodo te testes. Entraremos em contato quando a MARiA estiver disponivel, caso tenha optado por isso. Para mais informações acesse: https://maria.alemdatech.com")
+            return
         else:
-            return await self.get_thread_id_from_user_threads(user_threads)
+            thread_id = await self.get_thread_id_from_user_threads(user_with_threads)
+
+        message_text = await self.get_maria_response(user_message, thread_id)
+        await self.send_whatsapp_message(remote_jid, message_text)
     
     async def get_thread_id_from_user_threads(self, user_threads: dict | None) -> str:
         if len(user_threads['threads']) > 0:
@@ -41,7 +45,6 @@ class MessageService:
 
     async def send_whatsapp_message(self, to:str, message: str):
         try:
-            print("Enviando mensagem....")
             base_url = f"{self.message_base_url}/{self.instance}"
             body = {
                 "number": to,
@@ -56,6 +59,12 @@ class MessageService:
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(base_url, json=body, headers=headers)
-                print("Mensagem enviada: ", response)
         except Exception as e:
-            print("Error: ", e)
+            print("ERROR TO SEND WHATSAPP MESSAGE: ", e)
+            raise e
+    
+    def get_phone_number_from_remote_jid(self, remote_jid:str) -> str:
+        # 5531933057272:6@s.whatsapp.net
+        first_part, _ = remote_jid.split("@")
+        phone_number = first_part.split(":")[0]
+        return phone_number

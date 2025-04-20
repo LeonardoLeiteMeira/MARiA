@@ -3,7 +3,7 @@ from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
 
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 
 class CreateNewTransactionInput(BaseModel):
     name: str = Field(description="Nome escolhido pelo usuário para identificar a transação")

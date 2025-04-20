@@ -1,4 +1,4 @@
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
@@ -9,22 +9,22 @@ class NotionAccess:
     def __init__(self, notion_repository: NotionRepository):
         self.notion_repository = notion_repository
         self.databases = {
-            Database.TRANSACTIONS.value: {
+            NotionDatabaseEnum.TRANSACTIONS.value: {
                 "id": "97c5aad2c46d46a49c3b78e83473ae52"
             },
-            Database.CATEGORIES.value : {
+            NotionDatabaseEnum.CATEGORIES.value : {
                 "id": "38236d860412473fa9f8d3a0f1e4b0e1"
             },
-            Database.MONTHS.value : {
+            NotionDatabaseEnum.MONTHS.value : {
                 "id": "d91b81e32555418a8bb62a76d7c69ac7"
             },
-            Database.CARDS.value: {
+            NotionDatabaseEnum.CARDS.value: {
                 "id" : "d1f6611fa1c046eb8cdf87ba3c757f6b"
             },
-            Database.TYPES.value: {
+            NotionDatabaseEnum.TYPES.value: {
                 'id': '6852342492704ecf8205c6ac953cf3a2'
             },
-            Database.PLANNING.value: {
+            NotionDatabaseEnum.PLANNING.value: {
                 'id': 'e1bb24b27a5b41c6879b7ff51d18673c'
             }
         }
@@ -47,7 +47,7 @@ class NotionAccess:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]
         data = self.notion_repository.get_database(
-            self.databases[Database.TRANSACTIONS.value]['id'],
+            self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id'],
             start_cursor=cursor,
             page_size=page_size,
             filter=filter,
@@ -63,15 +63,15 @@ class NotionAccess:
     
     def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
-        data = self.notion_repository.get_database(self.databases[Database.CATEGORIES.value]['id'])
+        data = self.notion_repository.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
         return self.__process_database_registers(data)
     
     def get_months_by_year(self, year:int, property_ids: list[str] = []) -> dict:
         try:
-            title_property_id = self.__get_title_property_from_schema(self.databases[Database.MONTHS.value]['properties'])
+            title_property_id = self.__get_title_property_from_schema(self.databases[NotionDatabaseEnum.MONTHS.value]['properties'])
             property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
             data = self.notion_repository.get_database(
-                self.databases[Database.MONTHS.value]['id'],
+                self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
                 filter_properties=[title_property_id, *property_ids_parsed],
                 filter={
                     'and':[{
@@ -83,7 +83,7 @@ class NotionAccess:
         except Exception as e:
             print(e)
 
-    def get_simple_data(self, database:Database, cursor: str = None):
+    def get_simple_data(self, database:NotionDatabaseEnum, cursor: str = None):
         title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
         data = self.notion_repository.get_database(
             self.databases[database.value]['id'], 
@@ -106,7 +106,7 @@ class NotionAccess:
     
     def get_current_month(self) -> dict:
         data = self.notion_repository.get_database(
-            self.databases[Database.MONTHS.value]['id'],
+            self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
             filter={
                 'and': [{
                 'property': 'isMesAtual',
@@ -123,7 +123,7 @@ class NotionAccess:
         page = {
             "parent": {
                 "type": "database_id",
-                "database_id": self.databases[Database.TRANSACTIONS.value]['id']
+                "database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
             },
             "properties": {
                 "Name": {
@@ -174,7 +174,7 @@ class NotionAccess:
         self.notion_repository.create_page(page)
 
     def get_planning_by_month(self, month_id) -> dict:
-        database_id = self.databases[Database.PLANNING.value]['id']
+        database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
         data = self.notion_repository.get_database(
             database_id,
             filter={

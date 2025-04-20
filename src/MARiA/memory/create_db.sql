@@ -33,3 +33,6 @@ CREATE TABLE IF NOT EXISTS threads (
   status      TEXT        NOT NULL  DEFAULT 'open'
 );
 
+alter table users 
+add column has_finished_test boolean NOT NULL DEFAULT false;
+

@@ -3,7 +3,7 @@ from notion_client import Client
 from dotenv import load_dotenv
 from MARiA.notion_repository.notion_repository import NotionRepository
 from MARiA.notion_repository.notion_access import NotionAccess
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 from datetime import datetime
 
 load_dotenv()

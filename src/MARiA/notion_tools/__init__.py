@@ -8,6 +8,7 @@ from .get_data_structure import GetDataStructure
 from .get_all_databases import GeAllDatabases
 from .get_month_planning import GetMonthPlanning
 from .register_feedback_and_email import RegisterFeedbackAndEmail
+from MARiA.memory import Database
 
 tools = [
     SearchTransactions(), 
@@ -22,5 +23,5 @@ tools = [
 ]
 
 websummitTools = [
-    RegisterFeedbackAndEmail()
+    RegisterFeedbackAndEmail(Database())
 ]

@@ -1,7 +1,7 @@
 from dotenv import load_dotenv
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
-from MARiA.memory import Database
+from MARiA.memory import Database, get_checkpointer_manager
 from MARiA.graph import MariaGraph
 
 load_dotenv()
@@ -46,7 +46,7 @@ async def run_debug():
     maria_graph = MariaGraph()
     database = Database()
     await database.start_connection()
-    checkpoint_manager = database.get_checkpointer_manager()
+    checkpoint_manager = get_checkpointer_manager()
     async with checkpoint_manager as checkpointer:
         try:
             await checkpointer.setup()
@@ -78,7 +78,7 @@ async def delete_user_threads_by_phone_number(phone_number: str):
     try:
         database = Database()
         await database.start_connection()
-        checkpoint_manager = database.get_checkpointer_manager()
+        checkpoint_manager = get_checkpointer_manager()
         async with checkpoint_manager as checkpointer:
             await checkpointer.setup()
             user_threads = await database.get_thread_id_by_phone_number(phone_number)

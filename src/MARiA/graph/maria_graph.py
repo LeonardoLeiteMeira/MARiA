@@ -23,7 +23,6 @@ class MariaGraph:
         graph_builder.add_node("chatbot", self.__chatbot)
         graph_builder.add_node("collect_email", self.__collect_email)
         graph_builder.add_node('finish', self.__finish)
-        # TODO adicionar nodo depois do feedback para tirar o acesso do usuario
 
         graph_builder.set_entry_point('start_router') 
         graph_builder.set_finish_point('finish')

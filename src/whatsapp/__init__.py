@@ -9,7 +9,7 @@ from langgraph.graph.state import CompiledStateGraph
 import httpx
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
-from MARiA import Database, MariaGraph
+from MARiA import Database, MariaGraph, get_checkpointer_manager
 from .message_service import MessageService
 
 load_dotenv()
@@ -26,9 +26,9 @@ async def lifespan(app: FastAPI):
     app.state = cast(CustomState, app.state)
     app.state.database = Database()
     mariaGraph = MariaGraph()
-    
+
     await app.state.database.start_connection()
-    checkpointer_manager = app.state.database.get_checkpointer_manager()
+    checkpointer_manager = get_checkpointer_manager()
 
     async with checkpointer_manager as checkpointer:
         await checkpointer.setup()
@@ -58,9 +58,10 @@ async def root(
         if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
             user_phone_Jid = data['data']['key']['remoteJid']
             name = data['data']["pushName"]
-            thread_id = await service.get_user_thread_id(user_phone_Jid, name)
-            message_text = await service.get_maria_response(data['data']['message']['conversation'], thread_id)
-            await service.send_whatsapp_message(user_phone_Jid, message_text)
+            user_message = data['data']['message']['conversation']
+
+            await service.new_message(user_phone_Jid, user_message, name)
+            
             return JSONResponse(status_code=200, content={"status":"received and processed with success"})
 
         return JSONResponse(status_code=200, content={"status":"received"})

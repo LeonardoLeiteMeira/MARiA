@@ -1,6 +1,6 @@
 from enum import Enum
 
-class Database(Enum):
+class NotionDatabaseEnum(Enum):
     TRANSACTIONS = "transactions"
     CATEGORIES = "categories"
     MONTHS = "months"

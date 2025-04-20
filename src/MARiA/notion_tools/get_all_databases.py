@@ -3,7 +3,7 @@ from langchain_core.tools import BaseTool
 from typing import Type
 import asyncio
 
-from MARiA.notion_types import Database
+from MARiA.notion_types import NotionDatabaseEnum
 
 class GeAllDatabasesInput(BaseModel):
     pass
@@ -16,6 +16,6 @@ class GeAllDatabases(BaseTool):
 
     def _run(self, *args, **kwargs) -> list[str]:
         try:
-            return [x.value for x in Database]
+            return [x.value for x in NotionDatabaseEnum]
         except Exception as e:
             return str(e)

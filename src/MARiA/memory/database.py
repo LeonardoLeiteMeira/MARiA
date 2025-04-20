@@ -3,13 +3,24 @@ import dotenv
 import os
 from datetime import datetime
 from psycopg_pool import AsyncConnectionPool
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from typing import Optional
 
 dotenv.load_dotenv()
 
 # TODO quando tiver mais estrutura, mudar o self.pool.connection() para ser criado em nivel de request 
 class Database:
+    _instance: Optional["Database"] = None
+    _initialized: bool = False
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(Database, cls).__new__(cls)
+        return cls._instance
+    
     def __init__(self):
+        if self._initialized:
+            return
+        self._initialized = True
         self.database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA')
         self.pool = AsyncConnectionPool(
             conninfo=self.database_conn_string,
@@ -21,12 +32,8 @@ class Database:
     async def start_connection(self):
         await self.pool.open()
 
-
     async def stop_connection(self):
         await self.pool.close()
-
-    def get_checkpointer_manager(self):
-        return AsyncPostgresSaver.from_conn_string(self.database_conn_string)
     
     async def start_new_thread(self, user_id: str) -> str:
         new_thread = str(uuid.uuid4())
@@ -74,8 +81,8 @@ class Database:
         try:
             async with self.pool.connection() as conn:
                 query = (
-                    "SELECT u.id AS user_id, "
-                    "array_agg(t.thread_id ORDER BY t.created_at DESC) AS threads "
+                    "SELECT u.id AS user_id, u.has_finished_test, "
+                    "array_agg (t.thread_id ORDER BY t.created_at DESC) AS threads "
                     "FROM users u "
                     "LEFT JOIN threads t "
                     "ON u.id = t.user_id "
@@ -94,6 +101,22 @@ class Database:
         except Exception as ex:
             print(ex)
             raise ex
+        
+    async def finish_user_feedback(self, user_id: str):
+        try:
+            async with self.pool.connection() as conn:
+                query = (
+                    "UPDATE users "
+                    "SET has_finished_test = TRUE "
+                    "WHERE id = %s;"
+                )
+                await conn.execute(query, (user_id,))
+                await conn.commit()
+        except Exception as ex:
+            await conn.rollback()
+            print(ex)
+            raise ex
+
 
 
 async def my_test():
