@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from typing import Annotated
+from typing import Annotated, Literal
 from langgraph.graph.message import add_messages
 from langgraph.graph.state import CompiledStateGraph
 from langgraph.graph import StateGraph, START, END
@@ -17,7 +17,7 @@ class State(TypedDict):
     is_trial: bool
     user_input: HumanMessage
 
-TRIAL_DURATION = 5
+TRIAL_DURATION = 2
 
 agent = create_maria_agent()
 agent_email_collection = create_agent_email_collection()
@@ -25,14 +25,49 @@ resume_model = create_resume_model()
 
 
 
-# Utils
+
+
+# Separate nodes
 # ================
-async def verify_feedback_state(state: State):
+async def chatbot(state: State) -> Command[Literal[END]]: # type: ignore
+    """ Node with chatbot logic """
+    messages = state["messages"]
+    chain_output = await agent.ainvoke({"messages": messages})
+    new_messages: list = chain_output["messages"]
+    return Command(
+        goto=END,
+        update={
+            "messages": new_messages,
+        }
+    )
+
+async def collect_email(state: State) -> Command[Literal[END]]: # type: ignore
+    """ Node to collect user feedback """
+    messages = state["final_Trial_messages"]
+    chain_output = await agent_email_collection.ainvoke({"messages": messages})
+    new_messages: list = chain_output["messages"]
+    return Command(
+        goto=END,
+        update= {'final_Trial_messages': new_messages}
+    )
+
+async def start_router(state: State) -> Command[Literal["verify_feedback_state", "chatbot"]]:
+    """ Node to start graph """
+    messages = state["messages"]
+    human_messages = [message for message in messages if message.type == "human"]
+    if len(human_messages) >= TRIAL_DURATION:
+        return Command(goto="verify_feedback_state")
+    messages.append(state["user_input"])
+    return Command(goto="chatbot", update={"messages":messages})
+
+async def verify_feedback_state(state: State) -> Command[Literal["collect_email"]]:
     is_trial = state.get("is_trial", False)
     if is_trial:
         current_messages = state["final_Trial_messages"]
         current_messages.append(state["user_input"])
-        return {"final_Trial_messages":current_messages}
+        updated_state = {"final_Trial_messages":current_messages}
+        return Command(goto="collect_email", update=updated_state)
+
 
     historic_messages = state["messages"]
     historic_messages.append(state["user_input"])
@@ -56,67 +91,30 @@ async def verify_feedback_state(state: State):
         SystemMessage(f"Segue o resumo da conversa do usuário com a MARiA:\n {result.content}")
     ]
 
-    update = {
+    updated_state = {
         "is_trial": True,
         "final_Trial_messages": start_trial_message
     }
-    return update
+    return Command(goto="collect_email", update=updated_state)
 
-
-# ================
-
-
-# Separate nodes
-# ================
-
-
-async def chatbot(state: State):
-    """ Node with chatbot logic """
-    messages = state["messages"]
-    chain_output = await agent.ainvoke({"messages": messages})
-    new_messages: list = chain_output["messages"]
-    return Command(
-        goto=END,
-        update={
-            "messages": new_messages,
-        }
-    )
-
-async def collect_email(state: State):
-    """ Node to collect user feedback """
-    messages = state["final_Trial_messages"]
-    chain_output = await agent_email_collection.ainvoke({"messages": messages})
-    new_messages: list = chain_output["messages"]
-    return Command(
-        goto=END,
-        update= {'final_Trial_messages': new_messages}
-    )
-
-async def start_router(state: State):
-    """ Node to start graph """
-    messages = state["messages"]
-    human_messages = [message for message in messages if message.type == "human"]
-    if len(human_messages) >= TRIAL_DURATION:
-        update = await verify_feedback_state(state)
-        return Command(goto="collect_email", update=update)
-    messages.append(state["user_input"])
-    return Command(goto="chatbot", update={"messages":messages})
+async def finish(state:State):
+    return state
 # ================
 
 
 
 def build_graph() -> StateGraph:
     graph_builder = StateGraph(State)
-    graph_builder.add_edge(START, "start_router")
-
-    graph_builder.add_edge("chatbot", END)
-    graph_builder.add_edge("collect_email", END)
-
-    graph_builder.add_node("start_router", start_router)
+    
+    graph_builder.add_node('start_router', start_router)
+    graph_builder.add_node("verify_feedback_state", verify_feedback_state)
     graph_builder.add_node("chatbot", chatbot)
     graph_builder.add_node("collect_email", collect_email)
-
+    graph_builder.add_node('finish', finish)
     # TODO adicionar nodo depois do feedback para tirar o acesso do usuario
+
+    graph_builder.set_entry_point('start_router') 
+    graph_builder.set_finish_point('finish')
 
     return graph_builder
 
@@ -161,11 +159,11 @@ async def run_debug():
     await database.start_connection()
     checkpoint_manager = database.get_checkpointer_manager()
     async with checkpoint_manager as checkpointer:
-        await checkpointer.setup()
-        graph_builder = build_graph()
-        graph = graph_builder.compile(checkpointer=checkpointer)
-        
         try:
+            await checkpointer.setup()
+            graph_builder = build_graph()
+            graph = graph_builder.compile(checkpointer=checkpointer)
+        
             phone_number = "5531933057272"
             user_threads = await database.get_thread_id_by_phone_number(phone_number)
             if len(user_threads['threads']) > 0:
@@ -205,4 +203,4 @@ async def delete_user_threads_by_phone_number(phone_number: str):
 if __name__ == '__main__':
     import asyncio 
     asyncio.run(delete_user_threads_by_phone_number("5531933057272"))
-    # asyncio.run(run_debug())
+    asyncio.run(run_debug())

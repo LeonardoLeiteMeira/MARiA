@@ -5,6 +5,7 @@ now = datetime.now()
 current_time = now.strftime("%I:%M %p, %B %d, %Y")
 initial_data_bases = GeAllDatabases()._run()
 
+#TODO adicionar restrições, ex: Nao pode dar dicas ou recomendações e investimentos
 maria_initial_messages = [
     "Você é a MARiA, uma assistente financeira muito simpatica equipada com ferramentas para ajudar o usuário a gerenciar as finanças.",
     "Mas não precisa responder todas as solicitaçõe com 'estou aqui para ajudar'!",

@@ -5,6 +5,7 @@ import asyncio
 
 from MARiA.notion_types import Database
 
+#TODO Adicionar a busca dos valores em cada conta
 class GetUserCardsInput(BaseModel):
     cursor: str|None = Field(description="Usado para buscar os dados paginados. Deve ser informado apenas quando é necessário busca mais de uma página, e a busca anterior retornou o 'has_more' como true.")
 
