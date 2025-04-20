@@ -33,7 +33,21 @@ class Database:
         await self.create_thread_record(thread_id=new_thread, user_id=user_id)
         return new_thread
     
-    
+    async def create_user(self, user_name: str, user_phone: str):
+        async with self.pool.connection() as conn:
+            try:
+                query = (
+                    "INSERT INTO users"
+                    "(name, phone_number)"
+                    "values (%s , %s);"
+                )
+                await conn.execute(query, (user_name, user_phone))
+                await conn.commit()
+            except Exception as ex:
+                await conn.rollback()
+                print(ex)
+                raise ex
+
     async def create_thread_record(self, thread_id: str, user_id: str):
         async with self.pool.connection() as conn:
             try:
@@ -80,3 +94,15 @@ class Database:
         except Exception as ex:
             print(ex)
             raise ex
+
+
+async def my_test():
+    database = Database()
+    await database.start_connection()
+    result = await database.get_thread_id_by_phone_number("fsdfga")   
+    print(result)
+    print("+++++++")
+
+if __name__ == "__main__":
+    import asyncio 
+    asyncio.run(my_test())

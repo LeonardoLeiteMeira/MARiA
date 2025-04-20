@@ -1,11 +1,12 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE users (
-  id                       UUID    PRIMARY KEY DEFAULT uuid_generate_v4(),
-  name                     TEXT    NOT NULL,
-  email                    TEXT    NOT NULL UNIQUE,
-  accepts_communications   BOOLEAN NOT NULL DEFAULT FALSE,
-  phone_number             TEXT
+  id                       UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
+  name                     TEXT         NOT NULL,
+  email                    TEXT,
+  accepts_communications   BOOLEAN      NOT NULL DEFAULT FALSE,
+  phone_number             TEXT         NOT NULL UNIQUE,
+  created_at               TIMESTAMPTZ  NOT NULL DEFAULT now()
 );
 
 insert into users (name, email, accepts_communications, phone_number) values ('Leonardo Leite Meira', 'leonardo.leitemeira10@gmail.com', TRUE, '+5531933057272');
