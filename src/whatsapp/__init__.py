@@ -1,7 +1,7 @@
 # poetry run uvicorn whatsapp:app --reload
 import os
 from typing import Annotated, cast
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, Request, Body
 from starlette.datastructures import State
 from contextlib import asynccontextmanager
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -9,12 +9,12 @@ from langgraph.graph.state import CompiledStateGraph
 import httpx
 from dotenv import load_dotenv
 
-from whatsapp.message_repository import MessageRepository
+# from whatsapp.message_repository import MessageRepository
 from MARiA import send_message, Database, build_graph
 
 load_dotenv()
 
-message_repository = MessageRepository()
+# message_repository = MessageRepository()
 
 evolution_api_key = os.getenv("AUTHENTICATION_API_KEY")
 
@@ -62,8 +62,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.state = cast(CustomState, app.state)
 
-def get_maria_response(user_message: str, thread_id: str):
-    return send_message(app.state.graph, user_message, thread_id)
+async def get_maria_response(user_message: str, thread_id: str):
+    return await send_message(app.state.graph, user_message, thread_id)
 
 async def send_whatsapp_message(to:str, message: str):
     try:
@@ -89,12 +89,15 @@ async def send_whatsapp_message(to:str, message: str):
     
 
 @app.post('/whatsapp')
-async def root(data: dict, service:MessageService = Annotated[MessageService, Depends(service_dependency)]):
+async def root(
+    data: dict = Body(...), 
+    service:MessageService = Depends(service_dependency)
+):
+    print(data)
     if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
         user_phone_Jid = data['data']['key']['remoteJid']
-        await message_repository.get_last_messages(user_phone_Jid)
         thread_id = await service.get_user_thread_id(user_phone_Jid)
-        message_text = get_maria_response(data['data']['message']['conversation'], thread_id)
+        message_text = await get_maria_response(data['data']['message']['conversation'], thread_id)
         await send_whatsapp_message(user_phone_Jid, message_text)
 
     return {'hello':'world'}

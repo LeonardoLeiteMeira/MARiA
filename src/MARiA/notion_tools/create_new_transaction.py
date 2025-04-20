@@ -34,7 +34,7 @@ class CreateNewTransaction(BaseTool):
                 date,
                 cardId,
                 categoryId,
-                type
+                typeId
             )
         except Exception as e:
             return str(e)

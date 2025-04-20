@@ -5,6 +5,7 @@ import json
 from psycopg_pool import AsyncConnectionPool
 load_dotenv()
 
+@DeprecationWarning
 class MessageRepository:
     def __init__(self):
         self.user = os.getenv('POSTGRES_USER')

@@ -10,8 +10,7 @@ dotenv.load_dotenv()
 # TODO quando tiver mais estrutura, mudar o self.pool.connection() para ser criado em nivel de request 
 class Database:
     def __init__(self):
-        connection_uri = os.getenv('DATABASE_CONNECTION_URI')
-        self.database_conn_string = f"{connection_uri}/maria"
+        self.database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA')
         self.pool = AsyncConnectionPool(
             conninfo=self.database_conn_string,
             max_size=10,
@@ -71,7 +70,6 @@ class Database:
                 )
                 cursor = await conn.execute(query, (phone_number,))
                 row = await cursor.fetchone()
-                print(row)
                 if row is None:
                     return None
                 columns = [col.name for col in cursor.description]

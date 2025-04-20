@@ -120,7 +120,20 @@ def build_graph() -> StateGraph:
 
     return graph_builder
 
-async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str):
+async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str) -> str:
+    config = {"configurable": {"thread_id": thread_id}}
+
+    result = await graph.ainvoke({"user_input": HumanMessage(user_input)}, config=config, debug=True)
+    is_trial = result.get("is_trial", False)
+    if is_trial:
+        messages = result["final_Trial_messages"]
+    else:
+        messages = result["messages"]
+
+    resp = messages[-1].content
+    return resp
+
+async def send_message_with_stream(graph: CompiledStateGraph, user_input: str, thread_id: str) -> None:
     config = {"configurable": {"thread_id": thread_id}}
 
     graph_strem = graph.astream(
@@ -142,7 +155,8 @@ async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: st
         if last_message.type != "human":
             print(last_message.pretty_print())
 
-async def main():
+
+async def run_debug():
     database = Database()
     await database.start_connection()
     checkpoint_manager = database.get_checkpointer_manager()
@@ -165,21 +179,30 @@ async def main():
                 if user_input.lower() in ["quit", "exit", "q"]:
                     print("\nBye!\n")
                     break
-                await send_message(graph, user_input, thread_id)
+                resp_msg = await send_message(graph, user_input, thread_id)
+                print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+                print(f"\n{resp_msg}\n")
+                print("+++++++++++++++++++++++++++++++++++++++++++++++++++")
+            await database.stop_connection()
         except Exception as ex:
             print(ex)
         
 async def delete_user_threads_by_phone_number(phone_number: str):
-    database = Database()
-    await database.start_connection()
-    checkpoint_manager = database.get_checkpointer_manager()
-    async with checkpoint_manager as checkpointer:
-        await checkpointer.setup()
-        user_threads = await database.get_thread_id_by_phone_number(phone_number)
-        for thread_id in user_threads['threads']:
-            await checkpointer.adelete_thread(thread_id)
+    try:
+        database = Database()
+        await database.start_connection()
+        checkpoint_manager = database.get_checkpointer_manager()
+        async with checkpoint_manager as checkpointer:
+            await checkpointer.setup()
+            user_threads = await database.get_thread_id_by_phone_number(phone_number)
+            for thread_id in user_threads['threads']:
+                await checkpointer.adelete_thread(thread_id)
+
+        print("=> Threads deleted")
+    except Exception as ex:
+        print(ex)
 
 if __name__ == '__main__':
     import asyncio 
-    asyncio.run(main())
-    # asyncio.run(delete_user_threads_by_phone_number("5531933057272"))
+    asyncio.run(delete_user_threads_by_phone_number("5531933057272"))
+    # asyncio.run(run_debug())
