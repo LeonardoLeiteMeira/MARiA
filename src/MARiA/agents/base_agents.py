@@ -1,11 +1,11 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
-from MARiA.agents.prompts import maria_initial_messages, prompt_email_collection
+from MARiA.agents.prompts import prompt_maria_initial, prompt_email_collection
 from MARiA.notion_tools import tools, websummitTools
 
 
 def create_maria_agent(): #-> CompiledGraph:
-    prompt = " ".join(maria_initial_messages)
+    prompt = " ".join(prompt_maria_initial)
     model = ChatOpenAI(model='gpt-4.1', temperature=0)
     # model = ChatOpenAI(model='gpt-4.1', temperature=0)
     model = model.bind_tools(tools)

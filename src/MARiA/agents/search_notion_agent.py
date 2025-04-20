@@ -17,7 +17,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
 from MARiA.notion_tools import tools
-from MARiA.agents.prompts import maria_initial_messages
+from MARiA.agents.prompts import prompt_maria_initial
 
 
 # 1. Identificar a tabela principal
@@ -42,7 +42,7 @@ class RelationshipsTables(TypedDict):
 llm = init_chat_model("gpt-4o-mini", model_provider="openai")
 structured_llm = llm.with_structured_output(RelationshipsTables)
 
-system = maria_initial_messages # TODO Adicionar um exemplo de busca - Como as que eu anotei
+system = prompt_maria_initial # TODO Adicionar um exemplo de busca - Como as que eu anotei
 
 prompt = ChatPromptTemplate.from_messages([("system", system), ("human", "{input}")])
 
