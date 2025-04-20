@@ -19,11 +19,11 @@ She can create new transactions and read diferents notion databases.
     - [x] Query de dados com filter, properties, cursor e page_size
     - [x] Sort
     - [x] Melhorar nomeclatura das colunas
-- [ ] Conectar no whatsapp
-    - [ ] Simples
+- [x] Conectar no whatsapp
+    - [x] Simples
     - [ ] Diferenciar numeros controlando acessos
-    - [ ] Mover docker compose para esse repositorio 
-- [ ] Lista todas as funcoes e testes que quero levar para o web summit
+    - [x] Mover docker compose para esse repositorio 
+- [x] Lista todas as funcoes e testes que quero levar para o web summit
 - [ ] Update de informação (se conseguir antes do web summit seria top)
 - [ ] Fazer um planejamento (Multi agente?)
     - [ ] Agente apenas para busca. Ler os dados -> Entender a Query -> Executar -> Check Result
