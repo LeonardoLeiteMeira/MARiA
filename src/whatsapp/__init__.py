@@ -10,7 +10,7 @@ import httpx
 from dotenv import load_dotenv
 
 # from whatsapp.message_repository import MessageRepository
-from MARiA import send_message, Database, build_graph
+from MARiA import send_message, Database, MariaGraph
 
 load_dotenv()
 
@@ -52,7 +52,8 @@ async def lifespan(app: FastAPI):
 
     async with checkpointer_manager as checkpointer:
         await checkpointer.setup()
-        graph_builder = build_graph()
+        mariaGraph = MariaGraph()
+        graph_builder = mariaGraph.build_graph()
         app.state.graph = graph_builder.compile(checkpointer=checkpointer)
         app.state.checkpointer = checkpointer
         yield
