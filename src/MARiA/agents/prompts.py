@@ -1,4 +1,4 @@
-from MARiA.notion_tools import GeAllDatabases
+from MARiA.tools import GeAllDatabases
 from datetime import datetime
 
 now = datetime.now()

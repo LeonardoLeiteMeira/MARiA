@@ -16,7 +16,7 @@ from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.prebuilt import create_react_agent
 
-from MARiA.notion_tools import tools
+from MARiA.tools import tools
 from MARiA.agents.prompts import prompt_maria_initial
 
 

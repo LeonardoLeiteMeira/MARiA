@@ -1,7 +1,7 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
 from MARiA.agents.prompts import prompt_maria_initial, prompt_email_collection
-from MARiA.notion_tools import tools, websummitTools
+from MARiA.tools import tools, websummitTools
 
 
 def create_maria_agent(): #-> CompiledGraph:
