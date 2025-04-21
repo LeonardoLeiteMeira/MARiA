@@ -102,15 +102,17 @@ class Database:
             print(ex)
             raise ex
         
-    async def finish_user_feedback(self, user_id: str):
+    async def finish_user_feedback_by_thread_id(self, thread_id: str):
         try:
             async with self.pool.connection() as conn:
                 query = (
-                    "UPDATE users "
+                    "UPDATE users u "
                     "SET has_finished_test = TRUE "
-                    "WHERE id = %s;"
+                    "FROM threads t "
+                    "WHERE t.thread_id = %s "
+                    "AND t.user_id = u.id;"
                 )
-                await conn.execute(query, (user_id,))
+                await conn.execute(query, (thread_id,))
                 await conn.commit()
         except Exception as ex:
             await conn.rollback()
@@ -118,11 +120,10 @@ class Database:
             raise ex
 
 
-
 async def my_test():
     database = Database()
     await database.start_connection()
-    result = await database.get_thread_id_by_phone_number("fsdfga")   
+    result = await database.finish_user_feedback_by_thread_id("0b28b21a-41f8-43b3-8365-17bf8f153ff3")
     print(result)
     print("+++++++")
 

@@ -32,9 +32,10 @@ class RegisterFeedbackAndEmail(BaseTool):
             email = parms['args']['email']
             feedback = parms['args']['feedback']
             contacted = parms['args']['contacted']
+            thread_id = config['metadata']['thread_id']
 
             print(name, email, feedback, contacted)
-            # await self.repository.finish_user_feedback(user_id)
+            await self.repository.finish_user_feedback_by_thread_id(thread_id)
             return ToolMessage(
                 content=True,
                 tool_call_id=parms['id'],

@@ -48,7 +48,4 @@ class GetMonths(BaseTool):
                 content=f"Ocorreu um erro na execução {e}",
                 tool_call_id=parms['id'],
             )
-        
-    # TODO
-    # 1. Deixar todas as tools async
-    # 2. Modificar a tool de feedback para atualizar o banco
+

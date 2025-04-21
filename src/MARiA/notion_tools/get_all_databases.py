@@ -21,7 +21,7 @@ class GeAllDatabases(BaseTool):
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
             database_registers = [x.value for x in NotionDatabaseEnum]
-            ToolMessage(
+            return ToolMessage(
                 content=database_registers,
                 tool_call_id=parms['id'],
             )
