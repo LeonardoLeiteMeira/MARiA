@@ -1,7 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from langchain_core.tools import BaseTool
-from typing import Type
-import asyncio
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 
 from MARiA.notion_types import NotionDatabaseEnum
 
@@ -14,8 +15,19 @@ class GeAllDatabases(BaseTool):
     description: str = "Listar todas as possíveis bases de dados"
     args_schema: Type[BaseModel] = GeAllDatabasesInput
 
-    def _run(self, *args, **kwargs) -> list[str]:
+    def _run(self, *args, **kwargs) -> ToolMessage:
+        return [x.value for x in NotionDatabaseEnum]
+
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            return [x.value for x in NotionDatabaseEnum]
+            database_registers = [x.value for x in NotionDatabaseEnum]
+            ToolMessage(
+                content=database_registers,
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
+            print("GeAllDatabases - Ocorreu um erro: ", e)
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução: {e}",
+                tool_call_id=parms['id'],
+            )

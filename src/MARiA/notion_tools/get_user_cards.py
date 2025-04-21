@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
-import asyncio
-
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from MARiA.notion_types import NotionDatabaseEnum
 
 #TODO Adicionar a busca dos valores em cada conta
@@ -16,8 +16,22 @@ class GetUserCards(BaseTool):
     args_schema: Type[BaseModel] = GetUserCardsInput
 
     def _run(self, cursor: str = None, *args, **kwargs) -> list[dict]:
+        pass
+
+
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
-            return notion_access.get_simple_data(NotionDatabaseEnum.CARDS, cursor)
+            cursor = parms['args']['cursor']
+            user_cards = notion_access.get_simple_data(NotionDatabaseEnum.CARDS, cursor)
+
+            return ToolMessage(
+                content=user_cards,
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
+            print("GetMonths - Ocorreu um erro: ", e)
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução {e}",
+                tool_call_id=parms['id'],
+            )

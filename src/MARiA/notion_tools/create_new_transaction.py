@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
-import asyncio
-
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from MARiA.notion_types import NotionDatabaseEnum
 
 class CreateNewTransactionInput(BaseModel):
@@ -24,9 +24,20 @@ class CreateNewTransaction(BaseTool):
     description: str = "Cria uma nova transação de saida com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar. É necessário verificar a estrutura do banco de dados. Lembre-se de passar os IDs corretos e não os nomes"
     args_schema: Type[BaseModel] = CreateNewTransactionInput
 
-    def _run(self, name: str,amount: float,date: str,cardId: str,categoryId: str,monthId: str,typeId: str, *args, **kwargs) -> list[dict]:
+    def _run(self, name: str,amount: float,date: str,cardId: str,categoryId: str,monthId: str,typeId: str, *args, **kwargs) -> ToolMessage:
+        pass
+
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
+            name = parms['args']['name']
+            amount = parms['args']['amount']
+            date = parms['args']['date']
+            cardId = parms['args']['cardId']
+            categoryId = parms['args']['categoryId']
+            monthId = parms['args']['monthId']
+            typeId = parms['args']['typeId']
+
             notion_access.create_out_transaction(
                 name,
                 monthId,
@@ -36,6 +47,12 @@ class CreateNewTransaction(BaseTool):
                 categoryId,
                 typeId
             )
+            return ToolMessage(
+                content="Criado com sucesso",
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
-
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução: {e}",
+                tool_call_id=parms['id'],
+            )

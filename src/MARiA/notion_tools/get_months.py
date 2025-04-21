@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
+from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 
 class GetMonthsInput(BaseModel):
     year: int = Field(description="O ano do mês que deve ser listado")
@@ -24,20 +25,30 @@ class GetMonths(BaseTool):
     def _run(self, year:int, property_ids: list[str] = [],*args, **kwargs):
         pass
 
-    async def ainvoke(self, parms:dict, property_ids: list[str] = [],*args, **kwargs) -> list[dict]:
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
             year = parms['args']['year']
             properties = parms['args']['property_ids']
+
             data = notion_access.get_months_by_year(year, properties)
             if data == None:
-                return []
+                return ToolMessage(
+                    content='Nenhum registro encontrado! Verifique a busca.',
+                    tool_call_id=parms['id'],
+                )
+
             return ToolMessage(
                 content=data,
                 tool_call_id=parms['id'],
             )
         except Exception as e:
+            print("GetMonths - Ocorreu um erro: ", e)
             return ToolMessage(
-                content=f"Ocorreu um erro na execucao",
-                artifact=e,
+                content=f"Ocorreu um erro na execução {e}",
+                tool_call_id=parms['id'],
             )
+        
+    # TODO
+    # 1. Deixar todas as tools async
+    # 2. Modificar a tool de feedback para atualizar o banco

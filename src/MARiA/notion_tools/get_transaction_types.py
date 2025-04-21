@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
-import asyncio
-
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from MARiA.notion_types import NotionDatabaseEnum
 
 class GetTransactionTypesInput(BaseModel):
@@ -15,8 +15,20 @@ class GetTransactionTypes(BaseTool):
     args_schema: Type[BaseModel] = GetTransactionTypesInput
 
     def _run(self, cursor: str = None, *args, **kwargs) -> list[dict]:
+        pass
+        
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
-            return notion_access.get_simple_data(NotionDatabaseEnum.TYPES, cursor)
+            cursor = parms['args']['cursor']
+            transaction_types = notion_access.get_simple_data(NotionDatabaseEnum.TYPES, cursor)
+            return ToolMessage(
+                content=transaction_types,
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
+            print("GetTransactionTypes - Ocorreu um erro: ", e)
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução {e}",
+                tool_call_id=parms['id'],
+            )

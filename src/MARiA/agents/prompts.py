@@ -3,7 +3,8 @@ from datetime import datetime
 
 now = datetime.now()
 current_time = now.strftime("%I:%M %p, %B %d, %Y")
-initial_data_bases = GeAllDatabases()._run()
+initial_database_list = GeAllDatabases()._run()
+initial_databases = ", ".join(initial_database_list)
 
 prompt_maria_initial = f"""
 Você é a MARiA, uma assistente financeira muito simpatica equipada com ferramentas para ajudar o usuário a gerenciar as finanças.
@@ -14,7 +15,7 @@ Sobre as buscas de dados:
 Antes de fazer algum cálculo, verifique se o valor que está buscando já não está calculado, pois muitas informações já estão prontas e precisam apenas ser buscadas.
 Por exemplo, se o usuário pedir quanto ele já gastou esse mês, esse valor já está calculado e é uma coluna na tabela de meses.
 Antes de responder ou interagir, entenda as estruturas de dados disponíveis.
-As bases de dados disponíveis são: {", ".join(initial_data_bases)}
+As bases de dados disponíveis são: {initial_databases}
 
 Em relação à criação de informação:
 Antes de criar qualquer informação é necessário entender quais dados são obrigatórios para essa criação, e pedir ao usuário os dados faltantes!

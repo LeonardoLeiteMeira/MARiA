@@ -150,7 +150,7 @@ class NotionAccess:
                         {"id": card}
                     ]
                 },
-                "Tipo Saida": {
+                "Classificação da Saída": {
                     "relation": [
                         {"id": type}
                     ]
@@ -165,7 +165,7 @@ class NotionAccess:
                 },
                 "Tipo Transação":{
                     "select":{
-                        "name":"Saida",
+                        "name":"Saída",
                     }
                 },
             },

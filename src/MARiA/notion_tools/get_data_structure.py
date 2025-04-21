@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
-
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 from MARiA.notion_types import NotionDatabaseEnum
 
 class GetDataStructureInput(BaseModel):
@@ -14,11 +15,23 @@ class GetDataStructure(BaseTool):
     args_schema: Type[BaseModel] = GetDataStructureInput
 
     def _run(self, database_name: str, *args, **kwargs) -> list[dict]:
+        pass
+
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
+            database_name = parms['args']['database_name']
             valid_databases = [x.value for x in NotionDatabaseEnum]
             if database_name not in valid_databases:
                 return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
-            return notion_access.get_properties(database_name)
+            properties = notion_access.get_properties(database_name)
+            return ToolMessage(
+                content=properties,
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
+            print("GetDataStructure - Ocorreu um erro: ", e)
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução {e}",
+                tool_call_id=parms['id'],
+            )

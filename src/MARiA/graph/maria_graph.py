@@ -13,7 +13,7 @@ class MariaGraph:
         self.main_agent = create_maria_agent()
         self.agent_email_collection = create_agent_email_collection()
         self.resume_model = create_resume_model()
-        self.TRIAL_DURATION = 10
+        self.TRIAL_DURATION = 20
     
     def build_graph(self) -> StateGraph:
         graph_builder = StateGraph(State)

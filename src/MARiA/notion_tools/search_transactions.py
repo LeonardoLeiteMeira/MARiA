@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Type
-import asyncio
+from typing import Optional, Type
+from langchain_core.messages.tool import ToolMessage
+from langchain_core.runnables import RunnableConfig
 
 class SearchTransactionsInput(BaseModel):
     cursor: str | None = Field(description="Usado para buscar os dados paginados. Deve ser informado apenas quando é necessário busca mais de uma página, e a busca anterior retornou o 'has_more' como true.")
@@ -49,8 +50,31 @@ class SearchTransactions(BaseTool):
             filter: dict = None,
             properties: list = None,
             *args, **kwargs) -> list[dict]:
+        pass
+        
+    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         from ..notion_repository import notion_access
         try:
-            return notion_access.get_transactions(cursor, page_size, filter, properties)
+            cursor = parms['args']['cursor']
+            page_size = parms['args']['page_size']
+            filter = parms['args']['filter']
+            properties = parms['args']['properties']
+
+            transactions =  notion_access.get_transactions(cursor, page_size, filter, properties)
+
+            if transactions == None:
+                return ToolMessage(
+                    content='Nenhum registro encontrado! Verifique a busca.',
+                    tool_call_id=parms['id'],
+                )
+        
+            return ToolMessage(
+                content=transactions,
+                tool_call_id=parms['id'],
+            )
         except Exception as e:
-            return str(e)
+            print("GetMonths - Ocorreu um erro: ", e)
+            return ToolMessage(
+                content=f"Ocorreu um erro na execução {e}",
+                tool_call_id=parms['id'],
+            )
