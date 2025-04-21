@@ -5,8 +5,8 @@ from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from MARiA.notion_types import NotionDatabaseEnum
 
-class CreateNewTransactionInput(BaseModel):
-    name: str = Field(description="Nome escolhido pelo usuário para identificar a transação")
+class CreateNewOutTransactionInput(BaseModel):
+    name: str = Field(description="Nome escolhido pelo usuário para identificar a transação de saída")
     amount: float = Field(description="Valor da transação")
     date: str = Field(description="Data da transação no formato iso")
     cardId: str = Field(description="Id de um Cartão ou Conta usado para a transação")
@@ -19,10 +19,10 @@ class CreateNewTransactionInput(BaseModel):
 # 1. Esta inventando infos - Criou no cartao nda nubank sem eu ter falado isso e o typo colocou como essencial sem eu dizer
 # 2. Acredito que tenha muitas etapas para fazer essa busca - Simplificar o processo de criacao de transacao
 
-class CreateNewTransaction(BaseTool):
-    name: str = "criar_nova_transacao"
-    description: str = "Cria uma nova transação de saida com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar. É necessário verificar a estrutura do banco de dados. Lembre-se de passar os IDs corretos e não os nomes"
-    args_schema: Type[BaseModel] = CreateNewTransactionInput
+class CreateNewOutTransaction(BaseTool):
+    name: str = "criar_nova_transacao_de_saida"
+    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar. É necessário verificar a estrutura do banco de dados. Lembre-se de passar os IDs corretos e não os nomes."
+    args_schema: Type[BaseModel] = CreateNewOutTransactionInput
 
     def _run(self, name: str,amount: float,date: str,cardId: str,categoryId: str,monthId: str,typeId: str, *args, **kwargs) -> ToolMessage:
         pass

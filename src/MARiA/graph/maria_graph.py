@@ -82,9 +82,9 @@ class MariaGraph:
             full_history_string += f"{origin}{message.content}\n"
 
         prompt_filled = prompt_resume_messsages.format(conversation=full_history_string)
-        messages = [# TODO Melhorar o prompt pois esta com textos iniciais desnecessarios
+        messages = [
             SystemMessage(prompt_filled),
-            HumanMessage("Restorne o resumo")
+            HumanMessage("Retorne o resumo")
         ]
         
         result = await self.resume_model.ainvoke(messages)

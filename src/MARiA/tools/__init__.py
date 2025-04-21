@@ -1,6 +1,6 @@
 from .search_transactions import SearchTransactions
 from .get_transactions_categories import GetTransactionsCategories
-from .create_new_transaction import CreateNewTransaction
+from .create_new_transaction import CreateNewOutTransaction
 from .get_transaction_types import GetTransactionTypes
 from .get_months import GetMonths
 from .get_user_cards import GetUserCards
@@ -17,7 +17,7 @@ tools = [
     GetTransactionTypes(), 
     GetMonths(), 
     GetUserCards(), 
-    CreateNewTransaction(), 
+    CreateNewOutTransaction(), 
     GetDataStructure(), 
     GeAllDatabases(),
     GetMonthPlanning()
