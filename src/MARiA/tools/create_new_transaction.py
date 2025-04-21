@@ -15,7 +15,7 @@ class CreateNewOutTransactionInput(BaseModel):
     typeId: str = Field(description="Id de um Tipo válido para classificar a transação")
 
 
-#TODO Problemas
+#TODO Problemas (Esse problemas serão resolvidos com um workflow especifico)
 # 1. Esta inventando infos - Criou no cartao nda nubank sem eu ter falado isso e o typo colocou como essencial sem eu dizer
 # 2. Acredito que tenha muitas etapas para fazer essa busca - Simplificar o processo de criacao de transacao
 

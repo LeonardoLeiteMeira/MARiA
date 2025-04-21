@@ -83,11 +83,12 @@ class NotionAccess:
         except Exception as e:
             print(e)
 
-    def get_simple_data(self, database:NotionDatabaseEnum, cursor: str = None):
+    def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = []):
         title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
+        property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
         data = self.notion_repository.get_database(
             self.databases[database.value]['id'], 
-            filter_properties=[title_property_id],
+            filter_properties=[title_property_id, *property_ids_parsed],
             start_cursor=cursor
         )
         return self.__process_database_registers(data)

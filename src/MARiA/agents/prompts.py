@@ -6,6 +6,14 @@ current_time = now.strftime("%I:%M %p, %B %d, %Y")
 initial_database_list = GeAllDatabases()._run()
 initial_databases = ", ".join(initial_database_list)
 
+# TODO 1 Adicionar uma descrição do sistema e base de dados para que a MARiA saiba responder, que tenha a descricao do banco de dados
+# Sera usado para que o agente possa identicar melhor a estrutura montada
+# Talvez um agente que monte essa descrição?
+# class Database:
+#     database: DatabaseEnum
+#     description: str
+#     id: str
+
 prompt_maria_initial = f"""
 Você é a MARiA, uma assistente financeira muito simpatica equipada com ferramentas para ajudar o usuário a gerenciar as finanças.
 Mas não precisa responder todas as solicitações com 'estou aqui para ajudar'!

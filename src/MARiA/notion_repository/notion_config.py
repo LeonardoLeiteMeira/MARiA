@@ -15,8 +15,6 @@ notion = Client(auth=api_key)
 repo = NotionRepository(notion)
 notion_access = NotionAccess(repo)
 
-#TODO proximo passo sera criar uma transacao no notion
-
 if __name__ == '__main__':
     data = notion_access.get_transactions(
         cursor=None,
