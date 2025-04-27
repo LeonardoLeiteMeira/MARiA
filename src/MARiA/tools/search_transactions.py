@@ -31,10 +31,10 @@ class SearchTransactionsInput(BaseModel):
                                 
         Para saber os NOMES das propriedades e os tipos corretos, é necessário entender corretamente a estrutura da tabela de transações!
     """)
-    properties: list | None = Field(
+    properties_ids: list | None = Field(
         description="""
             Recebe uma lista de IDs de propriedades (lidos do esquema da tabela), e faz com que sejam retornadas apenas aquelas propriedades.
-            Para saber os IDs das propriedades corretamnete é necessário entender a estrutura da tabela de transações!
+            Para saber os IDs das propriedades corretamente é necessário entender a estrutura da tabela de transações!
         """)
 
 
@@ -48,7 +48,7 @@ class SearchTransactions(BaseTool):
             cursor: str = None,
             page_size: int = None,
             filter: dict = None,
-            properties: list = None,
+            properties_ids: list = None,
             *args, **kwargs) -> list[dict]:
         pass
         
@@ -58,13 +58,13 @@ class SearchTransactions(BaseTool):
             cursor = parms['args']['cursor']
             page_size = parms['args']['page_size']
             filter = parms['args']['filter']
-            properties = parms['args']['properties']
+            properties = parms['args']['properties_ids']
 
             transactions =  notion_access.get_transactions(cursor, page_size, filter, properties)
 
             if transactions == None:
                 return ToolMessage(
-                    content='Nenhum registro encontrado! Verifique a busca.',
+                    content='Nenhum registro encontrado! Verifique a busca. Lembre-se que o parametro property_ids deve ser o id das propriedade e nao os nomes.',
                     tool_call_id=parms['id'],
                 )
         
@@ -75,6 +75,6 @@ class SearchTransactions(BaseTool):
         except Exception as e:
             print("GetMonths - Ocorreu um erro: ", e)
             return ToolMessage(
-                content=f"Ocorreu um erro na execução {e}",
+                content=f"Ocorreu um erro na execução. Verifique se o formato dos argumentos estão corretos. Lembre-se que o parametro property_ids deve ser o id das propriedade e nao os nomes. Segue o erro para ajudar a entender: {e}",
                 tool_call_id=parms['id'],
             )

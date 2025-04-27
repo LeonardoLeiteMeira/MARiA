@@ -21,12 +21,12 @@ class MessageService:
         if user_with_threads == None:
             thread_id = await self.create_user_and_get_thread_id(phone_number, user_name)
         elif user_with_threads['has_finished_test']:
-            await self.send_whatsapp_message(remote_jid, "Olá! Você já concluiu seu periodo te testes. Entraremos em contato quando a MARiA estiver disponivel, caso tenha optado por isso. Para mais informações acesse: https://maria.alemdatech.com")
+            await self.send_whatsapp_message(remote_jid, "Olá! Você já concluiu seu periodo de testes. Entraremos em contato quando a MARiA estiver disponivel, caso tenha optado por isso. Para mais informações acesse: https://maria.alemdatech.com")
             return
         else:
             thread_id = await self.get_thread_id_from_user_threads(user_with_threads)
 
-        message_text = await self.get_maria_response(user_message, thread_id)
+        message_text = await self.get_maria_response(user_message, thread_id, user_name, remote_jid)
         await self.send_whatsapp_message(remote_jid, message_text)
     
     async def get_thread_id_from_user_threads(self, user_threads: dict | None) -> str:
@@ -40,8 +40,8 @@ class MessageService:
         user_threads = await self.database.get_thread_id_by_phone_number(phone_number)
         return await self.get_thread_id_from_user_threads(user_threads)
 
-    async def get_maria_response(self, user_message: str, thread_id: str):
-        return await send_message(self.graph, user_message, thread_id)
+    async def get_maria_response(self, user_message: str, thread_id: str, user_name: str = "", remote_jid: str = ""):
+        return await send_message(self.graph, user_message, thread_id, user_name, remote_jid)
 
     async def send_whatsapp_message(self, to:str, message: str):
         try:

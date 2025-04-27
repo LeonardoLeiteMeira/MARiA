@@ -34,7 +34,7 @@ class GetMonths(BaseTool):
             data = notion_access.get_months_by_year(year, properties)
             if data == None:
                 return ToolMessage(
-                    content='Nenhum registro encontrado! Verifique a busca.',
+                    content='Nenhum registro encontrado! Verifique os parametros da busca. Lembre-se que o parametro property_ids deve ser o id das propriedade e nao os nomes.',
                     tool_call_id=parms['id'],
                 )
 
@@ -45,7 +45,7 @@ class GetMonths(BaseTool):
         except Exception as e:
             print("GetMonths - Ocorreu um erro: ", e)
             return ToolMessage(
-                content=f"Ocorreu um erro na execução {e}",
+                content=f"Ocorreu um erro na execução. Verifique os dados e tente novamente. Lembre-se que o parametro property_ids deve ser o id das propriedade e nao os nomes. Segue o erro para ajudar a entender: {e}",
                 tool_call_id=parms['id'],
             )
 

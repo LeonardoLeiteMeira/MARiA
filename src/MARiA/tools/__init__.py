@@ -17,7 +17,7 @@ tools = [
     GetTransactionTypes(), 
     GetMonths(), 
     GetUserCards(), 
-    CreateNewOutTransaction(), 
+    # CreateNewOutTransaction(), 
     GetDataStructure(), 
     GeAllDatabases(),
     GetMonthPlanning()

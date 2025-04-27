@@ -28,6 +28,6 @@ class GetMonthPlanning(BaseTool):
         except Exception as e:
             print("GetMonthPlanning - Ocorreu um erro: ", e)
             return ToolMessage(
-                content=f"Ocorreu um erro na execução {e}",
+                content=f"Ocorreu um erro na execução. Verifique os dados e tente novamente. Lembre-se que aqui precisa ser passado o ID do mês. Segue o erro para ajudar a entender: {e}",
                 tool_call_id=parms['id'],
             )

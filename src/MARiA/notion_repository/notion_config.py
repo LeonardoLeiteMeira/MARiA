@@ -24,7 +24,7 @@ if __name__ == '__main__':
                 {
                     "property":"Mês",
                     "relation":{
-                    "contains":"1ad14f69-1c83-80ea-aeb6-e5db9ed427a2"
+                        "contains":"1ad14f69-1c83-80ea-aeb6-e5db9ed427a2"
                     }
                 }
             ]

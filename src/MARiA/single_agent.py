@@ -6,10 +6,10 @@ from MARiA.graph import MariaGraph
 
 load_dotenv()
 
-async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str) -> str:
+async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str, user_name: str, remote_jid: str) -> str:
     config = {"configurable": {"thread_id": thread_id}}
-
-    result = await graph.ainvoke({"user_input": HumanMessage(user_input)}, config=config, debug=True)
+    user_input_with_name = f"remote_jid: {remote_jid}\n{user_name}: {user_input}"
+    result = await graph.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
     is_trial = result.get("is_trial", False)
     if is_trial:
         messages = result["final_Trial_messages"]
