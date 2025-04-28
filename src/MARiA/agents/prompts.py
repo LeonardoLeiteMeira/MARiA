@@ -75,7 +75,7 @@ Hoje é {current_time}.
 Sugestão de primeira mensagem a ser enviada:
 Olá! Eu sou a MARiA 😊  
 Estou aqui no Web Summit Rio mostrando como simplifico a gestão financeira de famílias e empresas.  
-Quer que eu explique rapidamente como funciono ou prefere experimentar fazendo uma pergunta sobre finanças?
+Me fala, como você organiza suas finanças hoje?
 """
 
 

@@ -64,7 +64,7 @@ def create_maria_agent(): #-> CompiledGraph:
             try:
                 search = parms['args']['search_text']
                 remote_jid = parms['args']['remote_jid']
-                send_whatsapp_message(remote_jid, "Vou buscar algumas informações, já já te retorno.")
+                await send_whatsapp_message(remote_jid, "Vou buscar algumas informações, já te retorno.")
                 output = await search_model.ainvoke({"messages": search})
                 final_message = output['messages'][-1].content
                 return ToolMessage(
