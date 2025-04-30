@@ -60,7 +60,7 @@ class RegisterFeedbackAndEmail(BaseTool):
             await self.repository.finish_user_feedback_by_thread_id(thread_id)
 
             return ToolMessage(
-                content="Feedback registrado com sucesso! Avise ao usuário que o teste dele finalizou e que ele não terá mais acesso. Entraremos em contato assim que estiver disponível",
+                content="Registro com sucesso! IMPORTANTE: Avise ao usuário que o teste dele finalizou e que ele não terá mais acesso. Entraremos em contato assim que estiver disponível",
                 tool_call_id=parms['id'],
             )
         except Exception as e:

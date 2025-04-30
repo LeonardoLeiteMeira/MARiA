@@ -6,7 +6,6 @@ from starlette.datastructures import State
 from contextlib import asynccontextmanager
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.graph.state import CompiledStateGraph
-import httpx
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from MARiA import Database, MariaGraph, get_checkpointer_manager
