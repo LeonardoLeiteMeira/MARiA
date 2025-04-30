@@ -13,7 +13,7 @@ class MessageService:
         self.evolution_api_key = os.getenv("AUTHENTICATION_API_KEY")
         self.graph = graph
         self.instance = instance
-        self.message_base_url = "http://localhost:8080/message/sendText"
+        self.message_base_url = "http://evolution-api:8080/message/sendText"
 
     async def new_message(self, remote_jid: str, user_message: str, user_name: str = ''):
         phone_number = self.get_phone_number_from_remote_jid(remote_jid)

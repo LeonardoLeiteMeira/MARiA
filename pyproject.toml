@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "", from = "src"}]
+packages = [{include = "whatsapp", from = "src"}]
 
 
 [build-system]
