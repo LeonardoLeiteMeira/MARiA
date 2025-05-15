@@ -9,6 +9,7 @@ from .get_all_databases import GeAllDatabases
 from .get_month_planning import GetMonthPlanning
 from .register_feedback_and_email import RegisterFeedbackAndEmail
 from .finished_test_period import FinishedTestPeriod
+from .search_data import SearchData
 from MARiA.memory import Database
 
 tools = [
