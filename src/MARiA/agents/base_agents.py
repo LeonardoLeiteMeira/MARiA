@@ -1,28 +1,45 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
-from MARiA.agents.prompts import prompt_maria_initial, prompt_email_collection, prompt_maria_websummit
-from MARiA.tools import tools, websummitTools, SearchData
+from MARiA.agents.prompts import prompt_main_agent, prompt_write_agent, prompt_read_agent
+from MARiA.tools import tools_to_read_data, tools_to_write_data, SearchData, WriteData
 
 
-def create_maria_data_access(): #-> CompiledGraph:
-    prompt = " ".join(prompt_maria_initial)
+def maria_write_access(search_data_tool: SearchData): #-> CompiledGraph:
+    prompt = " ".join(prompt_write_agent)
     model = ChatOpenAI(model='gpt-4.1', temperature=0)
-    model = model.bind_tools(tools)
+    tools_to_write = [search_data_tool, *tools_to_write_data]
+    model = model.bind_tools(tools_to_write)
     agent = create_react_agent(
         model,
-        tools=tools,
+        tools=tools_to_write,
+        prompt=prompt,
+        debug=True
+    )
+    return agent
+
+def maria_read_access(): #-> CompiledGraph:
+    prompt = " ".join(prompt_read_agent)
+    model = ChatOpenAI(model='gpt-4.1', temperature=0)
+    model = model.bind_tools(tools_to_read_data)
+    agent = create_react_agent(
+        model,
+        tools=tools_to_read_data,
         prompt=prompt,
         debug=True
     )
     return agent
 
 def create_maria_agent(): #-> CompiledGraph:
-    prompt = " ".join(prompt_maria_websummit)
+    prompt = " ".join(prompt_main_agent)
     model = ChatOpenAI(model='gpt-4.1', temperature=0)
 
-    search_model = create_maria_data_access()
+    search_model = maria_read_access()
+    search_data_tool = SearchData(search_model)
+
+    write_model = maria_write_access(search_data_tool)
+    write_data_tool = WriteData(write_model)
             
-    all_tools = [*websummitTools, SearchData(search_model)]
+    all_tools = [search_data_tool, write_data_tool]
 
     model = model.bind_tools(all_tools)
     agent = create_react_agent(
@@ -33,16 +50,3 @@ def create_maria_agent(): #-> CompiledGraph:
     )
     return agent
 
-def create_agent_email_collection(): #-> CompiledGraph:
-    model_email_collection = ChatOpenAI(model='gpt-4.1', temperature=0)
-    model_email_collection = model_email_collection.bind_tools(websummitTools)
-    agent_email_collection = create_react_agent(
-        model_email_collection,
-        tools=websummitTools,
-        prompt=prompt_email_collection,
-        debug=True
-    )
-    return agent_email_collection
-
-def create_resume_model():
-    return ChatOpenAI(model='gpt-4.1', temperature=0)

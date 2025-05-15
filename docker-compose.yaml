@@ -10,8 +10,8 @@ services:
     volumes:
       - evolution_store:/evolution/store
       - evolution_instances:/evolution/instances
-    # depends_on:
-    #   - database
+    depends_on:
+      - database
 
   api:
     build: .
@@ -20,24 +20,25 @@ services:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/app
     env_file:
       - .env
-    # depends_on:
-    #   - db
+    depends_on:
+      - database
     # Porta não publicada externamente; acesso só entre containers
     expose:
       - "8000"
-  # database:
-  #   container_name: postgres_db
-  #   image: postgres:latest
-  #   restart: always
-  #   ports:
-  #     - "5432:5432"
-  #   env_file:
-  #     - .env
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
+
+  database:
+    container_name: postgres_db
+    image: postgres:latest
+    restart: always
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
 volumes:
   evolution_store:
   evolution_instances:
-  # postgres_data:
-  #   driver: local
+  postgres_data:
+    driver: local

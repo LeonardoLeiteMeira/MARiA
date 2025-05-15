@@ -10,21 +10,24 @@ from .get_month_planning import GetMonthPlanning
 from .register_feedback_and_email import RegisterFeedbackAndEmail
 from .finished_test_period import FinishedTestPeriod
 from .search_data import SearchData
-from MARiA.memory import Database
+from .write_data import WriteData
 
-tools = [
+tools_to_read_data = [
     SearchTransactions(), 
     GetTransactionsCategories(), 
     GetTransactionTypes(), 
     GetMonths(), 
     GetUserCards(), 
-    # CreateNewOutTransaction(), 
     GetDataStructure(), 
     GeAllDatabases(),
     GetMonthPlanning()
 ]
 
-websummitTools = [
-    RegisterFeedbackAndEmail(Database()),
-    FinishedTestPeriod(Database())
+tools_to_write_data = [
+    CreateNewOutTransaction(), 
 ]
+
+# websummitTools = [
+#     RegisterFeedbackAndEmail(Database()),
+#     FinishedTestPeriod(Database())
+# ]

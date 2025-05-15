@@ -5,26 +5,26 @@ from langchain_core.runnables import RunnableConfig
 from langchain_core.messages.tool import ToolMessage
 
 
-class SearchDataInput(BaseModel):
-    search_text: str = Field(description="Texto em linguagem natural descrevendo a busca que deve ser feita. Por exemplo: 'Busque minha transação mais cara do mês de março' ou 'Busque o meu planejamento de fevereiro'")
-    remote_jid: str = Field(description="Dado do whatsapp que vem antes de todoas as mensagens que o usuario envia")
+class WriteDataInput(BaseModel):
+        search_text: str = Field(description="Texto em linguagem natural descrevendo a busca que deve ser feita. Por exemplo: 'Busque minha transação mais cara do mês de março' ou 'Busque o meu planejamento de fevereiro'")
+        remote_jid: str = Field(description="Dado do whatsapp que vem antes de todoas as mensagens que o usuario envia")
 
-class SearchData(BaseTool):
-    name: str = "fazer_busca_nos_dados"
-    description: str = "Usa um outro agente para fazer a busca dos dados com base em um texto em linguagem natural. So existe uma fonte de dados seja sucinto."
-    args_schema: Type[BaseModel] = SearchDataInput
-    search_model: Type[Any] = None
+class WriteData(BaseTool):
+    name: str = "fazer_escrita_de_dados"
+    description: str = "Usa um outro agente para fazer a escrita de dados com base em um texto em linguagem natural. Inserir transações por exemplo. So existe uma fonte de dados seja sucinto."
+    args_schema: Type[BaseModel] = WriteDataInput
+    write_model: Type[Any] = None
 
-    def __init__(self, search_model, *args , **kwargs):
+    def __init__(self, write_model, *args , **kwargs):
         super().__init__(*args, **kwargs)
-        self.search_model = search_model
+        self.write_model = write_model
 
     def _run(self, search: str, *args, **kwargs) -> list[dict]:
         pass
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
             search = parms['args']['search_text']
-            output = await self.search_model.ainvoke({"messages": search})
+            output = await self.write_model.ainvoke({"messages": search})
             final_message = output['messages'][-1].content
             return ToolMessage(
                 content=final_message,
