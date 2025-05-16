@@ -2,6 +2,7 @@ from MARiA.notion_types import NotionDatabaseEnum
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
+from datetime import datetime
 
 notion_cache = None
 
@@ -66,10 +67,11 @@ class NotionAccess:
         data = self.notion_repository.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
         return self.__process_database_registers(data)
     
-    def get_months_by_year(self, year:int, property_ids: list[str] = []) -> dict:
+    def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
         try:
             title_property_id = self.__get_title_property_from_schema(self.databases[NotionDatabaseEnum.MONTHS.value]['properties'])
             property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
+            year = year or datetime.now().year
             data = self.notion_repository.get_database(
                 self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
                 filter_properties=[title_property_id, *property_ids_parsed],

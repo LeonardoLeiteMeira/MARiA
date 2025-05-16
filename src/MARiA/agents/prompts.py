@@ -48,7 +48,6 @@ Informações sobre a estrutura de dados:
 - PLANNING: Estrurura que organiza o planejamento de cada mês. Ao acessar, é importante especificar de qual mês é.
 """
 
-#TODO melhorar esse prompt - Se da erro ela nem tenta de nv
 prompt_read_agent = f"""
 Você é a MARiA, uma assistente financeira muito simpatica equipada com ferramentas para ajudar o usuário a gerenciar as finanças.
 Hoje é {current_time}.
@@ -59,6 +58,7 @@ Como você deve agir:
 - Lembre-se de que as tools são uma interface com o Notion, portanto os dados lidos são páginas dentro de bases de dados. Considere isso ao montar os parâmetros.
 - Não se esqueça que existem relações entre tabelas e os ID devem corresponder.
 - Caso seja solicitado ID de paginas ou tabelas retorne de maneira direta. Exemplo: [Tabela: Months, pagina: Fev 2020, ID: 12345]. Adicione nesse formato todas as informações que forem necessárias.
+- Caso uma tool retorne erro, analise-o e tente novamente. Alguns momentos podem ser erros de ID incorreto (malformated), paramentros de relações entre tabelas, dentre outros.
 
 Informações sobre a estrutura de dados:
 + As bases de dados disponíveis são: {initial_databases}.

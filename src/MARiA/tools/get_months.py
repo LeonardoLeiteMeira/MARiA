@@ -5,7 +5,7 @@ from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
 
 class GetMonthsInput(BaseModel):
-    year: int = Field(description="O ano do mês que deve ser listado")
+    year: int | None = Field(description="O ano do mês que deve ser listado. O default e None, e serão listados os meses desse ano!")
     property_ids: list[str] = Field(
         description="""
             "Uma lista de IDs de propriedades a serem retornadas.

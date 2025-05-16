@@ -1,7 +1,8 @@
 from langgraph.prebuilt import create_react_agent
 from langchain_openai import ChatOpenAI
-from MARiA.agents.prompts import prompt_main_agent, prompt_write_agent, prompt_read_agent
+from MARiA.agents.prompts import prompt_maria_initial, prompt_main_agent, prompt_write_agent, prompt_read_agent
 from MARiA.tools import tools_to_read_data, tools_to_write_data, SearchData, WriteData
+import asyncio
 
 
 def maria_write_access(search_data_tool: SearchData): #-> CompiledGraph:
@@ -30,7 +31,8 @@ def maria_read_access(): #-> CompiledGraph:
     return agent
 
 def create_maria_agent(): #-> CompiledGraph:
-    prompt = " ".join(prompt_main_agent)
+    prompt = " ".join(prompt_maria_initial)
+    # prompt = " ".join(prompt_main_agent)
     model = ChatOpenAI(model='gpt-4.1', temperature=0)
 
     search_model = maria_read_access()
@@ -39,14 +41,25 @@ def create_maria_agent(): #-> CompiledGraph:
     write_model = maria_write_access(search_data_tool)
     write_data_tool = WriteData(write_model)
             
-    all_tools = [search_data_tool, write_data_tool]
+    single_agent_tools = [*tools_to_read_data, *tools_to_write_data]
+    # all_tools = [search_data_tool, write_data_tool]
 
-    model = model.bind_tools(all_tools)
+    model = model.bind_tools(single_agent_tools)
     agent = create_react_agent(
         model,
-        tools=all_tools,
+        tools=single_agent_tools,
         prompt=prompt,
         debug=True
     )
     return agent
 
+
+async def test():
+    human = "Listar todos os cartões cadastrados do usuário"
+    graph = maria_read_access()
+    result = await graph.ainvoke({"messages": human})
+    print(result)
+
+
+if __name__ == "__main__":
+    asyncio.run(test())

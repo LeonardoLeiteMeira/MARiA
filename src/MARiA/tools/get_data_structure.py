@@ -23,7 +23,10 @@ class GetDataStructure(BaseTool):
             database_name = parms['args']['database_name']
             valid_databases = [x.value for x in NotionDatabaseEnum]
             if database_name not in valid_databases:
-                return ['Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!']
+                return ToolMessage(
+                    content='Este não é um nome valido de base de dados. Verifique a lista de bases de dados validas!',
+                    tool_call_id=parms['id'],
+                )
             properties = notion_access.get_properties(database_name)
             return ToolMessage(
                 content=properties,
