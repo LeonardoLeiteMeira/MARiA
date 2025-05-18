@@ -16,24 +16,5 @@ repo = NotionRepository(notion)
 notion_access = NotionAccess(repo)
 
 if __name__ == '__main__':
-    data = notion_access.get_transactions(
-        cursor=None,
-        page_size=30,
-        filter={
-            "and":[
-                {
-                    "property":"Mês",
-                    "relation":{
-                        "contains":"1ad14f69-1c83-80ea-aeb6-e5db9ed427a2"
-                    }
-                }
-            ]
-        },
-        properties=[
-            "title",
-            "xlOO",
-            "IQK~",
-            "TL%3EA"
-        ]
-    )
+    data = notion_access.get_properties('months')
     print(data)

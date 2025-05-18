@@ -11,22 +11,22 @@ class NotionAccess:
         self.notion_repository = notion_repository
         self.databases = {
             NotionDatabaseEnum.TRANSACTIONS.value: {
-                "id": "97c5aad2c46d46a49c3b78e83473ae52"
+                "id": "1cb14f691c8381d9a75ffb3e58f0a481"
             },
             NotionDatabaseEnum.CATEGORIES.value : {
-                "id": "38236d860412473fa9f8d3a0f1e4b0e1"
+                "id": "1cb14f691c8381da9fa0f66de51c0ad9"
             },
             NotionDatabaseEnum.MONTHS.value : {
-                "id": "d91b81e32555418a8bb62a76d7c69ac7"
+                "id": "1cb14f691c8381858f6dd41c0feb3ab8"
             },
             NotionDatabaseEnum.CARDS.value: {
-                "id" : "d1f6611fa1c046eb8cdf87ba3c757f6b"
+                "id" : "1cb14f691c8381e1bf00e7b91896c0ef"
             },
             NotionDatabaseEnum.TYPES.value: {
-                'id': '6852342492704ecf8205c6ac953cf3a2'
+                'id': '1f514f691c838054a52acfa5dc34fdd1'
             },
             NotionDatabaseEnum.PLANNING.value: {
-                'id': 'e1bb24b27a5b41c6879b7ff51d18673c'
+                'id': '1cb14f691c83819db7abe1dad9990d87'
             }
         }
         self.cache = {}
@@ -55,7 +55,7 @@ class NotionAccess:
             filter_properties=properties,
             sorts=[
                 {
-                    "property": "Criado em",
+                    "property": "Data Planejada",# TODO: remover
                     "direction": "descending"
                 }
             ]
@@ -77,7 +77,7 @@ class NotionAccess:
                 filter_properties=[title_property_id, *property_ids_parsed],
                 filter={
                     'and':[{
-                        'property': 'MesData',
+                        'property': 'Data Inicio',
                             'date': {'on_or_after': f"{year}"},
                         }]}
                 )
@@ -104,6 +104,7 @@ class NotionAccess:
                 "name":value["name"],
                 "type":value["type"],
                 "description":value.get("description", ""),
+                value["type"]: value.get(value["type"], None)
             }   
         return properties
     
@@ -112,7 +113,7 @@ class NotionAccess:
             self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
             filter={
                 'and': [{
-                'property': 'isMesAtual',
+                'property': 'GestaoAtual', # TODO remover
                 'formula': {
                     'checkbox': {
                         'equals': True
@@ -128,7 +129,7 @@ class NotionAccess:
                 "type": "database_id",
                 "database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
             },
-            "properties": {
+            "properties": { # TODO Tornar isso dinamico
                 "Name": {
                     "title": [
                         {
@@ -143,7 +144,7 @@ class NotionAccess:
                         {"id": category}
                     ]
                 },
-                "Mês": {
+                "Gestão": {
                     "relation": [
                         {"id": month}
                     ]
@@ -153,7 +154,7 @@ class NotionAccess:
                         {"id": card}
                     ]
                 },
-                "Classificação da Saída": {
+                "Macro Categorias": {
                     "relation": [
                         {"id": type}
                     ]
@@ -161,12 +162,12 @@ class NotionAccess:
                 "Valor": {
                     "number": amount
                 },
-                "Criado em": {
+                "Data Planejada": {
                     "date":{
                         "start": date
                     }
                 },
-                "Tipo Transação":{
+                "Tipo de Transação": {
                     "select":{
                         "name":"Saída",
                     }
@@ -182,7 +183,7 @@ class NotionAccess:
             database_id,
             filter={
                 'and': [{
-                'property': 'Mes',
+                'property': 'Gestão', # TODO Remover
                 'relation': {'contains':month_id}}]
             }    
         )
