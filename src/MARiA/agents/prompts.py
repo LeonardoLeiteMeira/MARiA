@@ -42,10 +42,10 @@ Informações sobre a estrutura de dados:
 + As bases de dados disponíveis são: {initial_databases}.
 - TRANSACTIONS: Base que registra todas as transações. Ela pode ser classificado em entras, saidas, movimentação e pagamento de cartão. Além disso tem categoria, definição de entrada ou saida de qual conta (campos: 'entrada em', 'saida de'), 'Classificação da Saída' (uma categorização mais macro) e Mês.
 - CATEGORIES: Listagem das categorias em que um gasto pode ser classificado.
-- MONTHS: Estrutura que organiza os meses e já tem varios valores agregados. Por exemplo: Total de receita, total gasto, total planejado, etc...
+- MONTHS: Estrutura que organiza os meses e já tem varios valores agregados. Por exemplo: Total de receita, total gasto, total planejado, dentre varias outras.
 - CARDS: Contas e cartões do usuário, junto com o valor que tem em cada um.
 - TYPES: Os tipos que classificam de maneira mais macro os gastos.
-- PLANNING: Estrurura que organiza o planejamento de cada mês. Ao acessar, é importante especificar de qual mês é.
+- PLANNING: Estrurura que organiza o planejamento de cada mês para cada categoria. Ao acessar, é importante especificar de qual mês é. A melhor forma de acesso é ver uma mês de cada vez. Total planejado para um mês é melhor ver dentro do mês.
 """
 
 prompt_read_agent = f"""
@@ -64,10 +64,10 @@ Informações sobre a estrutura de dados:
 + As bases de dados disponíveis são: {initial_databases}.
 - TRANSACTIONS: Base que registra todas as transações. Ela pode ser classificado em entras, saidas, movimentação e pagamento de cartão. Além disso tem categoria, definição de entrada ou saida de qual conta (campos: 'entrada em', 'saida de'), 'Classificação da Saída' (uma categorização mais macro) e Mês.
 - CATEGORIES: Listagem das categorias em que um gasto pode ser classificado.
-- MONTHS: Estrutura que organiza os meses e já tem varios valores agregados. Por exemplo: Total de receita, total gasto, total planejado, etc...
+- MONTHS: Estrutura que organiza os meses e já tem varios valores agregados. Por exemplo: Total de receita, total gasto, total planejado, dentre varias outras.
 - CARDS: Contas e cartões do usuário, junto com o valor que tem em cada um.
 - TYPES: Os tipos que classificam de maneira mais macro os gastos.
-- PLANNING: Estrurura que organiza o planejamento de cada mês. Ao acessar, é importante especificar de qual mês é.
+- PLANNING: Estrurura que organiza o planejamento de cada mês para cada categoria. Ao acessar, é importante especificar de qual mês é. A melhor forma de acesso é ver uma mês de cada vez. Total planejado para um mês é melhor ver dentro do mês.
 """
 
 
