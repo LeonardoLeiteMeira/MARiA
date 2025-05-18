@@ -9,8 +9,8 @@ from .get_all_databases import GeAllDatabases
 from .get_month_planning import GetMonthPlanning
 from .register_feedback_and_email import RegisterFeedbackAndEmail
 from .finished_test_period import FinishedTestPeriod
-from .search_data import SearchData
-from .write_data import WriteData
+from .tool_agent.search_data import SearchData
+from .tool_agent.write_data import WriteData
 
 tools_to_read_data = [
     SearchTransactions(), 
