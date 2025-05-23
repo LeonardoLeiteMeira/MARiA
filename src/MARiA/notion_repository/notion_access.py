@@ -1,4 +1,4 @@
-from MARiA.notion_types import NotionDatabaseEnum
+from MARiA.notion_types import NotionDatabaseEnum, TransactionType
 from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
@@ -6,11 +6,6 @@ from datetime import datetime
 from enum import Enum
 
 notion_cache = None
-
-class TransactionType(Enum):
-    INCOME = 'Entrada'
-    OUTCOME = 'Saída'
-    TRANSFER = 'Movimentação'
 
 class NotionAccess:
     def __init__(self, notion_repository: NotionRepository):
@@ -67,6 +62,70 @@ class NotionAccess:
             ]
         )
         return self.notion_repository.process_database_registers(data)
+    
+    def new_get_transactions(
+            self,
+            name: str|None,
+            hasPaid: bool|None,
+            card_account_enter_id: str|None,
+            card_account_out_id: str|None,
+            category_id: str|None,
+            macro_category_id: str|None,
+            month_id: str|None,
+            transaction_type: str|None,
+            cursor: str| None,
+            page_size: int
+        ) -> dict:
+        database_id = self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
+        filter = {"and": []}
+
+        if name is not None:
+            name_filter = {"property": "Name","title": {"contains": name}}
+            filter["and"].append(name_filter)
+
+        if hasPaid is not None:
+            status_filter  = {"property": "Status", "status": {'name': 'Pago' if hasPaid else 'Pendente'}}
+            filter["and"].append(status_filter)
+
+        if card_account_enter_id is not None:
+            enter_in_filter  = {"property": "Entrada em", "relation": [{"id": card_account_enter_id}]}
+            filter["and"].append(enter_in_filter)
+
+        if card_account_out_id is not None:
+            out_of_filter  = {"property": "Saida de", "relation": [{"id": card_account_out_id}]}
+            filter["and"].append(out_of_filter)
+
+        if category_id is not None:
+            category_filter  = {"property": "Categoria", "relation": [{"id": category_id}]}
+            filter["and"].append(category_filter)
+
+        if macro_category_id is not None:
+            marco_category_filter  = {"property": "Macro Categorias", "relation": [{"id": macro_category_id}]}
+            filter["and"].append(marco_category_filter)
+        
+        if month_id is not None:
+            month_filter  = {"property": "Gestão", "relation": [{"id": month_id}]}
+            filter["and"].append(month_filter)
+
+        if transaction_type is not None:
+            transaction_type_filter  = {"property": "Tipo de Transação", "select": {"name": transaction_type}}
+            filter["and"].append(transaction_type_filter)
+
+        data = self.notion_repository.get_database(
+            database_id=database_id,
+            start_cursor=cursor,
+            page_size=page_size,
+            filter=filter,
+            sorts=[
+                {
+                    "property": "Data Planejada",# TODO: remover
+                    "direction": "descending"
+                }
+            ]
+        )
+
+        return self.notion_repository.process_database_registers(data)
+
     
     def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
