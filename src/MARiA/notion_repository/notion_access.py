@@ -224,6 +224,29 @@ class NotionAccess:
             transaction_type=TransactionType.TRANSFER,
         )
 
+    def create_planning(
+            self,
+            name,
+            month_id,
+            category_id,
+            amount,
+            text 
+        ):
+        page = {
+            "parent": {
+                "type": "database_id",
+                "database_id": self.databases[NotionDatabaseEnum.PLANNING.value]['id']
+            },
+            "properties": {
+                "Name": {"title": [{"text": {"content": name}}]},
+                "Gestão": {"relation": [{"id": month_id}]},
+                "Areas e Categorias": {"relation": [{"id": category_id}]},
+                "Valor planejado": {"number": amount},
+                "Observações": {"rich_text": [{"text": {"content": text}}]}
+            },
+        }
+        self.notion_repository.create_page(page)
+
     def create_card(self, name: str, initial_balance: float):
         page = {
             "parent": {
