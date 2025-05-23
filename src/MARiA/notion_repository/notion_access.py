@@ -128,9 +128,6 @@ class NotionAccess:
         )
         return self.notion_repository.process_database_registers(data)
     
-
-    def create_new_income(self):
-        pass
     
     def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
         self.__create_new_transaction(
@@ -179,12 +176,33 @@ class NotionAccess:
                     "title": [
                         {"text": {"content": name}}
                     ]
-                }
-            },
-            "Saldo Inicial": {
-                "number": initial_balance
+                },
+                "Saldo Inicial": {
+                    "number": initial_balance
+                },
             },
         }
+        self.notion_repository.create_page(page)
+
+    def create_month(self, name: str, start_date:str, finish_date:str):
+        page = {
+            "parent": {
+                "type": "database_id",
+                "database_id": self.databases[NotionDatabaseEnum.MONTHS.value]['id']
+            },
+            "properties": {
+                "Name": {
+                    "title": [
+                        {"text": {"content": name}}
+                    ]
+                },
+                "Data Inicio": {"date":{"start": start_date}},
+                "Data Fim": {"date":{"start": finish_date}},
+            },
+        }
+        self.notion_repository.create_page(page)
+    
+    
 
     def get_planning_by_month(self, month_id) -> dict:
         database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
