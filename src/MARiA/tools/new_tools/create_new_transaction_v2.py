@@ -25,7 +25,7 @@ class CreateNewOutTransactionV2(BaseTool, ToolInterface):
 
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateNewOutTransactionV2':
-        user_data = await notion_user_data.getUserBaseData()
+        user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
         CardEnum = Enum(

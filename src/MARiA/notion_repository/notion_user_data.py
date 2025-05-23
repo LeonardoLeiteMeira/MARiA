@@ -18,12 +18,23 @@ class UserData:
 
 
 class NotionUserData:
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, notion_access: NotionAccess):
+        if cls._instance is None:
+            cls._instance = super(NotionUserData, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, notion_access: NotionAccess):
+        if self.__class__._initialized:
+            return
         self.notion_access = notion_access
         self.user_data = UserData()
         self.user_data.is_loaded = False
+        self.__class__._initialized = True
 
-    async def getUserBaseData(self) -> UserData:
+    async def get_user_base_data(self) -> UserData:
         if self.user_data.is_loaded:
             return self.user_data
 
@@ -38,7 +49,7 @@ class NotionUserData:
     
     async def get_data_id(self, data_type: UserDataTypes, register_name: str):
         if not self.user_data.is_loaded:
-            await self.getUserBaseData()
+            await self.get_user_base_data()
 
         data = None
         user_data = getattr(self.user_data, data_type.value)
