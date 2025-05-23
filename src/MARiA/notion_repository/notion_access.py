@@ -3,8 +3,14 @@ from .notion_repository import NotionRepository
 from .basic_property import BasicProperty
 import urllib.parse
 from datetime import datetime
+from enum import Enum
 
 notion_cache = None
+
+class TransactionType(Enum):
+    INCOME = 'Entrada'
+    OUTCOME = 'Saída'
+    TRANSFER = 'Movimentação'
 
 class NotionAccess:
     def __init__(self, notion_repository: NotionRepository):
@@ -122,61 +128,63 @@ class NotionAccess:
         )
         return self.notion_repository.process_database_registers(data)
     
-    #TODO Simplficar esse metodo
-    def create_out_transaction(self, name, month_id, amount, date, card_id, category_id, type_id, status: bool = True):
+
+    def create_new_income(self):
+        pass
+    
+    def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
+        self.__create_new_transaction(
+            name=name,
+            month_id=month_id,
+            amount=amount,
+            date=date,
+            transaction_type=TransactionType.OUTCOME,
+            card_id_out=card_id,
+            category_id=category_id,
+            type_id=type_id,
+            status=status
+        )
+       
+    def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True):
+        self.__create_new_transaction(
+            name=name,
+            month_id=month_id,
+            amount=amount,
+            date=date,
+            card_id_enter=card_id,
+            status=status,
+            transaction_type=TransactionType.INCOME,
+        )
+
+    def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True):
+        self.__create_new_transaction(
+            name=name,
+            month_id=month_id,
+            amount=amount,
+            date=date,
+            card_id_enter=account_id_in,
+            card_id_out=account_id_out,
+            status=status,
+            transaction_type=TransactionType.TRANSFER,
+        )
+
+    def create_card(self, name: str, initial_balance: float):
         page = {
             "parent": {
                 "type": "database_id",
-                "database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
+                "database_id": self.databases[NotionDatabaseEnum.CARDS.value]['id']
             },
-            "properties": { # TODO Tornar isso dinamico
+            "properties": {
                 "Name": {
                     "title": [
-                        {
-                            "text": {
-                                "content": name
-                            }
-                        }
+                        {"text": {"content": name}}
                     ]
-                },
-                "Categoria": {
-                    "relation": [
-                        {"id": category_id}
-                    ]
-                },
-                "Gestão": {
-                    "relation": [
-                        {"id": month_id}
-                    ]
-                },
-                "Saida de": {
-                    "relation": [
-                        {"id": card_id}
-                    ]
-                },
-                "Macro Categorias": {
-                    "relation": [
-                        {"id": type_id}
-                    ]
-                },
-                "Valor": {
-                    "number": amount
-                },
-                "Data Planejada": {
-                    "date":{
-                        "start": date
-                    }
-                },
-                "Tipo de Transação": {
-                    "select":{
-                        "name":"Saída",
-                    }
-                },
-                'Status': {'status': {'name': 'Pago' if status else 'Pendente'}} # TODO Atualizar para a planilha que nao tem status
+                }
+            },
+            "Saldo Inicial": {
+                "number": initial_balance
             },
         }
-
-        self.notion_repository.create_page(page)
 
     def get_planning_by_month(self, month_id) -> dict:
         database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
@@ -189,6 +197,36 @@ class NotionAccess:
             }    
         )
         return self.notion_repository.process_database_registers(data)
+    
+    def __create_new_transaction(
+            self,
+            name: str,
+            month_id: str, 
+            amount: float, 
+            date: str,
+            transaction_type: TransactionType,
+            card_id_enter: str|None = None, 
+            card_id_out: str|None = None, 
+            category_id: str| None = None, 
+            type_id: str| None = None, 
+            status: bool = True
+        ):
+        page = {
+            "parent": {"type": "database_id","database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
+            "properties": { # TODO Tornar isso dinamico, com os nomes certos
+                "Name": {"title": [{"text": {"content": name}}]},
+                "Categoria": {"relation": [{"id": category_id}]},
+                "Gestão": {"relation": [{"id": month_id}]},
+                "Entrada em": {"relation": [{"id": card_id_enter}]},
+                "Saida de": {"relation": [{"id": card_id_out}]},
+                "Macro Categorias": {"relation": [{"id": type_id}]},
+                "Valor": {"number": amount},
+                "Data Planejada": {"date":{"start": date}},
+                "Tipo de Transação": {"select":{"name":transaction_type.value}},
+                'Status': {'status': {'name': 'Pago' if status else 'Pendente'}} # TODO Atualizar para a planilha que nao tem status
+            },
+        }
+        self.notion_repository.create_page(page)
 
     def __get_title_property_from_schema(self, schema:dict) -> str:
         for key, value in schema.items():
