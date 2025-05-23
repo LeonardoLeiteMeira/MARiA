@@ -9,6 +9,9 @@ from langgraph.graph.state import CompiledStateGraph
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from MARiA import Database, MariaGraph, get_checkpointer_manager
+from MARiA.tools import tools_to_read_data, CreateNewOutTransactionV2
+from MARiA.notion_repository import notion_user_data
+from MARiA.agents import AgentBase, prompt_main_agent
 from .message_service import MessageService
 
 load_dotenv()
@@ -24,7 +27,15 @@ class CustomState(State):
 async def lifespan(app: FastAPI):
     app.state = cast(CustomState, app.state)
     app.state.database = Database()
-    mariaGraph = MariaGraph()
+
+    create_transaction_v2 = CreateNewOutTransactionV2()
+    agent = AgentBase(
+        prompt=prompt_main_agent,
+        notion_user_data=notion_user_data,
+        ready_tools=tools_to_read_data,
+        tools=[create_transaction_v2],
+    )
+    mariaGraph = MariaGraph(agent)
 
     await app.state.database.start_connection()
     checkpointer_manager = get_checkpointer_manager()
@@ -32,7 +43,7 @@ async def lifespan(app: FastAPI):
     async with checkpointer_manager as checkpointer:
         await checkpointer.setup()
         
-        graph_builder = mariaGraph.build_graph()
+        graph_builder = await mariaGraph.build_graph()
         app.state.graph = graph_builder.compile(checkpointer=checkpointer)
         app.state.checkpointer = checkpointer
         yield

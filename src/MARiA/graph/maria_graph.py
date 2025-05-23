@@ -3,16 +3,20 @@ from typing import Literal
 from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langchain_core.messages import SystemMessage, HumanMessage
-from MARiA.agents import create_maria_agent, maria_read_access, maria_write_access
+from MARiA.agents import create_maria_agent, maria_read_access, maria_write_access, AgentBase
 from .state import State
 
 load_dotenv()
 
 class MariaGraph:
-    def __init__(self):
-        self.main_agent = create_maria_agent()
+    def __init__(self, agent: AgentBase):
+        self.main_agent = agent
+        # self.main_agent = create_maria_agent()
+
     
-    def build_graph(self) -> StateGraph:
+    async def build_graph(self) -> StateGraph:
+        await self.main_agent.create_agent()
+
         graph_builder = StateGraph(State)
         
         graph_builder.add_node("start_router", self.__start_router)
@@ -34,7 +38,7 @@ class MariaGraph:
     async def __chatbot(self, state: State) -> Command[Literal[END]]: # type: ignore
         """ Node with chatbot logic """
         messages = state["messages"]
-        chain_output = await self.main_agent.ainvoke({"messages": messages})
+        chain_output = await self.main_agent.agent.ainvoke({"messages": messages})
         new_messages: list = chain_output["messages"]
         return Command(
             goto=END,

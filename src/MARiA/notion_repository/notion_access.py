@@ -60,12 +60,12 @@ class NotionAccess:
                 }
             ]
         )
-        return self.__process_database_registers(data)
+        return self.notion_repository.process_database_registers(data)
     
     def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
         data = self.notion_repository.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
-        return self.__process_database_registers(data)
+        return self.notion_repository.process_database_registers(data)
     
     def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
         try:
@@ -81,7 +81,7 @@ class NotionAccess:
                             'date': {'on_or_after': f"{year}"},
                         }]}
                 )
-            return self.__process_database_registers(data)
+            return self.notion_repository.process_database_registers(data)
         except Exception as e:
             print(e)
 
@@ -93,7 +93,7 @@ class NotionAccess:
             filter_properties=[title_property_id, *property_ids_parsed],
             start_cursor=cursor
         )
-        return self.__process_database_registers(data)
+        return self.notion_repository.process_database_registers(data)
 
     def get_properties(self, database: str) -> dict:
         full_properties = self.databases[database]['properties']
@@ -120,10 +120,10 @@ class NotionAccess:
                 }}}]
             }    
         )
-        return self.__process_database_registers(data)
+        return self.notion_repository.process_database_registers(data)
     
     #TODO Simplficar esse metodo
-    def create_out_transaction(self, name, month, amount,date,card,category,type):
+    def create_out_transaction(self, name, month_id, amount, date, card_id, category_id, type_id, status: bool = True):
         page = {
             "parent": {
                 "type": "database_id",
@@ -141,22 +141,22 @@ class NotionAccess:
                 },
                 "Categoria": {
                     "relation": [
-                        {"id": category}
+                        {"id": category_id}
                     ]
                 },
                 "Gestão": {
                     "relation": [
-                        {"id": month}
+                        {"id": month_id}
                     ]
                 },
                 "Saida de": {
                     "relation": [
-                        {"id": card}
+                        {"id": card_id}
                     ]
                 },
                 "Macro Categorias": {
                     "relation": [
-                        {"id": type}
+                        {"id": type_id}
                     ]
                 },
                 "Valor": {
@@ -172,6 +172,7 @@ class NotionAccess:
                         "name":"Saída",
                     }
                 },
+                'Status': {'status': {'name': 'Pago' if status else 'Pendente'}} # TODO Atualizar para a planilha que nao tem status
             },
         }
 
@@ -187,41 +188,7 @@ class NotionAccess:
                 'relation': {'contains':month_id}}]
             }    
         )
-        return self.__process_database_registers(data)
-
-
-    def __process_database_registers(self, data) -> dict:
-        full_data = {
-            'has_more': data['has_more'],
-            'next_cursor': data['next_cursor']
-        }
-        registers = []
-        self.cache = {}
-        for item in data['results']:
-            row = {}
-            row['id'] = item['id']
-            for key, value in item['properties'].items():
-                property = BasicProperty(key, value)
-                row[property.name] = property.value
-                if property.property_type == 'relation' :
-                    row[property.name] = [self.__get_page_name(page_id['id']) for page_id in property.value]
-            registers.append(row)
-        self.cache = {}
-        full_data['data'] = registers
-        return full_data
-    
-    def __get_page_name(self, page_id: str) -> str:
-        if page_id in self.cache:
-            return self.cache[page_id]
-        
-        name = "not_found"
-        self.cache[page_id] = name
-        data = self.notion_repository.get_page(page_id)
-        for key, value in data['properties'].items():
-            if value['type'] == 'title':
-                name = value['title'][0]['plain_text']
-                self.cache[page_id] = name
-        return name
+        return self.notion_repository.process_database_registers(data)
 
     def __get_title_property_from_schema(self, schema:dict) -> str:
         for key, value in schema.items():

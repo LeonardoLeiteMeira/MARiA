@@ -1,8 +1,11 @@
 from notion_client import Client
 
+from .basic_property import BasicProperty
+
 class NotionRepository:
     def __init__(self, notion_client: Client):
         self.notion_client = notion_client
+        self.cache = {}
 
     def get_database(
         self,
@@ -51,6 +54,39 @@ class NotionRepository:
                         }]}},]
         response = self.notion_client.pages.create(**page)
         print(response)
+
+    def process_database_registers(self, data) -> dict:
+        full_data = {
+            'has_more': data['has_more'],
+            'next_cursor': data['next_cursor']
+        }
+        registers = []
+        self.cache = {}
+        for item in data['results']:
+            row = {}
+            row['id'] = item['id']
+            for key, value in item['properties'].items():
+                property = BasicProperty(key, value)
+                row[property.name] = property.value
+                if property.property_type == 'relation' :
+                    row[property.name] = [self.__get_page_name(page_id['id']) for page_id in property.value]
+            registers.append(row)
+        self.cache = {}
+        full_data['data'] = registers
+        return full_data
+    
+    def __get_page_name(self, page_id: str) -> str:
+        if page_id in self.cache:
+            return self.cache[page_id]
+        
+        name = "not_found"
+        self.cache[page_id] = name
+        data = self.get_page(page_id)
+        for key, value in data['properties'].items():
+            if value['type'] == 'title':
+                name = value['title'][0]['plain_text']
+                self.cache[page_id] = name
+        return name
 
     # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.create_page(database_id, properties)
