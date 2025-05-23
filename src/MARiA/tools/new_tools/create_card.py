@@ -7,24 +7,26 @@ from MARiA.notion_repository import NotionUserData
 from MARiA.notion_types import NotionDatabaseEnum
 from pydantic import create_model, Field
 from .tool_interface import ToolInterface
+from pydantic import PrivateAttr
 
 class CreateCard(BaseTool, ToolInterface):
-    name: str = "criar_nova_transacao_de_saida"
-    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
+    name: str = "criar_nova_conta_ou_cartao"
+    description: str = "Cria uma nova conta ou cartão para registrar entras e saidas"
     args_schema: Type[BaseModel] = None
+    _notion_user_data: NotionUserData = PrivateAttr()
 
     def _run(self, name: str, *args, **kwargs) -> ToolMessage:
         pass
 
-
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateCard':
         InputModel = create_model(
-            "CreateNewOutTransactionInputDynamic",
+            "CreateCardInput",
             name=(str, Field(..., description="Nome do cartao")),
+            initial_balance=(float, Field(..., description="Saldo inicial da conta ou cartão")),
         )
 
-        tool = CreateCard()
+        tool = CreateCard(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 
@@ -32,8 +34,9 @@ class CreateCard(BaseTool, ToolInterface):
         from ...notion_repository import notion_access
         try:
             name = parms['args']['name']
+            initial_balance = parms['args']['initial_balance']
 
-            # notion_access.create_out_transaction(name)
+            notion_access.create_card(name, initial_balance)
 
             return ToolMessage(
                 content="Criado com sucesso",
