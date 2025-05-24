@@ -49,7 +49,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
         InputModel = create_model(
             "CreateNewOutTransactionInputDynamic",
             name=(str | None, Field(..., description="Filtrar por nome")),
-            hasPaid=(bool | None, Field(..., description="Filtar transações pagas ou pendentes. True são as já pagas, False são as pendentes.")),
+            has_paid=(bool | None, Field(..., description="Filtar transações pagas ou pendentes. True são as já pagas, False são as pendentes.")),
             card_account_enter=(
                 CardEnum|None,
                 Field(..., description="Para filtrar as receitas"),
@@ -84,16 +84,16 @@ class SearchTransactionV2(BaseTool, ToolInterface):
 
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            name = parms['args']['name']
-            hasPaid = parms['args']['hasPaid']
-            card_account_enter = parms['args']['card_account_enter']
-            card_account_out = parms['args']['card_account_out']
-            category = parms['args']['category']
-            macro_category = parms['args']['macro_category']
-            month = parms['args']['month']
-            transaction_type = parms['args']['transaction_type']
-            cursor = parms['args']['cursor']
-            page_size = parms['args']['page_size']
+            name = parms['args'].get('name', None)
+            has_paid = parms['args'].get('has_paid', None)
+            card_account_enter = parms['args'].get('card_account_enter', None)
+            card_account_out = parms['args'].get('card_account_out', None)
+            category = parms['args'].get('category', None)
+            macro_category = parms['args'].get('macro_category', None)
+            month = parms['args'].get('month', None)
+            transaction_type = parms['args'].get('transaction_type', None)
+            cursor = parms['args'].get('cursor', None)
+            page_size = parms['args'].get('page_size', None)
 
             month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
             card_account_enter_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
@@ -103,7 +103,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
 
             transactions = notion_access.new_get_transactions(
                 name,
-                hasPaid,
+                has_paid,
                 card_account_enter_id,
                 card_account_out_id,
                 category_id,

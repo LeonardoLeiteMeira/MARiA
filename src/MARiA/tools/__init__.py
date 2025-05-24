@@ -21,6 +21,8 @@ from .new_tools.create_new_transaction_v2 import CreateNewOutTransactionV2
 from .new_tools.create_new_transfer import CreateNewTransfer
 from .new_tools.search_transactions_v2 import SearchTransactionV2
 from .new_tools.read_user_base_data import ReadUserBaseData
+from .new_tools.get_plan_by_month import GetPlanByMonth
+from .new_tools.delete_data import DeleteData
 
 tools_to_read_data = [
     SearchTransactions(), 

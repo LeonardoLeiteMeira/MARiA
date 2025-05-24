@@ -66,7 +66,7 @@ class NotionAccess:
     def new_get_transactions(
             self,
             name: str|None,
-            hasPaid: bool|None,
+            has_paid: bool|None,
             card_account_enter_id: str|None,
             card_account_out_id: str|None,
             category_id: str|None,
@@ -83,32 +83,32 @@ class NotionAccess:
             name_filter = {"property": "Name","title": {"contains": name}}
             filter["and"].append(name_filter)
 
-        if hasPaid is not None:
-            status_filter  = {"property": "Status", "status": {'name': 'Pago' if hasPaid else 'Pendente'}}
+        if has_paid is not None:
+            status_filter  = {"property": "Status", "status": {'equals': 'Pago' if has_paid else 'Pendente'}}
             filter["and"].append(status_filter)
 
         if card_account_enter_id is not None:
-            enter_in_filter  = {"property": "Entrada em", "relation": [{"id": card_account_enter_id}]}
+            enter_in_filter  = {"property": "Entrada em", "relation": {"contains": card_account_enter_id}}
             filter["and"].append(enter_in_filter)
 
         if card_account_out_id is not None:
-            out_of_filter  = {"property": "Saida de", "relation": [{"id": card_account_out_id}]}
+            out_of_filter  = {"property": "Saida de", "relation": {"contains": card_account_out_id}}
             filter["and"].append(out_of_filter)
 
         if category_id is not None:
-            category_filter  = {"property": "Categoria", "relation": [{"id": category_id}]}
+            category_filter  = {"property": "Categoria", "relation": {"contains": category_id}}
             filter["and"].append(category_filter)
 
         if macro_category_id is not None:
-            marco_category_filter  = {"property": "Macro Categorias", "relation": [{"id": macro_category_id}]}
+            marco_category_filter  = {"property": "Macro Categorias", "relation": {"contains": macro_category_id}}
             filter["and"].append(marco_category_filter)
         
         if month_id is not None:
-            month_filter  = {"property": "Gestão", "relation": [{"id": month_id}]}
+            month_filter  = {"property": "Gestão", "relation": {"contains": month_id}}
             filter["and"].append(month_filter)
 
         if transaction_type is not None:
-            transaction_type_filter  = {"property": "Tipo de Transação", "select": {"name": transaction_type}}
+            transaction_type_filter  = {"property": "Tipo de Transação", "select": {"equals": transaction_type}}
             filter["and"].append(transaction_type_filter)
 
         data = self.notion_repository.get_database(
@@ -298,6 +298,9 @@ class NotionAccess:
         )
         return self.notion_repository.process_database_registers(data)
     
+    def delete_page(self, page_id: str):
+        self.notion_repository.delete_page(page_id)
+    
     def __create_new_transaction(
             self,
             name: str,
@@ -311,20 +314,21 @@ class NotionAccess:
             type_id: str| None = None, 
             status: bool = True
         ):
+        properties = {
+            **({"Name": {"title": [{"text": {"content": name}}]}} if name is not None else {}),
+            **({"Categoria": {"relation": [{"id": category_id}]}} if category_id is not None else {}),
+            **({"Gestão": {"relation": [{"id": month_id}]}} if month_id is not None else {}),
+            **({"Entrada em": {"relation": [{"id": card_id_enter}]}} if card_id_enter is not None else {}),
+            **({"Saida de": {"relation": [{"id": card_id_out}]}} if card_id_out is not None else {}),
+            **({"Macro Categorias": {"relation": [{"id": type_id}]}} if type_id is not None else {}),
+            **({"Valor": {"number": amount}} if amount is not None else {}),
+            **({"Data Planejada": {"date": {"start": date}}} if date is not None else {}),
+            **({"Tipo de Transação": {"select": {"name": transaction_type.value}}} if transaction_type is not None else {}),
+            **({'Status': {'status': {'name': 'Pago' if status else 'Pendente'}}} if status is not None else {}),
+        }
         page = {
             "parent": {"type": "database_id","database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
-            "properties": { # TODO Tornar isso dinamico, com os nomes certos
-                "Name": {"title": [{"text": {"content": name}}]},
-                "Categoria": {"relation": [{"id": category_id}]},
-                "Gestão": {"relation": [{"id": month_id}]},
-                "Entrada em": {"relation": [{"id": card_id_enter}]},
-                "Saida de": {"relation": [{"id": card_id_out}]},
-                "Macro Categorias": {"relation": [{"id": type_id}]},
-                "Valor": {"number": amount},
-                "Data Planejada": {"date":{"start": date}},
-                "Tipo de Transação": {"select":{"name":transaction_type.value}},
-                'Status': {'status': {'name': 'Pago' if status else 'Pendente'}} # TODO Atualizar para a planilha que nao tem status
-            },
+            "properties": properties,
         }
         self.notion_repository.create_page(page)
 

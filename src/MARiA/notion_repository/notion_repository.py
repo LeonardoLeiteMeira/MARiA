@@ -87,6 +87,9 @@ class NotionRepository:
                 name = value['title'][0]['plain_text']
                 self.cache[page_id] = name
         return name
+    
+    def delete_page(self, page_id: str) -> None:
+        self.notion_client.pages.update(page_id=page_id, archived=True)
 
     # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.create_page(database_id, properties)
@@ -95,6 +98,3 @@ class NotionRepository:
     # def update_page(self, page_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.update_page(page_id, properties)
     #     return NotionPage(response)
-
-    # def delete_page(self, page_id: str) -> None:
-    #     self.notion_client.delete_page(page_id)

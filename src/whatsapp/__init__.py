@@ -17,7 +17,9 @@ from MARiA.tools import (
     CreateNewOutTransactionV2,
     CreateNewTransfer,
     SearchTransactionV2,
-    ReadUserBaseData
+    ReadUserBaseData,
+    GetPlanByMonth,
+    DeleteData
 )
 from MARiA.notion_repository import notion_user_data
 from MARiA.agents import AgentBase, prompt_main_agent
@@ -45,7 +47,9 @@ async def lifespan(app: FastAPI):
         CreateNewPlanning,
         CreateNewTransfer,
         SearchTransactionV2,
-        ReadUserBaseData
+        ReadUserBaseData,
+        GetPlanByMonth,
+        DeleteData
     ]
     agent = AgentBase(
         prompt=prompt_main_agent,
