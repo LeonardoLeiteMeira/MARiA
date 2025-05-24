@@ -33,8 +33,7 @@ class CreateNewMonth(BaseTool, ToolInterface):
             finish_date=(str, Field(..., description="Data referencia de final para a gestão do mes. Formato ISO!")),
         )
 
-        tool = CreateNewMonth()
-        tool._notion_user_data=notion_user_data
+        tool = CreateNewMonth(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 

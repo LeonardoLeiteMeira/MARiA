@@ -78,8 +78,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
             page_size=(int, Field(..., description="O padrão e 25 para a quantidade de registros retornados.")),
         )
 
-        tool = SearchTransactionV2()
-        tool._notion_user_data=notion_user_data
+        tool = SearchTransactionV2(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 
@@ -97,8 +96,8 @@ class SearchTransactionV2(BaseTool, ToolInterface):
             page_size = parms['args']['page_size']
 
             month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_account_enter_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, card_account_enter)
-            card_account_out_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, card_account_out)
+            card_account_enter_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
+            card_account_out_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_out)
             category_id = await self._notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
             marco_category_id = await self._notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
 

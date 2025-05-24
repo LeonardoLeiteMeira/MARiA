@@ -61,8 +61,7 @@ class CreateNewTransfer(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewTransfer()
-        tool._notion_user_data=notion_user_data
+        tool = CreateNewTransfer(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 
@@ -77,8 +76,8 @@ class CreateNewTransfer(BaseTool, ToolInterface):
             month = parms['args']['month']
 
             month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            enter_in = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, enter_in)
-            out_of = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, out_of)
+            enter_in = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
+            out_of = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
 
             notion_access.create_transfer_transaction(
                 name,

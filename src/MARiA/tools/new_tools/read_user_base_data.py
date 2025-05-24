@@ -12,8 +12,12 @@ from pydantic import PrivateAttr
 class ReadUserBaseData(BaseTool, ToolInterface):
     name: str = "ler_dados_base_do_usuario"
     description: str = "Acesso a dados como, categorias, meses, cartoes, constas e mais. As informações cadastradas pelo usuário são acessíveis por aqui."
-    # args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] = None
     _notion_user_data: NotionUserData = PrivateAttr()
+
+    def __init__(self, notion_user_data: NotionUserData, **data):
+        super().__init__(**data)
+        self._notion_user_data = notion_user_data
 
     def _run(self, name: str, *args, **kwargs) -> ToolMessage:
         pass
@@ -25,8 +29,7 @@ class ReadUserBaseData(BaseTool, ToolInterface):
             user_datas=(list[UserDataTypes], Field(..., description="Dados a serem lidos")),
         )
 
-        tool = ReadUserBaseData()
-        tool._notion_user_data=notion_user_data
+        tool = ReadUserBaseData(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 

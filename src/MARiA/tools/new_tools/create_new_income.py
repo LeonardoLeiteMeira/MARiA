@@ -53,8 +53,7 @@ class CreateNewIncome(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewIncome()
-        tool._notion_user_data=notion_user_data
+        tool = CreateNewIncome(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 
@@ -68,7 +67,7 @@ class CreateNewIncome(BaseTool, ToolInterface):
             hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
 
             month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, card_or_account)
+            card_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
 
             notion_access.create_in_transaction(
                 name = name,

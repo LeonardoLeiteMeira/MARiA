@@ -15,6 +15,10 @@ class CreateCard(BaseTool, ToolInterface):
     args_schema: Type[BaseModel] = None
     _notion_user_data: NotionUserData = PrivateAttr()
 
+    def __init__(self, notion_user_data: NotionUserData, **data):
+        super().__init__(**data)
+        self._notion_user_data = notion_user_data
+
     def _run(self, name: str, *args, **kwargs) -> ToolMessage:
         pass
 
@@ -26,8 +30,7 @@ class CreateCard(BaseTool, ToolInterface):
             initial_balance=(float, Field(..., description="Saldo inicial da conta ou cartão")),
         )
 
-        tool = CreateCard()
-        tool._notion_user_data=notion_user_data
+        tool = CreateCard(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 

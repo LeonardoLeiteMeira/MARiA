@@ -69,8 +69,7 @@ class CreateNewOutTransactionV2(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewOutTransactionV2()
-        tool._notion_user_data=notion_user_data
+        tool = CreateNewOutTransactionV2(notion_user_data=notion_user_data)
         tool.args_schema = InputModel
         return tool
 
@@ -86,7 +85,7 @@ class CreateNewOutTransactionV2(BaseTool, ToolInterface):
             hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
 
             month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS, card_or_account)
+            card_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
             category_id = await self._notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
             marco_category_id = await self._notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
 
