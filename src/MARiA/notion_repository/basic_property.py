@@ -1,4 +1,3 @@
-
 # TODO falta usar essa estrutura para armazenar as transacoes de maneira mais simples
 class BasicProperty:
     BASIC_PROPERTIES = ['number', 'relation', 'date', 'created_time']
@@ -30,6 +29,12 @@ class BasicProperty:
     def __formula(self):
         type_value = self.property['formula']['type']
         return self.property[self.property_type][type_value]
+    
+    def __created_by(self):
+        created_by = self.property.get('created_by')
+        if created_by is None:
+            return None
+        return created_by.get('name') or created_by.get('id')
     
 
 

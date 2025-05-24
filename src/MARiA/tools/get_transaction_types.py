@@ -21,7 +21,7 @@ class GetTransactionTypes(BaseTool):
         from ..notion_repository import notion_access
         try:
             cursor = parms['args']['cursor']
-            transaction_types = notion_access.get_simple_data(NotionDatabaseEnum.TYPES, cursor)
+            transaction_types = notion_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES, cursor)
             return ToolMessage(
                 content=transaction_types,
                 tool_call_id=parms['id'],

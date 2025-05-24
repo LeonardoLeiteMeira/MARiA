@@ -5,13 +5,19 @@ class NotionDatabaseEnum(Enum):
     CATEGORIES = "categories"
     MONTHS = "months"
     CARDS = "cards"
-    TYPES = "types"
+    MACRO_CATEGORIES = "types"
     PLANNING = "planning"
 
 class TransactionType(Enum):
     INCOME = 'Entrada'
     OUTCOME = 'Saída'
     TRANSFER = 'Movimentação'
+
+class UserDataTypes(Enum):
+    CATEGORIES = "categories"
+    MACRO_CATEGORIES= "macroCategories"
+    MONTHS = "months"
+    CARDS_AND_ACCOUNTS = "cards"
 
 # class NotionBaseColumns:
 #     NotionDatabaseEnum.TRANSACTIONS = ['Nome', 'Valor', 'Data Planejada', 'Status', 'Categoria', 'Tipo de Transação', 'Entrada em', 'Saida de', 'Verificação', 'Macro Categorias']

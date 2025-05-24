@@ -9,7 +9,16 @@ from langgraph.graph.state import CompiledStateGraph
 from fastapi.responses import JSONResponse
 from dotenv import load_dotenv
 from MARiA import Database, MariaGraph, get_checkpointer_manager
-from MARiA.tools import tools_to_read_data, CreateNewOutTransactionV2
+from MARiA.tools import (
+    CreateCard,
+    CreateNewIncome,
+    CreateNewMonth,
+    CreateNewPlanning,
+    CreateNewOutTransactionV2,
+    CreateNewTransfer,
+    SearchTransactionV2,
+    ReadUserBaseData
+)
 from MARiA.notion_repository import notion_user_data
 from MARiA.agents import AgentBase, prompt_main_agent
 from .message_service import MessageService
@@ -28,12 +37,21 @@ async def lifespan(app: FastAPI):
     app.state = cast(CustomState, app.state)
     app.state.database = Database()
 
-    create_transaction_v2 = CreateNewOutTransactionV2()
+    tools = [
+        CreateNewOutTransactionV2,
+        CreateCard,
+        CreateNewIncome,
+        CreateNewMonth,
+        CreateNewPlanning,
+        CreateNewTransfer,
+        SearchTransactionV2,
+        ReadUserBaseData
+    ]
     agent = AgentBase(
         prompt=prompt_main_agent,
         notion_user_data=notion_user_data,
-        ready_tools=tools_to_read_data,
-        tools=[create_transaction_v2],
+        ready_tools=[],
+        tools=tools,
     )
     mariaGraph = MariaGraph(agent)
 

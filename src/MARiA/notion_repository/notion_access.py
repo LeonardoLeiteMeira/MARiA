@@ -23,7 +23,7 @@ class NotionAccess:
             NotionDatabaseEnum.CARDS.value: {
                 "id" : "1cb14f691c8381e1bf00e7b91896c0ef"
             },
-            NotionDatabaseEnum.TYPES.value: {
+            NotionDatabaseEnum.MACRO_CATEGORIES.value: {
                 'id': '1f514f691c838054a52acfa5dc34fdd1'
             },
             NotionDatabaseEnum.PLANNING.value: {

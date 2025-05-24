@@ -13,7 +13,14 @@ from .tool_agent.search_data import SearchData
 from .tool_agent.write_data import WriteData
 
 from .new_tools.tool_interface import ToolInterface
+from .new_tools.create_card import CreateCard
+from .new_tools.create_new_income import CreateNewIncome
+from .new_tools.create_new_month import CreateNewMonth
+from .new_tools.create_new_planning import CreateNewPlanning
 from .new_tools.create_new_transaction_v2 import CreateNewOutTransactionV2
+from .new_tools.create_new_transfer import CreateNewTransfer
+from .new_tools.search_transactions_v2 import SearchTransactionV2
+from .new_tools.read_user_base_data import ReadUserBaseData
 
 tools_to_read_data = [
     SearchTransactions(), 

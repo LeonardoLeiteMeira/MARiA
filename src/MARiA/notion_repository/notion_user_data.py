@@ -1,13 +1,7 @@
 from enum import Enum
-from MARiA.notion_types import NotionDatabaseEnum
+from MARiA.notion_types import NotionDatabaseEnum, UserDataTypes
 from .notion_access import NotionAccess
 
-
-class UserDataTypes(Enum):
-    MONTHS = 'months'
-    CATEGORIES = 'categories'
-    MACRO_CATEGORIES = 'macroCategories'
-    CARDS = 'cards'
 
 class UserData:
     cards: dict
@@ -40,7 +34,7 @@ class NotionUserData:
 
         self.user_data.cards = self.notion_access.get_simple_data(NotionDatabaseEnum.CARDS)
         self.user_data.categories = self.notion_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
-        self.user_data.macroCategories = self.notion_access.get_simple_data(NotionDatabaseEnum.TYPES)
+        self.user_data.macroCategories = self.notion_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
         self.user_data.months = self.notion_access.get_simple_data(NotionDatabaseEnum.MONTHS)
 
         self.user_data.is_loaded = True
