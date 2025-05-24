@@ -69,7 +69,8 @@ class CreateNewOutTransactionV2(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewOutTransactionV2(notion_user_data=notion_user_data)
+        tool = CreateNewOutTransactionV2()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 

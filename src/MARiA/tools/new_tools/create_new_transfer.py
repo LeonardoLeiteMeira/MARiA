@@ -61,7 +61,8 @@ class CreateNewTransfer(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewTransfer(notion_user_data=notion_user_data)
+        tool = CreateNewTransfer()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 

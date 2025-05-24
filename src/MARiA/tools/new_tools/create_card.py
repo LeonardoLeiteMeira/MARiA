@@ -26,7 +26,8 @@ class CreateCard(BaseTool, ToolInterface):
             initial_balance=(float, Field(..., description="Saldo inicial da conta ou cartão")),
         )
 
-        tool = CreateCard(notion_user_data=notion_user_data)
+        tool = CreateCard()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 

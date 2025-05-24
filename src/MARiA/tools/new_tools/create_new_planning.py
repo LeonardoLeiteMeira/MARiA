@@ -53,7 +53,8 @@ class CreateNewPlanning(BaseTool, ToolInterface):
             text=(str, Field(..., description="Texto de observação sobre esse planejamento. Pode ser algo do usuário ou percepção sua.")),
         )
 
-        tool = CreateNewPlanning(notion_user_data=notion_user_data)
+        tool = CreateNewPlanning()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 

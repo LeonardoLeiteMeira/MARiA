@@ -53,7 +53,8 @@ class CreateNewIncome(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewIncome(notion_user_data=notion_user_data)
+        tool = CreateNewIncome()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 

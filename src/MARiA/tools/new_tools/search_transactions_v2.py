@@ -78,7 +78,8 @@ class SearchTransactionV2(BaseTool, ToolInterface):
             page_size=(int, Field(..., description="O padrão e 25 para a quantidade de registros retornados.")),
         )
 
-        tool = SearchTransactionV2(notion_user_data=notion_user_data)
+        tool = SearchTransactionV2()
+        tool._notion_user_data=notion_user_data
         tool.args_schema = InputModel
         return tool
 
