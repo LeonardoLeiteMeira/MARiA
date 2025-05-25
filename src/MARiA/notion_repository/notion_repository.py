@@ -61,19 +61,21 @@ class NotionRepository:
             'next_cursor': data['next_cursor']
         }
         registers = []
-        self.cache = {}
         for item in data['results']:
-            row = {}
-            row['id'] = item['id']
-            for key, value in item['properties'].items():
-                property = BasicProperty(key, value)
-                row[property.name] = property.value
-                if property.property_type == 'relation' :
-                    row[property.name] = [self.__get_page_name(page_id['id']) for page_id in property.value]
-            registers.append(row)
-        self.cache = {}
+            page_processed = self.process_page_register(item)
+            registers.append(page_processed)
         full_data['data'] = registers
         return full_data
+    
+    def process_page_register(self, page):
+        row = {}
+        row['id'] = page['id']
+        for key, value in page['properties'].items():
+            property = BasicProperty(key, value)
+            row[property.name] = property.value
+            if property.property_type == 'relation' :
+                row[property.name] = [self.__get_page_name(page_id['id']) for page_id in property.value]
+        return row
     
     def __get_page_name(self, page_id: str) -> str:
         if page_id in self.cache:

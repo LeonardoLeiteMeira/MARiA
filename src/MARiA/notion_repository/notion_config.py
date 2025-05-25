@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from MARiA.notion_repository.notion_repository import NotionRepository
 from MARiA.notion_repository.notion_access import NotionAccess
 from MARiA.notion_types import NotionDatabaseEnum
-from .notion_user_data import NotionUserData
+from MARiA.notion_repository.notion_user_data import NotionUserData
 from datetime import datetime
 
 load_dotenv()
@@ -19,5 +19,6 @@ notion_access = NotionAccess(repo)
 notion_user_data = NotionUserData(notion_access)
 
 if __name__ == '__main__':
-    data = notion_access.get_properties('months')
+    id = "1eb14f691c8380e9ac19d38d787fd3b2"
+    data = notion_access.get_page_by_id(id, ['Planejamentos', 'This (Não alterar)', 'Transações'])
     print(data)

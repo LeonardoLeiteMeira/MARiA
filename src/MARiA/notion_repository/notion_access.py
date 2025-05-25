@@ -173,6 +173,13 @@ class NotionAccess:
             }   
         return properties
     
+    def get_page_by_id(self, month_id, exclude_properties: list[str] = []):
+        data = self.notion_repository.get_page(month_id)
+        for prop in exclude_properties:
+            data['properties'].pop(prop, None)
+        return self.notion_repository.process_page_register(data)
+
+    
     def get_current_month(self) -> dict:
         data = self.notion_repository.get_database(
             self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
@@ -283,8 +290,6 @@ class NotionAccess:
             },
         }
         self.notion_repository.create_page(page)
-    
-    
 
     def get_planning_by_month(self, month_id) -> dict:
         database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']

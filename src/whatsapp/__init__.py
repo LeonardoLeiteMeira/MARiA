@@ -40,16 +40,16 @@ async def lifespan(app: FastAPI):
     app.state.database = Database()
 
     tools = [
+        CreateNewTransfer,
         CreateNewOutTransactionV2,
-        CreateCard,
         CreateNewIncome,
+        SearchTransactionV2,
+        CreateCard,
         CreateNewMonth,
         CreateNewPlanning,
-        CreateNewTransfer,
-        SearchTransactionV2,
-        ReadUserBaseData,
         GetPlanByMonth,
-        DeleteData
+        DeleteData,
+        ReadUserBaseData,
     ]
     agent = AgentBase(
         prompt=prompt_main_agent,
