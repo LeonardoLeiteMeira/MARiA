@@ -119,14 +119,3 @@ class Database:
             print(ex)
             raise ex
 
-
-async def my_test():
-    database = Database()
-    await database.start_connection()
-    result = await database.finish_user_feedback_by_thread_id("0b28b21a-41f8-43b3-8365-17bf8f153ff3")
-    print(result)
-    print("+++++++")
-
-if __name__ == "__main__":
-    import asyncio 
-    asyncio.run(my_test())
