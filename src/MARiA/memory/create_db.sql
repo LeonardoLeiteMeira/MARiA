@@ -36,3 +36,12 @@ CREATE TABLE IF NOT EXISTS threads (
 alter table users 
 add column has_finished_test boolean NOT NULL DEFAULT false;
 
+alter table threads 
+add column updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+
+alter table threads 
+add column is_active boolean not null default false;
+
+alter table users 
+add column updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+

@@ -17,7 +17,8 @@ class BaseDatabase:
     def __init__(self):
         dotenv.load_dotenv()
         # Init da aplicação
-        database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA')
+        database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA_NEW')
+        
         self.engine = create_async_engine(database_conn_string)
         self.SessionMk = async_sessionmaker(self.engine, expire_on_commit=False)
 

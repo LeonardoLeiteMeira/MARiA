@@ -85,6 +85,7 @@ async def root(
     data: dict = Body(...), 
     service:MessageService = Depends(service_dependency)
 ):
+
     try:
         print(data)
         if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):

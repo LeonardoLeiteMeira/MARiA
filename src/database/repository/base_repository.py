@@ -13,4 +13,4 @@ class BaseRepository:
         except Exception as err:
             await trans.rollback()
             print("Ocorreu um erro:", err)
-            raise
+            raise err
