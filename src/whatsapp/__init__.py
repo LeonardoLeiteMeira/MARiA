@@ -23,7 +23,7 @@ from MARiA.tools import (
 )
 from MARiA.notion_repository import notion_user_data
 from MARiA.agents import AgentBase, prompt_main_agent
-from .message_service import MessageService
+from messaging import MessageService
 
 load_dotenv()
 
