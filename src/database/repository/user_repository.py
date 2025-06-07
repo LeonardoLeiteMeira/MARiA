@@ -9,24 +9,22 @@ import uuid
 
 class UserRepository(BaseRepository):
     async def create_user(self, user: UserModel):
-        await self._execute_in_transaction(self._create_user, user)
-
-    async def _create_user(self, user: UserModel):
-        self._base_db.session.add(user)
+        async with self._base_db.session() as session:
+            session.add(user)
+            await session.commit()
 
     async def update_user(self, user: UserModel):
         if user.id is None:
             raise "user id is not defined"
-        await self._execute_in_transaction(self._update_user, user)
-
-    async def _update_user(self, user: UserModel):
         stmt = (
             update(UserModel)
             .where(UserModel.id == user.id)
             .values(user)
             .execution_options(synchronize_session="fetch")
         )
-        await self._base_db.session.execute(stmt)
+        async with self._base_db.session() as session:
+            await session.execute(stmt)
+            await session.commit()
 
     async def get_user_by_id(self, user_id:str) -> UserModel | None:
         stmt = (
@@ -34,7 +32,8 @@ class UserRepository(BaseRepository):
             .where(UserModel.id == user_id)
             .execution_options(synchronize_session="fetch")
         )
-        cursor = await self._base_db.session.execute(stmt)
+        async with self._base_db.session() as session:
+            cursor = await session.execute(stmt)
         user_tuple = cursor.first()
         if user_tuple:
             return user_tuple[0]
@@ -46,10 +45,9 @@ class UserRepository(BaseRepository):
             .where(UserModel.phone_number == phone_number)
             .execution_options(synchronize_session="fetch")
         )
-        session = self._base_db.session
-        cursor = await session.execute(stmt)
-        await session.close()
-        user_tuple = cursor.first()
+        async with self._base_db.session() as session:
+            cursor = await session.execute(stmt)
+            user_tuple = cursor.first()
         if user_tuple:
             return user_tuple[0]
         return None
@@ -68,10 +66,9 @@ class UserRepository(BaseRepository):
             .order_by(desc(ThreadModel.created_at))
             .limit(1)
         )
-        session = self._base_db.session
-        cursor = await session.execute(stmt)
-        thread_tuple = cursor.first()
-        await session.close()
+        async with self._base_db.session() as session:
+            cursor = await session.execute(stmt)
+            thread_tuple = cursor.first()
         if thread_tuple:
             return thread_tuple[0]
         return None
@@ -94,10 +91,9 @@ class UserRepository(BaseRepository):
         # await trans.commit()
         # await session.close()
     
-        session = self._base_db.session
-        session.add(new_thread)
-        await session.commit()
-        await session.close()
+        async with self._base_db.session() as session:
+            session.add(new_thread)
+            await session.commit()
 
 
 

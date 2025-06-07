@@ -25,8 +25,7 @@ class BaseDatabase:
     async def dispose(self):
         await self.engine.dispose()
 
-    @property
     def session(self) -> AsyncSession:
-        # Executando uma request 
+        """Return a new asynchronous session."""
         return self.SessionMk()
     
