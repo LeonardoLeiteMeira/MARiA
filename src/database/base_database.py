@@ -22,6 +22,9 @@ class BaseDatabase:
         self.engine = create_async_engine(database_conn_string)
         self.SessionMk = async_sessionmaker(self.engine, expire_on_commit=False)
 
+    async def dispose(self):
+        await self.engine.dispose()
+
     @property
     def session(self) -> AsyncSession:
         # Executando uma request 

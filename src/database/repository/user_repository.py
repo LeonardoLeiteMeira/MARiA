@@ -4,6 +4,7 @@ from database.db_models.thread_model import ThreadModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 from sqlalchemy.orm import aliased, joinedload
 from datetime import datetime, timedelta
+import uuid
 
 
 class UserRepository(BaseRepository):
@@ -27,21 +28,31 @@ class UserRepository(BaseRepository):
         )
         await self._base_db.session.execute(stmt)
 
-    async def get_user_by_id(self, user_id:str):
+    async def get_user_by_id(self, user_id:str) -> UserModel | None:
         stmt = (
             select(UserModel)
             .where(UserModel.id == user_id)
             .execution_options(synchronize_session="fetch")
         )
-        return await self._base_db.session.execute(stmt)
+        cursor = await self._base_db.session.execute(stmt)
+        user_tuple = cursor.first()
+        if user_tuple:
+            return user_tuple[0]
+        return None
 
-    async def get_user_by_phone_number(self, phone_number:str):
+    async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
         stmt = (
             select(UserModel)
             .where(UserModel.phone_number == phone_number)
             .execution_options(synchronize_session="fetch")
         )
-        return await self._base_db.session.execute(stmt)
+        session = self._base_db.session
+        cursor = await session.execute(stmt)
+        await session.close()
+        user_tuple = cursor.first()
+        if user_tuple:
+            return user_tuple[0]
+        return None
     
 
     async def get_user_last_thread_by_phone_number(self, phone_number: str) -> ThreadModel | None:
@@ -57,14 +68,36 @@ class UserRepository(BaseRepository):
             .order_by(desc(ThreadModel.created_at))
             .limit(1)
         )
-        cursor = await self._base_db.session.execute(stmt)
-        tuple = cursor.first()
-        return tuple[0]
+        session = self._base_db.session
+        cursor = await session.execute(stmt)
+        thread_tuple = cursor.first()
+        await session.close()
+        if thread_tuple:
+            return thread_tuple[0]
+        return None
     
 
-    async def create_new_thread_by_user_phone_number(self, phone_number: str):
-        pass
+    async def create_user_new_thread(self, user_id: str):
+        new_thread = ThreadModel(
+            thread_id=uuid.uuid4(),
+            user_id=user_id,
+            status='open',
+            is_active=True,
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+        )
+        # await self._execute_in_transaction(self._create_thread, new_thread)
+
+        # session = self._base_db.session
+        # trans = await session.begin()
+        # trans.session.add(new_thread)
+        # await trans.commit()
+        # await session.close()
     
+        session = self._base_db.session
+        session.add(new_thread)
+        await session.commit()
+        await session.close()
 
 
 

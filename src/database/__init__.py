@@ -7,12 +7,10 @@ async def test():
     database = BaseDatabase()
     repo = UserRepository(database)
 
-    thread = await repo.get_user_last_thread_by_phone_number('5531933057272')
-    # cursor = await repo.get_user_with_last_thread('5531933057272')
-    print(thread.thread_id)
-    print(thread.status)
-
-
+    user = await repo.get_user_by_phone_number('5531933057272')
+    print(user)
+    await repo.create_user_new_thread(user.id)
+    await repo._base_db.dispose()
 
 
 if __name__ == '__main__':
