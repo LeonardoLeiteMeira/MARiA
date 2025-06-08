@@ -3,13 +3,13 @@ from database.db_models.user_model import UserModel
 from database.db_models.thread_model import ThreadModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 from sqlalchemy.orm import aliased, joinedload
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import uuid
 
 
 class UserRepository(BaseRepository):
     async def create_user(self, user: UserModel):
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             session.add(user)
             await session.commit()
 
@@ -22,7 +22,7 @@ class UserRepository(BaseRepository):
             .values(user)
             .execution_options(synchronize_session="fetch")
         )
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             await session.execute(stmt)
             await session.commit()
 
@@ -32,7 +32,7 @@ class UserRepository(BaseRepository):
             .where(UserModel.id == user_id)
             .execution_options(synchronize_session="fetch")
         )
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             cursor = await session.execute(stmt)
         user_tuple = cursor.first()
         if user_tuple:
@@ -45,7 +45,7 @@ class UserRepository(BaseRepository):
             .where(UserModel.phone_number == phone_number)
             .execution_options(synchronize_session="fetch")
         )
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             cursor = await session.execute(stmt)
             user_tuple = cursor.first()
         if user_tuple:
@@ -55,7 +55,7 @@ class UserRepository(BaseRepository):
 
     async def get_user_last_thread_by_phone_number(self, phone_number: str) -> ThreadModel | None:
         now = datetime.now()
-        valid_thread_period = now - timedelta(hours=3)
+        valid_thread_period = now - timedelta(minutes=1)
         stmt = (
             select(ThreadModel)
             .join(UserModel, ThreadModel.user_id == UserModel.id)
@@ -63,14 +63,15 @@ class UserRepository(BaseRepository):
                 ThreadModel.updated_at > valid_thread_period,
                 UserModel.phone_number == phone_number
             )
-            .order_by(desc(ThreadModel.created_at))
+            .order_by(desc(ThreadModel.updated_at))
             .limit(1)
         )
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             cursor = await session.execute(stmt)
-            thread_tuple = cursor.first()
+            thread_tuple = cursor.scalars().all()
+        print(thread_tuple)
         if thread_tuple:
-            return thread_tuple[0]
+            return thread_tuple
         return None
     
 
@@ -80,27 +81,13 @@ class UserRepository(BaseRepository):
             user_id=user_id,
             status='open',
             is_active=True,
-            created_at=datetime.now(),
-            updated_at=datetime.now(),
+            created_at=datetime.now(timezone.utc) - timedelta(hours=-3),
+            updated_at=datetime.now() - timedelta(hours=-3),
         )
-        # await self._execute_in_transaction(self._create_thread, new_thread)
-
-        # session = self._base_db.session
-        # trans = await session.begin()
-        # trans.session.add(new_thread)
-        # await trans.commit()
-        # await session.close()
     
-        async with self._base_db.session() as session:
+        async with self.session() as session:
             session.add(new_thread)
             await session.commit()
-
-
-
-
-
-
-
 
     # async def get_user_with_last_thread(self, phone_number: str):
     #     last_thread_subq = (
