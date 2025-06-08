@@ -21,6 +21,7 @@ from MARiA.notion_repository import notion_user_data
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    #TODO app state esta para a instancia toda e nao por request - mas tem dados especificos do usuario
     app.state = cast(CustomState, app.state)
     app.state.database = Database()
 
