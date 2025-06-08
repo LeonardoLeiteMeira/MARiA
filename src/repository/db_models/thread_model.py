@@ -1,5 +1,5 @@
 from database.configs.base import Base
-from sqlalchemy import ForeignKey, Column, String, TIMESTAMP, Boolean
+from sqlalchemy import ForeignKey, String, TIMESTAMP, Boolean
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 import uuid

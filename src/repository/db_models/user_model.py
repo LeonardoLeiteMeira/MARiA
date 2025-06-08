@@ -1,5 +1,5 @@
 from database.configs.base import Base
-from sqlalchemy import text, Column, String, Integer, select, update, delete, Boolean, TIMESTAMP
+from sqlalchemy import String, Boolean, TIMESTAMP
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
@@ -20,7 +20,7 @@ class UserModel(Base):
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP)
 
-    threads:Mapped[list["ThreadModel"]] = relationship(backref='threads', lazy='noload')
+    threads:Mapped[list['ThreadModel']] = relationship(backref='threads', lazy='noload') # type: ignore
 
     def __repr__(self):
         return f"{self.id} - {self.name} - {self.email} "

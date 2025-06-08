@@ -1,19 +1,18 @@
 from fastapi import APIRouter, Body, Depends
 from fastapi.responses import JSONResponse
-from messaging import MessageService
-from typing import Callable
+from application import MessageApplication
+from collections.abc import Callable, Awaitable
 
 
 class NewMessageController(APIRouter):
-    def __init__(self, service_dependency_injected: Callable[[], MessageService]):
+    def __init__(self, service_dependency_injected: Callable[[], Awaitable[MessageApplication]]):
         super().__init__()
 
         @self.post("/whatsapp")
         async def call(
             data: dict = Body(...), 
-            service:MessageService = Depends(service_dependency_injected)
+            message_application: MessageApplication = Depends(service_dependency_injected),
         ):
-
             try:
                 print(data)
                 if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
@@ -21,7 +20,7 @@ class NewMessageController(APIRouter):
                     name = data['data']["pushName"]
                     user_message = data['data']['message']['conversation']
 
-                    await service.new_message(user_phone_Jid, user_message, name)
+                    await message_application.new_message(user_phone_Jid, user_message, name)
                     
                     return JSONResponse(status_code=200, content={"status":"received and processed with success"})
 

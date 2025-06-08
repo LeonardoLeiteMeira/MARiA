@@ -1,10 +1,8 @@
-from database.repository.base_repository import BaseRepository
-from database.db_models.user_model import UserModel
-from database.db_models.thread_model import ThreadModel
+from .base_repository import BaseRepository
+from .db_models.user_model import UserModel
+from .db_models.thread_model import ThreadModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
-from sqlalchemy.orm import aliased, joinedload, selectinload
-from datetime import datetime, timedelta, timezone
-import uuid
+from datetime import datetime
 
 
 class UserRepository(BaseRepository):
@@ -47,43 +45,28 @@ class UserRepository(BaseRepository):
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
-            user_tuple = cursor.scalars().first()
-        if user_tuple:
-            return user_tuple[0]
+            user = cursor.scalars().first()
+        if user:
+            return user
         return None
     
 
-    async def get_user_last_thread_by_user_id(self, user_id: str) -> ThreadModel | None:
-        now = datetime.now()
-        valid_thread_period = now - timedelta(hours=1)
-
+    async def get_user_valid_threads_by_user_id(self, user_id: str, last_valid_date: datetime) -> ThreadModel | None:
         stmt = (
             select(ThreadModel)
             .where(
                 ThreadModel.user_id == user_id,
-                ThreadModel.updated_at >= valid_thread_period
+                ThreadModel.updated_at >= last_valid_date
             )
             .order_by(desc(ThreadModel.updated_at))
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             thread_tuple = cursor.scalars().all()
-        print(thread_tuple)
-        if thread_tuple:
-            return thread_tuple
-        return None
+        return thread_tuple
     
 
-    async def create_user_new_thread(self, user_id: str):
-        new_thread = ThreadModel(
-            thread_id=uuid.uuid4(),
-            user_id=user_id,
-            status='open',
-            is_active=True,
-            created_at=datetime.now(timezone.utc) - timedelta(hours=-3),
-            updated_at=datetime.now() - timedelta(hours=-3),
-        )
-    
+    async def create_user_new_thread(self, new_thread: ThreadModel):
         async with self.session() as session:
             session.add(new_thread)
             await session.commit()

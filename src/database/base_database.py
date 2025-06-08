@@ -11,10 +11,14 @@ class BaseDatabase:
 
     def __new__(cls):
         if cls.__instance is None:
-            cls.__instance = super(BaseDatabase, cls).__new__(cls)
+            db_instance = super(BaseDatabase, cls).__new__(cls)
+            db_instance._BaseDatabase__start_engine()
+            db_instance._BaseDatabase__start_session_maker()
+            cls.__instance = db_instance
+
         return cls.__instance
 
-    def __init__(self):
+    def __start_engine(self):
         dotenv.load_dotenv()
         database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA_NEW')
 
@@ -24,6 +28,8 @@ class BaseDatabase:
             pool_size=10,
             max_overflow=0,
         )
+
+    def __start_session_maker(self):
         self.SessionMk = async_sessionmaker(self.engine, expire_on_commit=False)
 
     async def dispose(self):

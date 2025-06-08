@@ -1,0 +1,28 @@
+from langgraph.graph.state import CompiledStateGraph
+from langchain_core.messages import HumanMessage
+from domain import UserDomain
+from repository import UserModel, ThreadModel
+
+class MariaInteraction:
+    def __init__(self, graph: CompiledStateGraph, user_domain: UserDomain):
+        self.__graph = graph
+        self.__user_domain = user_domain
+
+    async def get_maria_answer(self, user: UserModel, user_input: str) -> str:
+        current_thread = await self.__get_current_thread(user.id)
+        thread_id_str = str(current_thread.thread_id)
+        config = {"configurable": {"thread_id": thread_id_str}}
+        user_input_with_name = f"{user.name}: {user_input}"
+        result = await self.__graph.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
+        messages = result["messages"]
+
+        resp = messages[-1].content
+        return resp
+    
+    async def __get_current_thread(self, user_id: str) -> ThreadModel:
+        user_threads = await self.__user_domain.get_user_valid_thread(user_id)
+        if len(user_threads) < 1:
+            current_thread = await self.__user_domain.create_new_user_thread(user_id) 
+        else:
+            current_thread = user_threads[0]
+        return current_thread
