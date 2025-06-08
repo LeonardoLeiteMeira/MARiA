@@ -27,8 +27,12 @@ dependencies = [
 
 [tool.poetry]
 packages = [
-    {include = "whatsapp", from = "src"},
+    {include = "app", from = "src"},
+    {include = "controllers", from = "src"},
+    {include = "database", from = "src"},
+    {include = "MARiA", from = "src"},
     {include = "messaging", from = "src"},
+    {include = "whatsapp", from = "src"},
 ]
 
 

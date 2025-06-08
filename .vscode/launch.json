@@ -12,7 +12,7 @@
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "whatsapp:app",
+                "app.main:app",
                 "--reload"
             ],
             "jinja": true
