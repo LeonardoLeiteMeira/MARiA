@@ -2,7 +2,7 @@ from database.repository.base_repository import BaseRepository
 from database.db_models.user_model import UserModel
 from database.db_models.thread_model import ThreadModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
-from sqlalchemy.orm import aliased, joinedload
+from sqlalchemy.orm import aliased, joinedload, selectinload
 from datetime import datetime, timedelta, timezone
 import uuid
 
@@ -34,7 +34,7 @@ class UserRepository(BaseRepository):
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
-        user_tuple = cursor.first()
+        user_tuple = cursor.scalars().first()
         if user_tuple:
             return user_tuple[0]
         return None
@@ -47,24 +47,23 @@ class UserRepository(BaseRepository):
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
-            user_tuple = cursor.first()
+            user_tuple = cursor.scalars().first()
         if user_tuple:
             return user_tuple[0]
         return None
     
 
-    async def get_user_last_thread_by_phone_number(self, phone_number: str) -> ThreadModel | None:
+    async def get_user_last_thread_by_user_id(self, user_id: str) -> ThreadModel | None:
         now = datetime.now()
-        valid_thread_period = now - timedelta(minutes=1)
+        valid_thread_period = now - timedelta(hours=1)
+
         stmt = (
             select(ThreadModel)
-            .join(UserModel, ThreadModel.user_id == UserModel.id)
             .where(
-                ThreadModel.updated_at > valid_thread_period,
-                UserModel.phone_number == phone_number
+                ThreadModel.user_id == user_id,
+                ThreadModel.updated_at >= valid_thread_period
             )
             .order_by(desc(ThreadModel.updated_at))
-            .limit(1)
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
@@ -88,6 +87,24 @@ class UserRepository(BaseRepository):
         async with self.session() as session:
             session.add(new_thread)
             await session.commit()
+        return new_thread
+
+    async def update_thread_model_updated_at(self, thread_id: str):
+        new_updated_at = datetime.now()
+        stmt = (
+            update(ThreadModel)
+            .where(ThreadModel.thread_id == thread_id)
+            .values(
+                {'updated_at': new_updated_at}
+            )
+            .returning(ThreadModel)
+        )
+        async with self.session() as session:
+            data = await session.execute(stmt)
+            await session.commit()
+            return data
+    
+
 
     # async def get_user_with_last_thread(self, phone_number: str):
     #     last_thread_subq = (
