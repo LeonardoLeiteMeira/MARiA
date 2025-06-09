@@ -8,12 +8,10 @@ from datetime import datetime
 class ThreadModel(Base):
     __tablename__ = 'threads'
 
-    thread_id:Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    id:Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     user_id:Mapped[str] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP)
-    status:Mapped[str] = mapped_column(String, nullable=False)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP) 
-    is_active:Mapped[bool] = mapped_column(Boolean, nullable=False)
 
     def __repr__(self):
-        return f"{self.thread_id} - {self.user_id}"
+        return f"Id:{self.id} - UserId{self.user_id}"

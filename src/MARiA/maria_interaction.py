@@ -10,7 +10,7 @@ class MariaInteraction:
 
     async def get_maria_answer(self, user: UserModel, user_input: str) -> str:
         current_thread = await self.__get_current_thread(user.id)
-        thread_id_str = str(current_thread.thread_id)
+        thread_id_str = str(current_thread.id)
         config = {"configurable": {"thread_id": thread_id_str}}
         user_input_with_name = f"{user.name}: {user_input}"
         result = await self.__graph.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)

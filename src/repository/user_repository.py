@@ -72,7 +72,7 @@ class UserRepository(BaseRepository):
         new_updated_at = datetime.now()
         stmt = (
             update(ThreadModel)
-            .where(ThreadModel.thread_id == thread_id)
+            .where(ThreadModel.id == thread_id)
             .values(
                 {'updated_at': new_updated_at}
             )

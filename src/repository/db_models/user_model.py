@@ -15,7 +15,6 @@ class UserModel(Base):
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=True)
-    accepts_communications:Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     phone_number:Mapped[str] = mapped_column(String, nullable=False)
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP)

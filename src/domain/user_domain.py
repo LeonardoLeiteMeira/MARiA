@@ -15,10 +15,8 @@ class UserDomain:
     
     async def create_new_user_thread(self, user_id: str) -> ThreadModel:
         new_thread = ThreadModel(
-            thread_id=uuid.uuid4(),
+            id=uuid.uuid4(),
             user_id=user_id,
-            status='open',
-            is_active=True,
             created_at=datetime.now(),
             updated_at=datetime.now() - timedelta(hours=-3),
         )
