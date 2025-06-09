@@ -27,15 +27,14 @@ class UserRepository(BaseRepository):
     async def get_user_by_id(self, user_id:str) -> UserModel | None:
         stmt = (
             select(UserModel)
-            .where(UserModel.id == user_id)
+            .where(UserModel.id == user_id) 
             .execution_options(synchronize_session="fetch")
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
-        user_tuple = cursor.scalars().first()
-        if user_tuple:
-            return user_tuple[0]
-        return None
+            user_tuple = cursor.scalars().first()
+            return user_tuple[0] if user_tuple else None
+        
 
     async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
         stmt = (
@@ -46,9 +45,7 @@ class UserRepository(BaseRepository):
         async with self.session() as session:
             cursor = await session.execute(stmt)
             user = cursor.scalars().first()
-        if user:
-            return user
-        return None
+            return user if user else None
     
 
     async def get_user_valid_threads_by_user_id(self, user_id: str, last_valid_date: datetime) -> ThreadModel | None:
@@ -62,8 +59,7 @@ class UserRepository(BaseRepository):
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
-            thread_tuple = cursor.scalars().all()
-        return thread_tuple
+            return cursor.scalars().all()
     
 
     async def create_user_new_thread(self, new_thread: ThreadModel):
