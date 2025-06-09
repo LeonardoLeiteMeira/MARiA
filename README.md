@@ -21,14 +21,25 @@ She can create new transactions and read diferents notion databases.
     - [x] Melhorar nomeclatura das colunas
 - [x] Conectar no whatsapp
     - [x] Simples
-    - [ ] Diferenciar numeros controlando acessos
+    - [x] Diferenciar numeros controlando acessos
     - [x] Mover docker compose para esse repositorio 
 - [x] Lista todas as funcoes e testes que quero levar para o web summit
-- [ ] Update de informação (se conseguir antes do web summit seria top)
-- [ ] Fazer um planejamento (Multi agente?)
-    - [ ] Agente apenas para busca. Ler os dados -> Entender a Query -> Executar -> Check Result
+- [x] Update de informação
+- [x] Fazer um planejamento
+
+- [ ] Escrever4 aqui proximos passos
+
 
 
 
 ## To Do Future 
 Pesquisar sobre e implementar uma cache no redis para as chamadas de tools. Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas
+
+
+# Alembic
+- poetry run alembic init -t async alembic
+- poetry run alembic revision -m "create_table_users"
+- poetry run alembic upgrade head
+- poetry run alembic downgrade -1
+
+
