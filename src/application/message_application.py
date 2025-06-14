@@ -15,7 +15,7 @@ class MessageApplication:
 
         phone_number = self.__message_service.get_phone_number(message_data)
         message = self.__message_service.get_message(message_data)
-        user_name = self.__message_service.get_name(message_data)
+        user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
         chat_id = self.__message_service.get_chat_id(message_data)
 
         user = await self.__user_domain.get_user_by_phone_number(phone_number)

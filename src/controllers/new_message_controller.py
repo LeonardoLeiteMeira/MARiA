@@ -9,12 +9,12 @@ class NewMessageController(APIRouter):
         super().__init__()
 
         @self.post("/whatsapp")
-        async def call(
+        async def new_message_controller_whatsapp(
             data: dict = Body(...), 
             message_application: MessageApplication = Depends(service_dependency_injected),
         ):
             try:
-                message_application.new_message(data)
+                await message_application.new_message(data)
                 return JSONResponse(status_code=200, content={"status":"received"})
             except Exception as ex:
                 print("\nERROR HAS OCCURRED")
