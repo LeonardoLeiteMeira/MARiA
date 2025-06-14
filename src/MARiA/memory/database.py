@@ -1,11 +1,9 @@
 import uuid
-import dotenv
-import os
+from config import get_settings
 from datetime import datetime
 from psycopg_pool import AsyncConnectionPool
 from typing import Optional
 
-dotenv.load_dotenv()
 
 # TODO quando tiver mais estrutura, mudar o self.pool.connection() para ser criado em nivel de request 
 class Database:
@@ -21,7 +19,8 @@ class Database:
         if self._initialized:
             return
         self._initialized = True
-        self.database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA')
+        settings = get_settings()
+        self.database_conn_string = settings.database_connection_uri_maria
         self.pool = AsyncConnectionPool(
             conninfo=self.database_conn_string,
             max_size=10,

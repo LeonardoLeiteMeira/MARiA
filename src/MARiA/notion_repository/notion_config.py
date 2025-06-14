@@ -1,15 +1,14 @@
-import os
 from notion_client import Client
-from dotenv import load_dotenv
+from config import get_settings
 from MARiA.notion_repository.notion_repository import NotionRepository
 from MARiA.notion_repository.notion_access import NotionAccess
 from MARiA.notion_types import NotionDatabaseEnum
 from MARiA.notion_repository.notion_user_data import NotionUserData
 from datetime import datetime
 
-load_dotenv()
+settings = get_settings()
 
-api_key = os.getenv("NOTION_API_KEY")
+api_key = settings.notion_api_key
 
 notion = Client(auth=api_key)
 

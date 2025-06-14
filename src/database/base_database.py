@@ -1,10 +1,10 @@
-import os
-import dotenv
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     async_sessionmaker,
-    AsyncSession
+    AsyncSession,
 )
+
+from config import get_settings
 
 class BaseDatabase:
     __instance: 'BaseDatabase' = None
@@ -19,12 +19,12 @@ class BaseDatabase:
         return cls.__instance
 
     def __start_engine(self):
-        dotenv.load_dotenv()
-        database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA_NEW')
+        settings = get_settings()
+        database_conn_string = settings.database_connection_uri_maria_new
 
         self.engine = create_async_engine(
             database_conn_string,
-            echo=True,
+            echo=settings.sqlalchemy_echo,
             pool_size=10,
             max_overflow=0,
         )
