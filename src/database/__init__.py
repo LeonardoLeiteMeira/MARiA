@@ -1,5 +1,5 @@
 from .base_database import BaseDatabase
-from .seed import seed_database
+from .seed import seed_database, ensure_migrations
 # from database.base_database import BaseDatabase
 # from database.repository.user_repository import UserRepository
 # import asyncio
