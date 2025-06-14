@@ -9,6 +9,7 @@ services:
       - evolution-api
     ports:
       - "8000:8000"
+
   evolution-api:
     container_name: evolution_api
     image: atendai/evolution-api

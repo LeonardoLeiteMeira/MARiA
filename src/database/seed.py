@@ -47,15 +47,7 @@ async def ensure_migrations(base_db: BaseDatabase) -> None:
     if not settings.is_production:
         return
 
-    async with base_db.session() as session:
-        query = text(
-            "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'alembic_version')"
-        )
-        result = await session.execute(query)
-        exists = result.scalar()
-
-    if not exists:
-        subprocess.run(
-            ["poetry", "run", "alembic", "upgrade", "head"],
-            check=True,
-        )
+    subprocess.run(
+        ["poetry", "run", "alembic", "upgrade", "head"],
+        check=True,
+    )
