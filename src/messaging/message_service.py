@@ -10,11 +10,11 @@ class MessageService:
         self.instance = instance
         self.message_base_url = "http://localhost:8080/message/sendText"
 
-    async def send_message(self, to:str, message: str):
+    async def send_message(self, chat_id:str, message: str):
         try:
             base_url = f"{self.message_base_url}/{self.instance}"
             body = {
-                "number": to,
+                "number": chat_id,
                 "options": {
                     "delay": 1200,
                     "presence": "composing",
@@ -29,3 +29,27 @@ class MessageService:
         except Exception as e:
             print("ERROR TO SEND WHATSAPP MESSAGE: ", e)
             raise e
+        
+    def is_event_a_new_message(self, data:dict) -> bool:
+        if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
+            return True
+        return False
+        
+    def get_phone_number(self, data:dict) -> str:
+        remote_jid = data['data']['key']['remoteJid']
+        return self.__get_phone_number_from_remote_jid(remote_jid)
+    
+    def get_name(self, data: dict) -> str:
+        return data['data']["pushName"]
+    
+    def get_message(self, data: dict) -> str:
+        return data['data']['message']['conversation']
+    
+    def get_chat_id(self, data: dict) -> str:
+        return data['data']['key']['remoteJid']
+    
+    def __get_phone_number_from_remote_jid(self, remote_jid:str) -> str:
+        # 5531933057272:6@s.whatsapp.net
+        first_part, _ = remote_jid.split("@")
+        phone_number = first_part.split(":")[0]
+        return phone_number

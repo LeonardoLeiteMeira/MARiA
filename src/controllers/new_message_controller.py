@@ -14,16 +14,7 @@ class NewMessageController(APIRouter):
             message_application: MessageApplication = Depends(service_dependency_injected),
         ):
             try:
-                print(data)
-                if data['event'] == 'messages.upsert' and (not data['data']['key']['fromMe']):
-                    user_phone_Jid = data['data']['key']['remoteJid']
-                    name = data['data']["pushName"]
-                    user_message = data['data']['message']['conversation']
-
-                    await message_application.new_message(user_phone_Jid, user_message, name)
-                    
-                    return JSONResponse(status_code=200, content={"status":"received and processed with success"})
-
+                message_application.new_message(data)
                 return JSONResponse(status_code=200, content={"status":"received"})
             except Exception as ex:
                 print("\nERROR HAS OCCURRED")
