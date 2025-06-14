@@ -1,4 +1,14 @@
 services:
+  api:
+    build: .
+    container_name: fastapi_app
+    env_file:
+      - .env
+    depends_on:
+      - database
+      - evolution-api
+    ports:
+      - "8000:8000"
   evolution-api:
     container_name: evolution_api
     image: atendai/evolution-api
@@ -13,18 +23,6 @@ services:
     depends_on:
       - database
 
-  # api:
-  #   build: .
-  #   container_name: fastapi_app
-  #   environment:
-  #     - DATABASE_URL=postgresql://postgres:postgres@db:5432/app
-  #   env_file:
-  #     - .env
-  #   depends_on:
-  #     - database
-  #   # Porta não publicada externamente; acesso só entre containers
-  #   expose:
-  #     - "8000"
 
   database:
     container_name: postgres_db
