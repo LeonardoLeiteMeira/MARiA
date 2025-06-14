@@ -11,13 +11,6 @@ DEFAULT_USER = {
 }
 
 async def seed_database(base_db: BaseDatabase) -> None:
-    """Create default user if it does not exist.
-
-    This implementation relies solely on the ``database`` module, avoiding
-    dependencies on ``repository`` or ``domain``.  It uses raw SQL through
-    ``sqlalchemy`` to check for the user and insert it when missing.
-    """
-
     async with base_db.session() as session:
         query = text(
             "SELECT id FROM users WHERE phone_number = :phone_number LIMIT 1"

@@ -2,8 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from .custom_state import CustomState
 from typing import cast
-from database import BaseDatabase
-from database.seed import seed_database
+from database import BaseDatabase, seed_database
 
 
 @asynccontextmanager

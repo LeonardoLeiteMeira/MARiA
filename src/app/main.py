@@ -8,6 +8,8 @@ import sentry_sdk
 from config import get_settings
 
 settings = get_settings()
+
+# TODO revisar a configuracao do sentry para que se enquadre bem no plano free e mostre o maximo de informacoes possivies
 sentry_sdk.init(
     dsn=settings.sentry_dsn,
     # Add data like request headers and IP for users,
