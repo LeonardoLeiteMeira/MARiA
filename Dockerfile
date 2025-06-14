@@ -13,13 +13,14 @@ WORKDIR /app
 
 COPY pyproject.toml poetry.lock* ./
 COPY README.md ./
+COPY alembic.ini ./
 
 RUN poetry config virtualenvs.create false \
- && poetry install --only main --no-interaction --no-ansi
+ && poetry install --only main --no-root --no-interaction --no-ansi
 
-COPY alembic alembic
-COPY alembic.ini ./
 COPY src ./src
+COPY alembic alembic
+
 
 ##################  Runtime  ##################
 FROM python:3.13-slim
