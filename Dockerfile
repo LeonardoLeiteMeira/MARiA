@@ -12,10 +12,11 @@ RUN curl -sSL https://install.python-poetry.org | python3 -
 WORKDIR /app
 
 COPY pyproject.toml poetry.lock* ./
+COPY README.md ./
+
 RUN poetry config virtualenvs.create false \
  && poetry install --only main --no-interaction --no-ansi
 
-COPY README.md ./
 COPY alembic alembic
 COPY alembic.ini ./
 COPY src ./src
