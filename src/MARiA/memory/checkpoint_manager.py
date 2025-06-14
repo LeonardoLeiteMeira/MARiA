@@ -1,8 +1,8 @@
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
-import os
-import dotenv
+from config import get_settings
 
-dotenv.load_dotenv()
+
 def get_checkpointer_manager():
-        database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA')
-        return AsyncPostgresSaver.from_conn_string(database_conn_string)
+    settings = get_settings()
+    database_conn_string = settings.database_connection_uri_maria
+    return AsyncPostgresSaver.from_conn_string(database_conn_string)

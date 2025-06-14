@@ -1,5 +1,4 @@
 import json
-from dotenv import load_dotenv
 from typing import Literal
 from langgraph.graph import StateGraph, END
 from langgraph.types import Command
@@ -9,8 +8,6 @@ from MARiA.notion_repository import notion_access
 from MARiA.notion_repository.notion_access import NotionAccess
 from MARiA.notion_types import NotionDatabaseEnum
 from pydantic import create_model
-
-load_dotenv()
 
 from typing import Annotated
 from langgraph.graph.message import add_messages

@@ -1,12 +1,9 @@
-from dotenv import load_dotenv
 from typing import Literal
 from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langchain_core.messages import SystemMessage, HumanMessage
 from MARiA.agents import create_maria_agent, maria_read_access, maria_write_access, AgentBase
 from .state import State
-
-load_dotenv()
 
 class MariaGraph:
     def __init__(self, agent: AgentBase):

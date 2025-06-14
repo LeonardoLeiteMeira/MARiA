@@ -8,18 +8,21 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 
 
-from database.configs.base import BaseModel
-import dotenv
-import os
+import sys
+from pathlib import Path
 
-dotenv.load_dotenv()
+sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
+
+from database.configs.base import BaseModel
+from config import get_settings
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-database_conn_string = os.getenv('DATABASE_CONNECTION_URI_MARIA_NEW')
-config.set_main_option('sqlalchemy.url', database_conn_string)
+settings = get_settings()
+database_conn_string = settings.database_connection_uri_maria_new
+config.set_main_option("sqlalchemy.url", database_conn_string)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -1,12 +1,11 @@
 
 import httpx
-import os
-from dotenv import load_dotenv
+from config import get_settings
 
-load_dotenv()
+settings = get_settings()
 class MessageService:
     def __init__(self, instance: str):
-        self.evolution_api_key = os.getenv("AUTHENTICATION_API_KEY")
+        self.evolution_api_key = settings.authentication_api_key
         self.instance = instance
         self.message_base_url = "http://localhost:8080/message/sendText"
 

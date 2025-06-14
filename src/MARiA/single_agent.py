@@ -1,10 +1,10 @@
-from dotenv import load_dotenv
+from config import get_settings
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
 from MARiA.memory import Database, get_checkpointer_manager
 from MARiA.graph import MariaGraph
 
-load_dotenv()
+get_settings()  # Load environment once
 
 async def send_message(graph: CompiledStateGraph, user_input: str, thread_id: str, user_name: str, remote_jid: str) -> str:
     config = {"configurable": {"thread_id": thread_id}}
