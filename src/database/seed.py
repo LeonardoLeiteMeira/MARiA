@@ -48,6 +48,6 @@ async def ensure_migrations(base_db: BaseDatabase) -> None:
         return
 
     subprocess.run(
-        ["poetry", "run", "alembic", "upgrade", "head"],
+        ["alembic", "upgrade", "head"],
         check=True,
     )
