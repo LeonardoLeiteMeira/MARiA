@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     authentication_api_key: str | None = None
     sentry_dsn: str | None = None
+    evo_send_message_endpoint: str|None = None
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8",  extra='allow') # TODO Fazer o mapeamento de todas as variaveis para remover esse parametro 'extra'
 
