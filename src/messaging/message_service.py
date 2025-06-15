@@ -7,7 +7,7 @@ class MessageService:
     def __init__(self, instance: str):
         self.evolution_api_key = settings.authentication_api_key
         self.instance = instance
-        self.message_base_url = "http://localhost:8080/message/sendText"
+        self.message_base_url = "http://evolution-api:8080/message/sendText"
 
     async def send_message(self, chat_id:str, message: str):
         try:
