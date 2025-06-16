@@ -1,7 +1,6 @@
 import enum
 import uuid
 from datetime import datetime
-from secrets import decrypt, encrypt
 
 from sqlalchemy import TIMESTAMP
 from sqlalchemy import Enum as SAEnum
@@ -10,7 +9,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database.configs.base import Base
-
+from secrets_functions.secret_utils import custom_decrypt, custom_encrypt
 
 class OwnerType(enum.Enum):
     workspace = "workspace"
@@ -34,15 +33,15 @@ class NotionAuthorizationModel(Base):
     workspace_icon: Mapped[str | None] = mapped_column(String, nullable=True)
     owner_type: Mapped[OwnerType] = mapped_column(SAEnum(OwnerType), nullable=False)
     owner_id: Mapped[str | None] = mapped_column(String, nullable=True)
-    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
     updated_at: Mapped[datetime] = mapped_column(
-        TIMESTAMP, default=datetime.utcnow, onupdate=datetime.utcnow
+        TIMESTAMP, default=datetime.now, onupdate=datetime.now
     )
 
     @property
     def access_token(self) -> str:
-        return decrypt(self._access_token)
+        return custom_decrypt(self._access_token)
 
     @access_token.setter
     def access_token(self, value: str) -> None:
-        self._access_token = encrypt(value)
+        self._access_token = custom_encrypt(value)

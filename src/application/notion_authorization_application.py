@@ -11,7 +11,7 @@ class NotionAuthorizationApplication:
         self._domain = domain
         self._settings = get_settings()
 
-    async def authorize(self, code: str, state: str | None) -> None:
+    async def authorize(self, code: str, user_id: str) -> None:
         token_url = "https://api.notion.com/v1/oauth/token"
         auth = (self._settings.notion_client_id, self._settings.notion_client_secret)
         data = {
@@ -30,7 +30,7 @@ class NotionAuthorizationApplication:
 
         record = NotionAuthorizationModel(
             id=uuid.uuid4(),
-            user_id=uuid.UUID(state) if state else uuid.uuid4(),
+            user_id=user_id,
             bot_id=payload.get("bot_id"),
             workspace_id=payload.get("workspace_id"),
             workspace_name=payload.get("workspace_name"),

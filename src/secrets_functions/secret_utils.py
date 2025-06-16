@@ -12,9 +12,9 @@ if _key is None:
 _f = Fernet(_key)
 
 
-def encrypt(text: str) -> str:
+def custom_encrypt(text: str) -> str:
     return _f.encrypt(text.encode()).decode()
 
 
-def decrypt(token: str) -> str:
+def custom_decrypt(token: str) -> str:
     return _f.decrypt(token.encode()).decode()
