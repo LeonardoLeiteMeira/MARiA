@@ -41,6 +41,7 @@ packages = [
     {include = "domain", from = "src"},
     {include = "config", from = "src"},
     {include = "secrets_functions", from = "src"},
+    {include = "external", from = "src"},
 ]
 
 

@@ -3,29 +3,30 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from MARiA.notion_repository import NotionUserData, notion_user_data, notion_access
-from MARiA.notion_repository.notion_user_data import UserDataTypes
-from pydantic import create_model, Field
+from pydantic import create_model, Field, PrivateAttr
+
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from pydantic import PrivateAttr
-from MARiA.notion_types import TransactionType
+from domain import NotionUserDataDomain, NotionToolDomain
+from external.enum import TransactionType, UserDataTypes
 
 class SearchTransactionV2(BaseTool, ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
     description: str = "Fazer busca de transacoes com base nas informacoes que o usuario passar. Use apenas as informações que o usuário passar, o que ele não passar deixe como None"
     args_schema: Type[BaseModel] = None
-    _notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionUserDataDomain = PrivateAttr()
+    __notion_tool: NotionToolDomain = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, **data):
+    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
         super().__init__(**data)
-        self._notion_user_data = notion_user_data
+        self.__notion_user_data = notion_user_data
+        self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'SearchTransactionV2':
+    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'SearchTransactionV2':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
@@ -78,7 +79,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
             page_size=(int, Field(..., description="O padrão e 25 para a quantidade de registros retornados.")),
         )
 
-        tool = SearchTransactionV2(notion_user_data=notion_user_data)
+        tool = SearchTransactionV2(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -95,19 +96,19 @@ class SearchTransactionV2(BaseTool, ToolInterface):
             cursor = parms['args'].get('cursor', None)
             page_size = parms['args'].get('page_size', None)
 
-            month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_account_enter_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
-            card_account_out_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_out)
-            category_id = await self._notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
-            marco_category_id = await self._notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
+            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+            card_account_enter_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
+            card_account_out_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_out)
+            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
+            macro_category_id = await self.__notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
 
-            transactions = notion_access.new_get_transactions(
+            transactions = await self.__notion_tool.get_transactions(
                 name,
                 has_paid,
                 card_account_enter_id,
                 card_account_out_id,
                 category_id,
-                marco_category_id,
+                macro_category_id,
                 month_id,
                 transaction_type,
                 cursor,
@@ -124,24 +125,24 @@ class SearchTransactionV2(BaseTool, ToolInterface):
                 tool_call_id=parms['id'],
             )
         
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    import asyncio
+#     import asyncio
 
-    async def test():
-        tool = await SearchTransactionV2.instantiate_tool(notion_user_data)
-        await tool.ainvoke(
-            {
-                'args': {
-                    'name':'Teste',
-                    'amount':400,
-                    'date':'2025-05-23',
-                    'card_or_account':'NuConta',
-                    'category':'Diversos',
-                    'macro_category':'Não Essencial',
-                    'month':'2025 - Maio',
-                }
-            },
-            {}
-        )
-    asyncio.run(test())
+#     async def test():
+#         tool = await SearchTransactionV2.instantiate_tool(notion_user_data)
+#         await tool.ainvoke(
+#             {
+#                 'args': {
+#                     'name':'Teste',
+#                     'amount':400,
+#                     'date':'2025-05-23',
+#                     'card_or_account':'NuConta',
+#                     'category':'Diversos',
+#                     'macro_category':'Não Essencial',
+#                     'month':'2025 - Maio',
+#                 }
+#             },
+#             {}
+#         )
+#     asyncio.run(test())

@@ -3,29 +3,31 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from MARiA.notion_repository import NotionUserData, notion_user_data, notion_access
-from MARiA.notion_repository.notion_user_data import UserDataTypes
 from pydantic import create_model, Field
-from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
-from MARiA.notion_types import TransactionType
+
+from MARiA.tools.new_tools.tool_interface import ToolInterface
+from domain import NotionToolDomain, NotionUserDataDomain
+from external.enum import UserDataTypes
 
 class CreateNewPlanning(BaseTool, ToolInterface):
     name: str = "criar_novo_planejamento"
     description: str = "Criar um novo planejamento associado um mes"
     args_schema: Type[BaseModel] = None
-    _notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionUserDataDomain = PrivateAttr()
+    __notion_user_data: NotionToolDomain = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, **data):
+    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
         super().__init__(**data)
-        self._notion_user_data = notion_user_data
+        self.__notion_user_data = notion_user_data
+        self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateNewPlanning':
+    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateNewPlanning':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
@@ -53,7 +55,7 @@ class CreateNewPlanning(BaseTool, ToolInterface):
             text=(str, Field(..., description="Texto de observação sobre esse planejamento. Pode ser algo do usuário ou percepção sua.")),
         )
 
-        tool = CreateNewPlanning(notion_user_data=notion_user_data)
+        tool = CreateNewPlanning(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -65,10 +67,10 @@ class CreateNewPlanning(BaseTool, ToolInterface):
             amount = parms['args']['amount']
             text = parms['args']['text']
      
-            month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            category_id = await self._notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
+            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
 
-            notion_access.create_planning(
+            await self.__notion_tool.create_plan(
                 name,
                 month_id,
                 category_id,
@@ -86,24 +88,24 @@ class CreateNewPlanning(BaseTool, ToolInterface):
                 tool_call_id=parms['id'],
             )
         
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    import asyncio
+#     import asyncio
 
-    async def test():
-        tool = await CreateNewPlanning.instantiate_tool(notion_user_data)
-        await tool.ainvoke(
-            {
-                'args': {
-                    'name':'Teste',
-                    'amount':400,
-                    'date':'2025-05-23',
-                    'card_or_account':'NuConta',
-                    'category':'Diversos',
-                    'macro_category':'Não Essencial',
-                    'month':'2025 - Maio',
-                }
-            },
-            {}
-        )
-    asyncio.run(test())
+#     async def test():
+#         tool = await CreateNewPlanning.instantiate_tool(notion_user_data)
+#         await tool.ainvoke(
+#             {
+#                 'args': {
+#                     'name':'Teste',
+#                     'amount':400,
+#                     'date':'2025-05-23',
+#                     'card_or_account':'NuConta',
+#                     'category':'Diversos',
+#                     'macro_category':'Não Essencial',
+#                     'month':'2025 - Maio',
+#                 }
+#             },
+#             {}
+#         )
+#     asyncio.run(test())

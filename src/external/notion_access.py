@@ -1,6 +1,5 @@
-from MARiA.notion_types import NotionDatabaseEnum, TransactionType
-from .notion_repository import NotionRepository
-from .basic_property import BasicProperty
+from .enum import NotionDatabaseEnum, TransactionType
+from .notion_external import NotionExternal
 import urllib.parse
 from datetime import datetime
 from enum import Enum
@@ -8,8 +7,19 @@ from enum import Enum
 notion_cache = None
 
 class NotionAccess:
-    def __init__(self, notion_repository: NotionRepository):
-        self.notion_repository = notion_repository
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(NotionAccess, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, notion_external: NotionExternal):
+        if self.__class__._initialized:
+            return
+
+        self.notion_external = notion_external
         self.databases = {
             NotionDatabaseEnum.TRANSACTIONS.value: {
                 "id": "1cb14f691c8381d9a75ffb3e58f0a481"
@@ -41,14 +51,14 @@ class NotionAccess:
 
         notion_cache = {}
         for key, value in self.databases.items():
-            data = self.notion_repository.retrieve_databse(value['id'])
+            data = self.notion_external.retrieve_databse(value['id'])
             value['properties'] = data['properties']
             notion_cache[value['id']] = value['properties']
 
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]
-        data = self.notion_repository.get_database(
+        data = self.notion_external.get_database(
             self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id'],
             start_cursor=cursor,
             page_size=page_size,
@@ -61,7 +71,7 @@ class NotionAccess:
                 }
             ]
         )
-        return self.notion_repository.process_database_registers(data)
+        return self.notion_external.process_database_registers(data)
     
     def new_get_transactions(
             self,
@@ -111,7 +121,7 @@ class NotionAccess:
             transaction_type_filter  = {"property": "Tipo de Transação", "select": {"equals": transaction_type}}
             filter["and"].append(transaction_type_filter)
 
-        data = self.notion_repository.get_database(
+        data = self.notion_external.get_database(
             database_id=database_id,
             start_cursor=cursor,
             page_size=page_size,
@@ -124,20 +134,20 @@ class NotionAccess:
             ]
         )
 
-        return self.notion_repository.process_database_registers(data)
+        return self.notion_external.process_database_registers(data)
 
     
     def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
-        data = self.notion_repository.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
-        return self.notion_repository.process_database_registers(data)
+        data = self.notion_external.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
+        return self.notion_external.process_database_registers(data)
     
     def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
         try:
             title_property_id = self.__get_title_property_from_schema(self.databases[NotionDatabaseEnum.MONTHS.value]['properties'])
             property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
             year = year or datetime.now().year
-            data = self.notion_repository.get_database(
+            data = self.notion_external.get_database(
                 self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
                 filter_properties=[title_property_id, *property_ids_parsed],
                 filter={
@@ -146,19 +156,19 @@ class NotionAccess:
                             'date': {'on_or_after': f"{year}"},
                         }]}
                 )
-            return self.notion_repository.process_database_registers(data)
+            return self.notion_external.process_database_registers(data)
         except Exception as e:
             print(e)
 
     def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = []):
         title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
         property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
-        data = self.notion_repository.get_database(
+        data = self.notion_external.get_database(
             self.databases[database.value]['id'], 
             filter_properties=[title_property_id, *property_ids_parsed],
             start_cursor=cursor
         )
-        return self.notion_repository.process_database_registers(data)
+        return self.notion_external.process_database_registers(data)
 
     def get_properties(self, database: str) -> dict:
         full_properties = self.databases[database]['properties']
@@ -174,14 +184,14 @@ class NotionAccess:
         return properties
     
     def get_page_by_id(self, month_id, exclude_properties: list[str] = []):
-        data = self.notion_repository.get_page(month_id)
+        data = self.notion_external.get_page(month_id)
         for prop in exclude_properties:
             data['properties'].pop(prop, None)
-        return self.notion_repository.process_page_register(data)
+        return self.notion_external.process_page_register(data)
 
     
     def get_current_month(self) -> dict:
-        data = self.notion_repository.get_database(
+        data = self.notion_external.get_database(
             self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
             filter={
                 'and': [{
@@ -192,7 +202,7 @@ class NotionAccess:
                 }}}]
             }    
         )
-        return self.notion_repository.process_database_registers(data)
+        return self.notion_external.process_database_registers(data)
     
     
     def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
@@ -252,7 +262,7 @@ class NotionAccess:
                 "Observações": {"rich_text": [{"text": {"content": text}}]}
             },
         }
-        self.notion_repository.create_page(page)
+        self.notion_external.create_page(page)
 
     def create_card(self, name: str, initial_balance: float):
         page = {
@@ -271,7 +281,7 @@ class NotionAccess:
                 },
             },
         }
-        self.notion_repository.create_page(page)
+        self.notion_external.create_page(page)
 
     def create_month(self, name: str, start_date:str, finish_date:str):
         page = {
@@ -289,11 +299,11 @@ class NotionAccess:
                 "Data Fim": {"date":{"start": finish_date}},
             },
         }
-        self.notion_repository.create_page(page)
+        self.notion_external.create_page(page)
 
     def get_planning_by_month(self, month_id) -> dict:
         database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
-        data = self.notion_repository.get_database(
+        data = self.notion_external.get_database(
             database_id,
             filter={
                 'and': [{
@@ -301,10 +311,10 @@ class NotionAccess:
                 'relation': {'contains':month_id}}]
             }    
         )
-        return self.notion_repository.process_database_registers(data)
+        return self.notion_external.process_database_registers(data)
     
     def delete_page(self, page_id: str):
-        self.notion_repository.delete_page(page_id)
+        self.notion_external.delete_page(page_id)
     
     def __create_new_transaction(
             self,
@@ -335,7 +345,7 @@ class NotionAccess:
             "parent": {"type": "database_id","database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
             "properties": properties,
         }
-        self.notion_repository.create_page(page)
+        self.notion_external.create_page(page)
 
     def __get_title_property_from_schema(self, schema:dict) -> str:
         for key, value in schema.items():

@@ -3,29 +3,30 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from MARiA.notion_repository import NotionUserData, notion_user_data, notion_access
-from MARiA.notion_repository.notion_user_data import UserDataTypes
 from pydantic import create_model, Field
-from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
+
+from MARiA.tools.new_tools.tool_interface import ToolInterface
+from domain import NotionUserDataDomain, NotionToolDomain
 
 class CreateNewMonth(BaseTool, ToolInterface):
     name: str = "criar_novo_mes"
     description: str = "Cria um novo mes para realizar a gestão financeira."
     args_schema: Type[BaseModel] = None
-    _notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionUserDataDomain = PrivateAttr()
+    __notion_tool: NotionToolDomain = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, **data):
+    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
         super().__init__(**data)
-        self._notion_user_data = notion_user_data
+        self.__notion_user_data = notion_user_data
+        self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateNewMonth':
-
+    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateNewMonth':
         InputModel = create_model(
             "CreateNewMonthInput",
             name=(str, Field(..., description="Nome escolhido para a transação")),
@@ -33,7 +34,7 @@ class CreateNewMonth(BaseTool, ToolInterface):
             finish_date=(str, Field(..., description="Data referencia de final para a gestão do mes. Formato ISO!")),
         )
 
-        tool = CreateNewMonth(notion_user_data=notion_user_data)
+        tool = CreateNewMonth(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -43,7 +44,7 @@ class CreateNewMonth(BaseTool, ToolInterface):
             start_date = parms['args']['start_date']
             finish_date = parms['args']['finish_date']
 
-            notion_access.create_month(
+            await self.__notion_tool.create_month(
                 name,
                 start_date,
                 finish_date
