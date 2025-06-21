@@ -4,8 +4,6 @@ import urllib.parse
 from datetime import datetime
 from enum import Enum
 
-notion_cache = None
-
 class NotionAccess:
     _instance = None
     _initialized = False
@@ -41,19 +39,16 @@ class NotionAccess:
             }
         }
         self.cache = {}
-        self.__load_database_schema()
 
-    def __load_database_schema(self) -> dict:
-        global notion_cache
-        if notion_cache != None:
-            for key, value in self.databases.items():
-                value['properties'] = notion_cache[value['id']]
+    def __get_properties(self, database: NotionDatabaseEnum) -> dict:
+        if 'properties' in self.databases[database.value]:
+            return self.databases[database.value]['properties']
+        
+        database_id = self.databases[database.value]['id']
+        data = self.notion_external.retrieve_databse(database_id)
+        self.databases[database.value]['properties'] = data['properties']
+        return self.databases[database.value]['properties']
 
-        notion_cache = {}
-        for key, value in self.databases.items():
-            data = self.notion_external.retrieve_databse(value['id'])
-            value['properties'] = data['properties']
-            notion_cache[value['id']] = value['properties']
 
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
@@ -144,7 +139,8 @@ class NotionAccess:
     
     def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
         try:
-            title_property_id = self.__get_title_property_from_schema(self.databases[NotionDatabaseEnum.MONTHS.value]['properties'])
+            full_properties = self.__get_properties(NotionDatabaseEnum.MONTHS)
+            title_property_id = self.__get_title_property_from_schema(full_properties)
             property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
             year = year or datetime.now().year
             data = self.notion_external.get_database(
@@ -161,7 +157,8 @@ class NotionAccess:
             print(e)
 
     def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = []):
-        title_property_id = self.__get_title_property_from_schema(self.databases[database.value]['properties'])
+        full_properties = self.__get_properties(database)
+        title_property_id = self.__get_title_property_from_schema(full_properties)
         property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
         data = self.notion_external.get_database(
             self.databases[database.value]['id'], 
@@ -171,7 +168,7 @@ class NotionAccess:
         return self.notion_external.process_database_registers(data)
 
     def get_properties(self, database: str) -> dict:
-        full_properties = self.databases[database]['properties']
+        full_properties = self.__get_properties(database)
         properties = {}
         for key, value in full_properties.items():
             properties[key] = {
