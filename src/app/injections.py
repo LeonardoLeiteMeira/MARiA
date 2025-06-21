@@ -12,7 +12,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
                          ReadUserBaseData, SearchTransactionV2)
-from messaging import MessageService
+from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository
 from external import NotionAccess, NotionExternal
 from config import get_settings
@@ -48,7 +48,10 @@ def create_notion_tool_domain() -> Callable[[], NotionToolDomain]:
 def create_message_service() -> Callable[[], MessageService]:
     def dependency():
         instance = "maria"
-        return MessageService(instance)
+        if settings.is_production:
+            return MessageService(instance)
+        else:
+            return MessageServiceDev(instance)
     return dependency
 
 

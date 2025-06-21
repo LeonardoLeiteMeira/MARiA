@@ -13,10 +13,11 @@ from .lifespan import lifespan
 
 settings = get_settings()
 
-sentry_sdk.init(
-    dsn=settings.sentry_dsn,
-    send_default_pii=True,
-)
+if settings.is_production:
+    sentry_sdk.init(
+        dsn=settings.sentry_dsn,
+        send_default_pii=True,
+    )
 
 app = FastAPI(lifespan=lifespan)
 app.state = cast(CustomState, app.state)
