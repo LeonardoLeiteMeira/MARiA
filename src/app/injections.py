@@ -34,12 +34,6 @@ def create_notion_access() -> Callable[[], NotionAccess]:
         return NotionAccess(notion_external)
     return dependency
 
-
-def create_notion_user_data_domain() -> Callable[[], NotionUserDataDomain]:
-    def dependency(notion_access = Depends(create_notion_access())):
-        return NotionUserDataDomain(notion_access)
-    return dependency
-
 def create_notion_tool_domain() -> Callable[[], NotionToolDomain]:
     def dependency(notion_access = Depends(create_notion_access())):
         return NotionToolDomain(notion_access)
@@ -140,20 +134,19 @@ def create_notion_authorization_repository(
 
     return dependency
 
-def create_notion_authorization_domain(
-    appState: CustomState,
-) -> Callable[[], NotionAuthorizationDomain]:
-    def dependency(repo=Depends(create_notion_authorization_repository(appState))):
-        return NotionAuthorizationDomain(repo)
-
+def create_notion_user_data_domain() -> Callable[[], NotionUserDataDomain]:
+    def dependency(
+        notion_access = Depends(create_notion_access()),
+        notion_auth_repo = Depends(create_notion_authorization_repository())
+    ):
+        return NotionUserDataDomain(notion_access, notion_auth_repo)
     return dependency
-
 
 def create_notion_authorization_application(
     appState: CustomState,
 ) -> Callable[[], NotionAuthorizationApplication]:
     async def dependency(
-        domain=Depends(create_notion_authorization_domain(appState)),
+        domain=Depends(create_notion_user_data_domain(appState)),
     ) -> NotionAuthorizationApplication:
         return NotionAuthorizationApplication(domain)
 

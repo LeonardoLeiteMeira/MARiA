@@ -2,13 +2,13 @@ import httpx
 import uuid
 
 from config import get_settings
-from domain import NotionAuthorizationDomain
+from domain import NotionUserDataDomain
 from repository import NotionAuthorizationModel, OwnerType
 
 
 class NotionAuthorizationApplication:
-    def __init__(self, domain: NotionAuthorizationDomain):
-        self._domain = domain
+    def __init__(self, notion_user_domain: NotionUserDataDomain):
+        self.__notion_user_domain = notion_user_domain
         self._settings = get_settings()
 
     async def authorize(self, code: str, user_id: str) -> None:
@@ -39,5 +39,5 @@ class NotionAuthorizationApplication:
             owner_id=owner_id,
         )
         record.access_token = payload.get("access_token")
-        await self._domain.save(record)
+        await self.__notion_user_domain.create_new_notion_auth(record)
 
