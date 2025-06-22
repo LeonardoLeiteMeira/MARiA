@@ -9,21 +9,8 @@ class UserData:
     months: dict
     is_loaded: bool
 
-# TODO algum lugar nao esta instanciando corretametne aqui
 class NotionUserData:
-    _instance = None
-    _initialized = False
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(NotionUserData, cls).__new__(cls)
-        return cls._instance
-
     def __init__(self, notion_access: NotionAccess):
-        if self.__class__._initialized:
-            return
-        if notion_access == None:
-            raise Exception("Invalid notion_access")
         self.notion_access = notion_access
         self.user_data = UserData()
         self.user_data.is_loaded = False
@@ -56,5 +43,8 @@ class NotionUserData:
             return data['id']
         
         return None
+    
+    async def get_user_databases(self):
+        return self.notion_access.get_all_databases()
     
 

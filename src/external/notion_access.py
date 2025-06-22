@@ -5,18 +5,7 @@ from datetime import datetime
 from enum import Enum
 
 class NotionAccess:
-    _instance = None
-    _initialized = False
-
-    def __new__(cls, *args, **kwargs):
-        if cls._instance is None:
-            cls._instance = super(NotionAccess, cls).__new__(cls)
-        return cls._instance
-
     def __init__(self, notion_external: NotionExternal):
-        if self.__class__._initialized:
-            return
-
         self.notion_external = notion_external
         self.databases = {
             NotionDatabaseEnum.TRANSACTIONS.value: {
@@ -48,7 +37,9 @@ class NotionAccess:
         data = self.notion_external.retrieve_databse(database_id)
         self.databases[database.value]['properties'] = data['properties']
         return self.databases[database.value]['properties']
-
+    
+    def get_all_databases(self):
+        return self.notion_external.get_all_databases()
 
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:

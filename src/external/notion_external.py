@@ -1,5 +1,5 @@
 from notion_client import Client
-from external.models import NotionProperties
+from external.models import NotionProperties, NotionBaseDatabase
 
 class NotionExternal:
     def __init__(self, notion_client: Client):
@@ -91,6 +91,22 @@ class NotionExternal:
     
     def delete_page(self, page_id: str) -> None:
         self.notion_client.pages.update(page_id=page_id, archived=True)
+
+    def get_all_databases(self) -> list[NotionBaseDatabase]:
+        payload = {
+            "filter": {"property": "object", "value": "database"},
+            "page_size": 20
+        }
+        search_result = self.notion_client.search(**payload)
+        databases = []
+        for result in search_result['results']:
+            databases.append(
+                NotionBaseDatabase(
+                    name=result['title'][0]['text']['content'],
+                    id=result['id']
+                )
+            )
+        return databases
 
     # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
     #     response = self.notion_client.create_page(database_id, properties)
