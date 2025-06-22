@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from domain import NotionUserDataDomain, NotionToolDomain
+from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 from .tool_interface import ToolInterface
 
@@ -14,10 +14,10 @@ class ReadUserBaseData(BaseTool, ToolInterface):
     name: str = "ler_dados_base_do_usuario"
     description: str = "Acesso a dados como, categorias, meses, cartoes, constas e mais. As informações cadastradas pelo usuário são acessíveis por aqui."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -26,7 +26,7 @@ class ReadUserBaseData(BaseTool, ToolInterface):
         pass
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'ReadUserBaseData':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'ReadUserBaseData':
         InputModel = create_model(
             "ReadUserBaseDataInput",
             user_datas=(list[UserDataTypes], Field(..., description="Dados a serem lidos")),

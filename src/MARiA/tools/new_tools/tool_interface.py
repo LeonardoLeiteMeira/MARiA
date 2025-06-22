@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 
-from domain.notion_tool_domain import NotionToolDomain
-from domain import NotionUserDataDomain
+from external import NotionTool, NotionUserData
 
 class ToolInterface(ABC):
     @classmethod
     @abstractmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain):
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool):
         pass

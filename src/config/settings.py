@@ -9,7 +9,6 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_connection_uri_maria: str | None = None
     database_connection_uri_maria_new: str | None = None
-    notion_api_key: str | None = None
     notion_client_id: str | None = None
     notion_client_secret: str | None = None
     notion_redirect_uri: str | None = None

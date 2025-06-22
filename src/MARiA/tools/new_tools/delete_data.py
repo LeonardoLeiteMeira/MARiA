@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from domain import NotionUserDataDomain, NotionToolDomain
+from external import NotionUserData, NotionTool
 from .tool_interface import ToolInterface
 
 
@@ -14,10 +14,10 @@ class DeleteData(BaseTool, ToolInterface):
     name: str = "deletar_dados_solicitado"
     description: str = "Apaga qualquer informação solicitada, basta passar o Id corretamente. Pode ser utilizada para atualizar também, apagando o registro anterior e criando um novo atualizado."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -26,7 +26,7 @@ class DeleteData(BaseTool, ToolInterface):
         pass
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'DeleteData':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'DeleteData':
         InputModel = create_model(
             "DeleteDataInput",
             register_id=(str, Field(..., description="Id da pagina a ser deletada")),

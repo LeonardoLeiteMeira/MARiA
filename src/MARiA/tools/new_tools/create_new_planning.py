@@ -7,17 +7,17 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from domain import NotionToolDomain, NotionUserDataDomain
+from external import NotionTool, NotionUserData
 from external.enum import UserDataTypes
 
 class CreateNewPlanning(BaseTool, ToolInterface):
     name: str = "criar_novo_planejamento"
     description: str = "Criar um novo planejamento associado um mes"
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_user_data: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -27,7 +27,7 @@ class CreateNewPlanning(BaseTool, ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateNewPlanning':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewPlanning':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum

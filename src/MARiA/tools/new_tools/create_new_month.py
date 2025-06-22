@@ -7,16 +7,16 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from domain import NotionUserDataDomain, NotionToolDomain
+from external import NotionUserData, NotionTool
 
 class CreateNewMonth(BaseTool, ToolInterface):
     name: str = "criar_novo_mes"
     description: str = "Cria um novo mes para realizar a gestão financeira."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -26,7 +26,7 @@ class CreateNewMonth(BaseTool, ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateNewMonth':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewMonth':
         InputModel = create_model(
             "CreateNewMonthInput",
             name=(str, Field(..., description="Nome escolhido para a transação")),

@@ -20,6 +20,7 @@ class UserModel(Base):
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP,  default=datetime.now, onupdate=datetime.now)
 
     threads:Mapped[list['ThreadModel']] = relationship(backref='threads', lazy='noload') # type: ignore
+    notion_authorization:Mapped['NotionAuthorizationModel'] = relationship(backref='notion_authorizations', lazy='noload', uselist=False) # type: ignore
 
     def __repr__(self):
         return f"{self.id} - {self.name} - {self.email} "

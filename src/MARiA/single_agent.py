@@ -50,7 +50,7 @@
 #     async with checkpoint_manager as checkpointer:
 #         try:
 #             await checkpointer.setup()
-#             graph_builder = maria_graph.build_graph()
+#             graph_builder = maria_graph.get_state_graph()
 #             graph = graph_builder.compile(checkpointer=checkpointer)
         
 #             phone_number = "5531933057272"

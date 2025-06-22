@@ -6,18 +6,17 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from domain.notion_tool_domain import NotionToolDomain
-from domain.notion_user_data_domain import NotionUserDataDomain
+from external import NotionTool, NotionUserData
 from .tool_interface import ToolInterface
 
 class CreateCard(BaseTool, ToolInterface):
     name: str = "criar_nova_conta_ou_cartao"
     description: str = "Cria uma nova conta ou cartão para registrar entras e saidas"
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -26,7 +25,7 @@ class CreateCard(BaseTool, ToolInterface):
         pass
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateCard':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateCard':
         InputModel = create_model(
             "CreateCardInput",
             name=(str, Field(..., description="Nome do cartao")),

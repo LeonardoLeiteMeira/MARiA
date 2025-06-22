@@ -2,7 +2,7 @@ from datetime import datetime
 
 from external.notion_access import NotionAccess
 
-class NotionToolDomain:
+class NotionTool:
     def __init__(self, notion_access: NotionAccess):
         self.__notion_access = notion_access
 

@@ -6,8 +6,7 @@ _SECRET_KEY_ENV = "APP_SECRET_KEY"
 
 _key = os.environ.get(_SECRET_KEY_ENV)
 if _key is None:
-    _key = Fernet.generate_key()
-    print(f"Secret key not found in environment; generated new key for runtime.")
+    raise Exception("APP_SECRET_KEY couldn't be loaded")
 
 _f = Fernet(_key)
 

@@ -6,7 +6,7 @@ from sqlalchemy import TIMESTAMP
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database.configs.base import Base
 from secrets_functions.secret_utils import custom_decrypt, custom_encrypt
@@ -26,6 +26,7 @@ class NotionAuthorizationModel(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
     )
+    user = relationship("UserModel", back_populates="notion_authorization")
     bot_id: Mapped[str] = mapped_column(String, nullable=False)
     _access_token: Mapped[str] = mapped_column("access_token", String, nullable=False)
     workspace_id: Mapped[str] = mapped_column(String, nullable=False)

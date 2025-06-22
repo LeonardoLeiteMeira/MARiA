@@ -6,17 +6,17 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field, PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from domain import NotionUserDataDomain, NotionToolDomain
+from external import NotionUserData, NotionTool
 from external.enum import TransactionType, UserDataTypes
 
 class SearchTransactionV2(BaseTool, ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
     description: str = "Fazer busca de transacoes com base nas informacoes que o usuario passar. Use apenas as informações que o usuário passar, o que ele não passar deixe como None"
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -26,7 +26,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'SearchTransactionV2':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'SearchTransactionV2':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum

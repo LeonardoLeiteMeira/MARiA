@@ -7,17 +7,17 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from domain import NotionToolDomain, NotionUserDataDomain
+from external import NotionTool, NotionUserData
 from external.enum import UserDataTypes
 
 class GetMonthData(BaseTool, ToolInterface):
     name: str = "buscar_dados_mes"
     description: str = "Busca todos os dados de um mês especifico. Inclui os totais planejado, gasto, receitas, valores previstos e concluidos e mais."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -27,7 +27,7 @@ class GetMonthData(BaseTool, ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'GetMonthData':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'GetMonthData':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum

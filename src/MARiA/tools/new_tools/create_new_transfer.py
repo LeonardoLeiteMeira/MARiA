@@ -7,7 +7,7 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from domain import NotionUserDataDomain, NotionToolDomain
+from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 
 
@@ -15,10 +15,10 @@ class CreateNewTransfer(BaseTool, ToolInterface):
     name: str = "criar_nova_transferencia"
     description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserDataDomain = PrivateAttr()
-    __notion_tool: NotionToolDomain = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
@@ -28,7 +28,7 @@ class CreateNewTransfer(BaseTool, ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserDataDomain, notion_tool: NotionToolDomain) -> 'CreateNewTransfer':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewTransfer':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum

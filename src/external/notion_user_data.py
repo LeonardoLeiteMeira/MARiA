@@ -9,19 +9,21 @@ class UserData:
     months: dict
     is_loaded: bool
 
-
-class NotionUserDataDomain:
+# TODO algum lugar nao esta instanciando corretametne aqui
+class NotionUserData:
     _instance = None
     _initialized = False
 
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
-            cls._instance = super(NotionUserDataDomain, cls).__new__(cls)
+            cls._instance = super(NotionUserData, cls).__new__(cls)
         return cls._instance
 
     def __init__(self, notion_access: NotionAccess):
         if self.__class__._initialized:
             return
+        if notion_access == None:
+            raise Exception("Invalid notion_access")
         self.notion_access = notion_access
         self.user_data = UserData()
         self.user_data.is_loaded = False

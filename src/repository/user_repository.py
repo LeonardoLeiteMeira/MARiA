@@ -2,6 +2,7 @@ from .base_repository import BaseRepository
 from .db_models.user_model import UserModel
 from .db_models.thread_model import ThreadModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
+from sqlalchemy.orm import joinedload
 from datetime import datetime
 
 
@@ -39,6 +40,7 @@ class UserRepository(BaseRepository):
     async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
         stmt = (
             select(UserModel)
+            .options(joinedload(UserModel.notion_authorization))
             .where(UserModel.phone_number == phone_number)
             .execution_options(synchronize_session="fetch")
         )
