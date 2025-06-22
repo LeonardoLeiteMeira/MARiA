@@ -1,7 +1,5 @@
 from external.enum import NotionDatabaseEnum, UserDataTypes
 from external import NotionAccess
-from repository import NotionAuthorizationRepository
-from repository.db_models.notion_authorization_model import NotionAuthorizationModel
 
 
 class UserData:
@@ -13,12 +11,21 @@ class UserData:
 
 
 class NotionUserDataDomain:
-    def __init__(self, notion_access: NotionAccess, notion_auth_repo: NotionAuthorizationRepository):
-        self.notion_access = notion_access
-        self.__notion_auth_repo = notion_auth_repo
+    _instance = None
+    _initialized = False
 
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(NotionUserDataDomain, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, notion_access: NotionAccess):
+        if self.__class__._initialized:
+            return
+        self.notion_access = notion_access
         self.user_data = UserData()
         self.user_data.is_loaded = False
+        self.__class__._initialized = True
 
     async def get_user_base_data(self) -> UserData:
         if self.user_data.is_loaded:
@@ -47,8 +54,5 @@ class NotionUserDataDomain:
             return data['id']
         
         return None
-    
-    async def create_new_notion_auth(self, record: NotionAuthorizationModel) -> None:
-        await self.__notion_auth_repo.create(record)
     
 

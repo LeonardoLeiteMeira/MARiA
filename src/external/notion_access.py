@@ -3,10 +3,20 @@ from .notion_external import NotionExternal
 import urllib.parse
 from datetime import datetime
 from enum import Enum
-from notion_client import Client
 
 class NotionAccess:
+    _instance = None
+    _initialized = False
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super(NotionAccess, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, notion_external: NotionExternal):
+        if self.__class__._initialized:
+            return
+
         self.notion_external = notion_external
         self.databases = {
             NotionDatabaseEnum.TRANSACTIONS.value: {
@@ -38,6 +48,7 @@ class NotionAccess:
         data = self.notion_external.retrieve_databse(database_id)
         self.databases[database.value]['properties'] = data['properties']
         return self.databases[database.value]['properties']
+
 
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
@@ -119,6 +130,7 @@ class NotionAccess:
         )
 
         return self.notion_external.process_database_registers(data)
+
     
     def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
@@ -174,6 +186,7 @@ class NotionAccess:
             data['properties'].pop(prop, None)
         return self.notion_external.process_page_register(data)
 
+    
     def get_current_month(self) -> dict:
         data = self.notion_external.get_database(
             self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
@@ -336,10 +349,3 @@ class NotionAccess:
             if value['type'] == 'title':
                 return value['id']
         return None
-
-
-class NotionAccessBuilder:
-    async def build_notion_access(self, notion_access_token: str) -> NotionAccess:
-        notion_client_auth = Client(auth=notion_access_token)
-        notion_external = NotionExternal(notion_client_auth)
-        return NotionAccess(notion_external)
