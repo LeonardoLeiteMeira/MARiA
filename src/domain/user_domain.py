@@ -1,10 +1,14 @@
-from repository import UserRepository, ThreadModel, UserModel
+from repository import UserRepository, ThreadModel, UserModel, NotionDatabaseRepository
+from external.models import NotionBaseDatabase, NotionDatabaseModel
 from datetime import datetime, timedelta
 import uuid
+from .domain_mixin.choose_notion_database_tag_mixin import ChooseNotionDatabaseTagMixin
 
-class UserDomain:
-    def __init__(self, user_repository: UserRepository):
+class UserDomain(ChooseNotionDatabaseTagMixin):
+    def __init__(self, user_repository: UserRepository, notion_database_repo: NotionDatabaseRepository):
         self.__user_repository = user_repository
+        self.__notion_database_repo = notion_database_repo
+
         self.__valid_thread_period = (datetime.now()) - timedelta(hours=1)
 
     async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
@@ -38,4 +42,17 @@ class UserDomain:
         )
         await self.__user_repository.create_user(new_user)
         return new_user
+    
+    async def save_user_notion_databases(self, user_id: str, user_databases: list[NotionBaseDatabase]):
+        new_databases = []
+        for database in user_databases:
+            new_databases.append(
+                NotionDatabaseModel(
+                    user_id=user_id,
+                    table_name=database.name,
+                    table_id=database.id,
+                    tag= self.select_database_tag(database)
+                )
+            )
+        await self.__notion_database_repo.create_new_databases(new_databases)
 
