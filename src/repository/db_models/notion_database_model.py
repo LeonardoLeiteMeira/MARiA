@@ -20,7 +20,5 @@ class NotionDatabaseModel(Base):
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP,  default=datetime.now, onupdate=datetime.now)
 
-    user = relationship("UserModel", back_populates="notion_authorization")
-
     def __repr__(self):
         return f"{self.table_name} - {self.tag} - {self.table_id} "

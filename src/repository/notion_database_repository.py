@@ -1,5 +1,5 @@
 from .base_repository import BaseRepository
-from .db_models.notion_database_model import NotionDatabaseModel, UserModel
+from .db_models.notion_database_model import NotionDatabaseModel
 
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 

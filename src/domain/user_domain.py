@@ -1,5 +1,5 @@
-from repository import UserRepository, ThreadModel, UserModel, NotionDatabaseRepository
-from external.models import NotionBaseDatabase, NotionDatabaseModel
+from repository import UserRepository, ThreadModel, UserModel, NotionDatabaseRepository, NotionDatabaseModel
+from external.models import NotionBaseDatabase
 from datetime import datetime, timedelta
 import uuid
 from .domain_mixin.choose_notion_database_tag_mixin import ChooseNotionDatabaseTagMixin

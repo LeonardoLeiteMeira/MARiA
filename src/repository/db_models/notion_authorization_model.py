@@ -23,10 +23,9 @@ class NotionAuthorizationModel(Base):
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    user_id: Mapped[uuid.UUID] = mapped_column(
+    user_id: Mapped[str] = mapped_column(
         UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE")
     )
-    user = relationship("UserModel", back_populates="notion_authorization")
     bot_id: Mapped[str] = mapped_column(String, nullable=False)
     _access_token: Mapped[str] = mapped_column("access_token", String, nullable=False)
     workspace_id: Mapped[str] = mapped_column(String, nullable=False)

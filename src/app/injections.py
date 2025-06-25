@@ -13,7 +13,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
                          ReadUserBaseData, SearchTransactionV2)
 from messaging import MessageService, MessageServiceDev
-from repository import UserRepository, NotionAuthorizationRepository
+from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
 from external import NotionFactory
 from config import get_settings
 
@@ -69,13 +69,19 @@ def create_maria_graph() -> Callable[[], MariaGraph]:
 def create_user_repository(appState: CustomState) -> Callable[[], UserRepository]:
     def dependency():
         return UserRepository(appState.database)
-
     return dependency
 
+def create_notion_database_repository(appState: CustomState) -> Callable[[], UserDomain]:
+    def dependency():
+        return NotionDatabaseRepository(appState.database)
+    return dependency
 
 def create_user_domain(appState: CustomState) -> Callable[[], UserDomain]:
-    def dependency(repo=Depends(create_user_repository(appState))):
-        return UserDomain(repo)
+    def dependency(
+        repo=Depends(create_user_repository(appState)),
+        notion_db_repo=Depends(create_notion_database_repository(appState))
+    ):
+        return UserDomain(repo, notion_db_repo)
 
     return dependency
 
@@ -125,7 +131,9 @@ def create_notion_authorization_application(
 ) -> Callable[[], NotionAuthorizationApplication]:
     async def dependency(
         domain=Depends(create_notion_authorization_domain(appState)),
+        user_domain=Depends(create_user_domain(appState)),
+        notion_factory=Depends(create_notion_factory())
     ) -> NotionAuthorizationApplication:
-        return NotionAuthorizationApplication(domain)
+        return NotionAuthorizationApplication(domain, user_domain, notion_factory)
 
     return dependency
