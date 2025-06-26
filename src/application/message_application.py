@@ -28,7 +28,8 @@ class MessageApplication:
             return
         
         if not user.notion_authorization:
-            self.send_auth_link(user, chat_id)
+            await self.send_auth_link(user, chat_id)
+            return
 
         answer = await self.__maria.get_maria_answer(user, message)
         await self.__message_service.send_message(chat_id, answer)

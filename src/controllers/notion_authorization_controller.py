@@ -1,7 +1,7 @@
 from collections.abc import Callable
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 
 from application import NotionAuthorizationApplication
 
@@ -31,6 +31,4 @@ class NotionAuthorizationController(APIRouter):
                 print(f"Authorization failed: {ex}")
                 return JSONResponse(status_code=400, content={"detail": "Token exchange failed"})
 
-            return JSONResponse(status_code=200, content={"detail": "Integração habilitada"})
-
-#https://www.notion.so/install-integration?response_type=code&client_id=19cd872b-594c-80f9-9c7b-0037760580d5&redirect_uri=http://localhost:8000/notion_authorization&state=64a61a98-a92c-4cf1-b258-a50bde8cef3b
+            return RedirectResponse(url="https://api.whatsapp.com/send/?phone=+554831997313&text=Ol%C3%A1+MARiA%2C+consegue+ler+minhas+informa%C3%A7%C3%B5es+financeiras%3F&type=phone_number&app_absent=0")
