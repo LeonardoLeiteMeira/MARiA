@@ -6,7 +6,7 @@
 # from MARiA.agents import create_maria_agent, maria_read_access, maria_write_access
 # from MARiA.notion_repository import notion_access
 # from external.enum.enums import NotionDatabaseEnum
-# # from external import NotionAccess
+# # from external import EjFinanceAccess
 # # from MARiA.notion_types import NotionDatabaseEnum
 # from pydantic import create_model
 

@@ -1,4 +1,4 @@
-from .notion_base_access.notion_access import NotionAccess
+from .notion_base_access.ej_finance_access import EjFinanceAccess
 from .notion_base_access.notion_external import NotionExternal
 from .notion_factory import NotionFactory
 

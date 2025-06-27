@@ -2,7 +2,7 @@ from notion_client import Client
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 from .notion_base_access.notion_external import NotionExternal
-from .notion_base_access.notion_access import NotionAccess
+from .notion_base_access.ej_finance_access import EjFinanceAccess
 from .notion_user.notion_tool import NotionTool
 from .notion_user.notion_user_data import NotionUserData
 from .notion_user.notion_authorization_data import NotionAuthorizationData
@@ -13,7 +13,7 @@ class NotionFactory:
         self.__access_token = None
         self.__notion_client = None
         self.__notion_external = None
-        self.__notion_access = None
+        self.__ej_finance_access = None
 
         self.__notion_authorization_data: NotionAuthorizationData = None
         self.__notion_tool: NotionTool = None
@@ -31,7 +31,7 @@ class NotionFactory:
         
         self.__create_base_classes()
         
-        self.__notion_tool = NotionTool(self.__notion_access)
+        self.__notion_tool = NotionTool(self.__ej_finance_access)
         return self.__notion_tool
     
     def create_notion_user_data(self) -> NotionUserData:
@@ -40,7 +40,7 @@ class NotionFactory:
         
         self.__create_base_classes()
 
-        self.__notion_user_data = NotionUserData(self.__notion_access)
+        self.__notion_user_data = NotionUserData(self.__ej_finance_access)
         return self.__notion_user_data
     
     def create_notion_authorization_data(self) -> NotionAuthorizationData:
@@ -51,8 +51,8 @@ class NotionFactory:
     def __create_base_classes(self):
         self.__create_access_classes()
         
-        if self.__notion_access == None: 
-            self.__notion_access = NotionAccess(self.__notion_external, self.__user_databases)
+        if self.__ej_finance_access == None: 
+            self.__ej_finance_access = EjFinanceAccess(self.__notion_external, self.__user_databases)
 
     def __create_access_classes(self):
         if self.__notion_client == None:

@@ -1,6 +1,6 @@
 # from enum import Enum
 # from MARiA.notion_types import NotionDatabaseEnum, UserDataTypes
-# from ...external.notion_access import NotionAccess
+# from ...external.notion_access import EjFinanceAccess
 
 
 # class UserData:
@@ -15,12 +15,12 @@
 #     _instance = None
 #     _initialized = False
 
-#     def __new__(cls, notion_access: NotionAccess):
+#     def __new__(cls, notion_access: EjFinanceAccess):
 #         if cls._instance is None:
 #             cls._instance = super(NotionUserData, cls).__new__(cls)
 #         return cls._instance
 
-#     def __init__(self, notion_access: NotionAccess):
+#     def __init__(self, notion_access: EjFinanceAccess):
 #         if self.__class__._initialized:
 #             return
 #         self.notion_access = notion_access

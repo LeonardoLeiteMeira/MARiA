@@ -6,7 +6,7 @@ from ..enum import NotionDatabaseEnum, TransactionType
 from .notion_external import NotionExternal
 from repository.db_models.notion_database_model import NotionDatabaseModel
 
-class NotionAccess:
+class EjFinanceAccess:
     def __init__(self, notion_external: NotionExternal, user_databases: list[NotionDatabaseModel]):
         self.notion_external = notion_external
         self.databases = {

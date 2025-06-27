@@ -1,7 +1,7 @@
 # from notion_client import Client
 # from config import get_settings
 # from MARiA.notion_repository.notion_repository import NotionRepository
-# from external.notion_access import NotionAccess
+# from external.notion_access import EjFinanceAccess
 # from MARiA.notion_repository.notion_user_data import NotionUserData
 # from datetime import datetime
 
@@ -12,7 +12,7 @@
 # notion = Client(auth=api_key)
 
 # repo = NotionRepository(notion)
-# notion_access = NotionAccess(repo)
+# notion_access = EjFinanceAccess(repo)
 
 # notion_user_data = NotionUserData(notion_access)
 
