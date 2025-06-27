@@ -9,11 +9,12 @@ class NotionDatabaseRepository(BaseRepository):
             session.add_all(new_databases)
             await session.commit()
 
-    async def get_user_databases(self, user_id:str):
+    async def get_user_databases(self, user_id:str) -> list[NotionDatabaseModel]:
         async with self.session() as session:
             stmt = (
                 select(NotionDatabaseModel)
                 .where(NotionDatabaseModel.user_id == user_id)
+                .where(NotionDatabaseModel.tag != None)
             )
             cursor = await session.execute(stmt)
             databases = cursor.scalars().all()

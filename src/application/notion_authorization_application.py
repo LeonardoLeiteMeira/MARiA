@@ -18,9 +18,10 @@ class NotionAuthorizationApplication:
         user_auth = await self.__store_notion_authorization(code, user_id)
 
         self.__notion_factory.set_user_access_token(user_auth.access_token)
-        notio_user_data = self.__notion_factory.create_notion_user_data()
+        notion_auth_data = self.__notion_factory.create_notion_authorization_data()
 
-        user_databases = await notio_user_data.get_user_databases()
+        user_databases = await notion_auth_data.get_all_databases()
+
         await self.__user_domain.save_user_notion_databases(user_id, user_databases)
     
     async def __store_notion_authorization(self,code: str, user_id: str) -> NotionAuthorizationModel:

@@ -2,6 +2,7 @@ from langgraph.prebuilt import create_react_agent
 from external import NotionFactory
 from MARiA.tools import ToolInterface
 from langchain_openai import ChatOpenAI
+from repository import NotionDatabaseModel
 
 
 class AgentBase:
@@ -16,10 +17,12 @@ class AgentBase:
         self.tools = tools
         self.__notion_factory = notion_factory
 
-    async def create_agent(self, user_notion_access_token: str):
+    async def create_agent(self, user_notion_access_token: str, user_databases: list[NotionDatabaseModel]):
         instanciated_tools = []
 
         self.__notion_factory.set_user_access_token(user_notion_access_token)
+        self.__notion_factory.set_user_databases(user_databases)
+
         notion_user_data = self.__notion_factory.create_notion_user_data()
         notion_tool = self.__notion_factory.create_notion_tool()
 

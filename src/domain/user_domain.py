@@ -56,3 +56,6 @@ class UserDomain(ChooseNotionDatabaseTagMixin):
             )
         await self.__notion_database_repo.create_new_databases(new_databases)
 
+    async def get_user_notion_databases_taged(self, user_id:str):
+        databases = await self.__notion_database_repo.get_user_databases(user_id)
+        return databases

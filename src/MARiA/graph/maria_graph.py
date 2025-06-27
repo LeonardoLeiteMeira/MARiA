@@ -3,14 +3,15 @@ from langgraph.graph import StateGraph, END
 from langgraph.types import Command
 from langchain_core.messages import SystemMessage, HumanMessage
 from MARiA.agents import AgentBase
+from repository import NotionDatabaseModel
 from .state import State
 
 class MariaGraph:
     def __init__(self, agent: AgentBase):
         self.main_agent = agent
     
-    async def get_state_graph(self, user_notion_access_token: str) -> StateGraph:
-        await self.main_agent.create_agent(user_notion_access_token)
+    async def get_state_graph(self, user_notion_access_token: str, user_databases: list[NotionDatabaseModel]) -> StateGraph:
+        await self.main_agent.create_agent(user_notion_access_token, user_databases)
 
         state_graph = StateGraph(State)
         

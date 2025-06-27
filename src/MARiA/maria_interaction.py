@@ -20,7 +20,8 @@ class MariaInteraction:
 
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
-            state_graph = await self.__maria_graph.get_state_graph(user.notion_authorization.access_token)
+            user_notion_databases = await self.__user_domain.get_user_notion_databases_taged(user.id)
+            state_graph = await self.__maria_graph.get_state_graph(user.notion_authorization.access_token, user_notion_databases)
             compiled = state_graph.compile(checkpointer=checkpointer)
             result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
             messages = result["messages"]

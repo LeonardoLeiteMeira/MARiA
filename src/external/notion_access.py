@@ -1,31 +1,19 @@
+from enum import Enum
+from datetime import datetime
+import urllib.parse
+
 from .enum import NotionDatabaseEnum, TransactionType
 from .notion_external import NotionExternal
-import urllib.parse
-from datetime import datetime
-from enum import Enum
+from repository.db_models.notion_database_model import NotionDatabaseModel
 
 class NotionAccess:
-    def __init__(self, notion_external: NotionExternal):
+    def __init__(self, notion_external: NotionExternal, user_databases: list[NotionDatabaseModel]):
         self.notion_external = notion_external
         self.databases = {
-            NotionDatabaseEnum.TRANSACTIONS.value: {
-                "id": "1cb14f691c8381d9a75ffb3e58f0a481"
-            },
-            NotionDatabaseEnum.CATEGORIES.value : {
-                "id": "1cb14f691c8381da9fa0f66de51c0ad9"
-            },
-            NotionDatabaseEnum.MONTHS.value : {
-                "id": "1cb14f691c8381858f6dd41c0feb3ab8"
-            },
-            NotionDatabaseEnum.CARDS.value: {
-                "id" : "1cb14f691c8381e1bf00e7b91896c0ef"
-            },
-            NotionDatabaseEnum.MACRO_CATEGORIES.value: {
-                'id': '1f514f691c838054a52acfa5dc34fdd1'
-            },
-            NotionDatabaseEnum.PLANNING.value: {
-                'id': '1cb14f691c83819db7abe1dad9990d87'
+            user_db.tag: {
+                'id': user_db.table_id
             }
+            for user_db in user_databases
         }
         self.cache = {}
 
@@ -37,9 +25,6 @@ class NotionAccess:
         data = self.notion_external.retrieve_databse(database_id)
         self.databases[database.value]['properties'] = data['properties']
         return self.databases[database.value]['properties']
-    
-    def get_all_databases(self):
-        return self.notion_external.get_all_databases()
 
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:

@@ -44,7 +44,4 @@ class NotionUserData:
         
         return None
     
-    async def get_user_databases(self):
-        return self.notion_access.get_all_databases()
-    
 
