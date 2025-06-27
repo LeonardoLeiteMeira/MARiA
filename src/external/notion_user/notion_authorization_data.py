@@ -1,4 +1,4 @@
-from .notion_external import NotionExternal
+from ..notion_base_access.notion_external import NotionExternal
 
 class NotionAuthorizationData:
     def __init__(self,notion_external: NotionExternal):

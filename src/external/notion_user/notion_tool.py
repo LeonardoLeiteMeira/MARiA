@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from external.notion_access import NotionAccess
+from external.notion_base_access.notion_access import NotionAccess
 
 class NotionTool:
     def __init__(self, notion_access: NotionAccess):

@@ -2,7 +2,7 @@ from enum import Enum
 from datetime import datetime
 import urllib.parse
 
-from .enum import NotionDatabaseEnum, TransactionType
+from ..enum import NotionDatabaseEnum, TransactionType
 from .notion_external import NotionExternal
 from repository.db_models.notion_database_model import NotionDatabaseModel
 

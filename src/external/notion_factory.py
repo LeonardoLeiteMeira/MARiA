@@ -1,11 +1,11 @@
 from notion_client import Client
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
-from .notion_external import NotionExternal
-from .notion_access import NotionAccess
-from .notion_tool import NotionTool
-from .notion_user_data import NotionUserData
-from .notion_authorization_data import NotionAuthorizationData
+from .notion_base_access.notion_external import NotionExternal
+from .notion_base_access.notion_access import NotionAccess
+from .notion_user.notion_tool import NotionTool
+from .notion_user.notion_user_data import NotionUserData
+from .notion_user.notion_authorization_data import NotionAuthorizationData
 
 class NotionFactory:
     def __init__(self):
