@@ -3,9 +3,12 @@ from datetime import datetime
 import urllib.parse
 
 from ..enum import NotionDatabaseEnum, TransactionType
+from .notion_external import NotionExternal
 from .base_template_access import BaseTemplateAccessInterface
 
-class EjFinanceAccess(BaseTemplateAccessInterface):
+from repository.db_models.notion_database_model import NotionDatabaseModel
+
+class SimplesFinanceAccess(BaseTemplateAccessInterface):
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]
@@ -17,7 +20,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             filter_properties=properties,
             sorts=[
                 {
-                    "property": "Data Planejada",# TODO: remover
+                    "property": "Criado em",# TODO: remover
                     "direction": "descending"
                 }
             ]
@@ -44,10 +47,6 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             name_filter = {"property": "Name","title": {"contains": name}}
             filter["and"].append(name_filter)
 
-        if has_paid is not None:
-            status_filter  = {"property": "Status", "status": {'equals': 'Pago' if has_paid else 'Pendente'}}
-            filter["and"].append(status_filter)
-
         if card_account_enter_id is not None:
             enter_in_filter  = {"property": "Entrada em", "relation": {"contains": card_account_enter_id}}
             filter["and"].append(enter_in_filter)
@@ -61,15 +60,15 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             filter["and"].append(category_filter)
 
         if macro_category_id is not None:
-            marco_category_filter  = {"property": "Macro Categorias", "relation": {"contains": macro_category_id}}
+            marco_category_filter  = {"property": "Tipo Saida", "relation": {"contains": macro_category_id}}
             filter["and"].append(marco_category_filter)
         
         if month_id is not None:
-            month_filter  = {"property": "Gestão", "relation": {"contains": month_id}}
+            month_filter  = {"property": "Mês", "relation": {"contains": month_id}}
             filter["and"].append(month_filter)
 
         if transaction_type is not None:
-            transaction_type_filter  = {"property": "Tipo de Transação", "select": {"equals": transaction_type}}
+            transaction_type_filter  = {"property": "Tipo Transação", "select": {"equals": transaction_type}}
             filter["and"].append(transaction_type_filter)
 
         data = self.notion_external.get_database(
@@ -79,7 +78,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             filter=filter,
             sorts=[
                 {
-                    "property": "Data Planejada",# TODO: remover
+                    "property": "Criado em",# TODO: remover
                     "direction": "descending"
                 }
             ]
@@ -99,20 +98,21 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
                 filter_properties=[title_property_id, *property_ids_parsed],
                 filter={
                     'and':[{
-                        'property': 'Data Inicio',
+                        'property': 'MesData',
                             'date': {'on_or_after': f"{year}"},
                         }]}
                 )
             return self.notion_external.process_database_registers(data)
         except Exception as e:
             print(e)
+
     
     def get_current_month(self) -> dict:
         data = self.notion_external.get_database(
             self.databases[NotionDatabaseEnum.MONTHS.value]['id'],
             filter={
                 'and': [{
-                'property': 'GestaoAtual', # TODO remover
+                'property': 'isMesAtual', # TODO remover
                 'formula': {
                     'checkbox': {
                         'equals': True
@@ -173,10 +173,9 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             },
             "properties": {
                 "Name": {"title": [{"text": {"content": name}}]},
-                "Gestão": {"relation": [{"id": month_id}]},
-                "Areas e Categorias": {"relation": [{"id": category_id}]},
-                "Valor planejado": {"number": amount},
-                "Observações": {"rich_text": [{"text": {"content": text}}]}
+                "Mes": {"relation": [{"id": month_id}]},
+                "Categoria": {"relation": [{"id": category_id}]},
+                "Planejado": {"number": amount},
             },
         }
         self.notion_external.create_page(page)
@@ -193,7 +192,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
                         {"text": {"content": name}}
                     ]
                 },
-                "Saldo Inicial": {
+                "Saldo inicial": {
                     "number": initial_balance
                 },
             },
@@ -212,8 +211,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
                         {"text": {"content": name}}
                     ]
                 },
-                "Data Inicio": {"date":{"start": start_date}},
-                "Data Fim": {"date":{"start": finish_date}},
+                "MesData": {"date":{"start": start_date, "end": finish_date}},
             },
         }
         self.notion_external.create_page(page)
@@ -224,7 +222,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             database_id,
             filter={
                 'and': [{
-                'property': 'Gestão', # TODO Remover
+                'property': 'Mes', # TODO Remover
                 'relation': {'contains':month_id}}]
             }    
         )
@@ -246,18 +244,16 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
         properties = {
             **({"Name": {"title": [{"text": {"content": name}}]}} if name is not None else {}),
             **({"Categoria": {"relation": [{"id": category_id}]}} if category_id is not None else {}),
-            **({"Gestão": {"relation": [{"id": month_id}]}} if month_id is not None else {}),
+            **({"Mês": {"relation": [{"id": month_id}]}} if month_id is not None else {}),
             **({"Entrada em": {"relation": [{"id": card_id_enter}]}} if card_id_enter is not None else {}),
             **({"Saida de": {"relation": [{"id": card_id_out}]}} if card_id_out is not None else {}),
-            **({"Macro Categorias": {"relation": [{"id": type_id}]}} if type_id is not None else {}),
+            **({"Tipo Saida": {"relation": [{"id": type_id}]}} if type_id is not None else {}),
             **({"Valor": {"number": amount}} if amount is not None else {}),
-            **({"Data Planejada": {"date": {"start": date}}} if date is not None else {}),
-            **({"Tipo de Transação": {"select": {"name": transaction_type.value}}} if transaction_type is not None else {}),
-            **({'Status': {'status': {'name': 'Pago' if status else 'Pendente'}}} if status is not None else {}),
+            **({"Criado em": {"date": {"start": date}}} if date is not None else {}),
+            **({"Tipo Transação": {"select": {"name": transaction_type.value}}} if transaction_type is not None else {})
         }
         page = {
             "parent": {"type": "database_id","database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
             "properties": properties,
         }
         self.notion_external.create_page(page)
-
