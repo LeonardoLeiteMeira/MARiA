@@ -15,7 +15,8 @@ class NotionAuthorizationApplication:
         self.__notion_factory = notion_factory
 
     async def authorize(self, code: str, user_id: str) -> None:
-        user_auth = await self.__store_notion_authorization(code, user_id)
+        payload = await self.__get_user_notion_auth(code)
+        user_auth = await self.__store_notion_authorization(user_id, payload)
 
         self.__notion_factory.set_user_access_token(user_auth.access_token)
         notion_auth_data = self.__notion_factory.create_notion_authorization_data()
@@ -24,8 +25,7 @@ class NotionAuthorizationApplication:
 
         await self.__user_domain.save_user_notion_databases(user_id, user_databases)
     
-    async def __store_notion_authorization(self,code: str, user_id: str) -> NotionAuthorizationModel:
-        payload = await self.__get_user_notion_auth(code)
+    async def __store_notion_authorization(self, user_id: str, payload) -> NotionAuthorizationModel:
         owner = payload.get("owner", {})
         owner_type = owner.get("type", "workspace")
         owner_id = owner.get(f"{owner_type}_id")
