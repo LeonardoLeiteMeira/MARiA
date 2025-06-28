@@ -1,3 +1,5 @@
+from dto import UserAnswerDataDTO
+from repository.db_models.notion_database_model import NotionDatabaseModel
 from .graph import MariaGraph
 from contextlib import _AsyncGeneratorContextManager
 from langgraph.graph.state import CompiledStateGraph
@@ -21,7 +23,10 @@ class MariaInteraction:
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
             user_notion_databases = await self.__user_domain.get_user_notion_databases_taged(user.id)
-            state_graph = await self.__maria_graph.get_state_graph(user.notion_authorization.access_token, user_notion_databases)
+
+            user_answer_data = self.__get_user_answer_data(user, user_notion_databases)
+            state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
+
             compiled = state_graph.compile(checkpointer=checkpointer)
             result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
             messages = result["messages"]
@@ -36,3 +41,10 @@ class MariaInteraction:
         else:
             current_thread = user_threads[0]
         return current_thread
+    
+    def __get_user_answer_data(self, user: UserModel, user_notion_databases: list[NotionDatabaseModel]) -> UserAnswerDataDTO:
+        return UserAnswerDataDTO(
+            access_token=user.notion_authorization.access_token,
+            user_databases=user_notion_databases,
+            use_default_template=user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
+        )

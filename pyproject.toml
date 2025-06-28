@@ -42,6 +42,7 @@ packages = [
     {include = "config", from = "src"},
     {include = "secrets_functions", from = "src"},
     {include = "external", from = "src"},
+    {include = "dto", from = "src"},
 ]
 
 

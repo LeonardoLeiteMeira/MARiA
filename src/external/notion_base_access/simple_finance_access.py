@@ -8,7 +8,7 @@ from .base_template_access import BaseTemplateAccessInterface
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 
-class SimplesFinanceAccess(BaseTemplateAccessInterface):
+class SimpleFinanceAccess(BaseTemplateAccessInterface):
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]

@@ -1,10 +1,10 @@
 from datetime import datetime
 
-from external.notion_base_access.ej_finance_access import EjFinanceAccess
+from external.notion_base_access import BaseTemplateAccessInterface
 
 class NotionTool:
-    def __init__(self, ej_finance_access: EjFinanceAccess):
-        self.__ej_finance_access = ej_finance_access
+    def __init__(self, template_access: BaseTemplateAccessInterface):
+        self.__template_access = template_access
 
     async def create_income(
         self, name: str,
@@ -14,7 +14,7 @@ class NotionTool:
         card_id: str,
         hasPaid: bool
     ):
-        self.__ej_finance_access.create_in_transaction(
+        self.__template_access.create_in_transaction(
             name = name,
             month_id = month_id,
             amount = amount,
@@ -32,7 +32,7 @@ class NotionTool:
         marco_category_id: str,
         hasPaid: bool
     ):
-        self.__ej_finance_access.create_out_transaction(
+        self.__template_access.create_out_transaction(
             name,
             month_id,
             amount,
@@ -53,7 +53,7 @@ class NotionTool:
         out_of: str,
         hasPaid: bool
     ):
-        self.__ej_finance_access.create_transfer_transaction(
+        self.__template_access.create_transfer_transaction(
             name,
             month_id,
             amount,
@@ -64,10 +64,10 @@ class NotionTool:
         )
 
     async def create_card(self, name: str, initial_balance: float):
-        self.__ej_finance_access.create_card(name, initial_balance)
+        self.__template_access.create_card(name, initial_balance)
 
     async def create_month(self, name:str, start_date: str, finish_date: str):
-        self.__ej_finance_access.create_month(
+        self.__template_access.create_month(
             name,
             start_date,
             finish_date
@@ -80,7 +80,7 @@ class NotionTool:
         amount: str,
         text: str
     ):
-        self.__ej_finance_access.create_planning(
+        self.__template_access.create_planning(
             name,
             month_id,
             category_id,
@@ -89,17 +89,17 @@ class NotionTool:
         )
 
     async def delete_data(self, id: str):
-        self.__ej_finance_access.delete_page(id)
+        self.__template_access.delete_page(id)
 
     async def get_month(self, month_id: str) -> dict:
-        month = self.__ej_finance_access.get_page_by_id(
+        month = self.__template_access.get_page_by_id(
             month_id,
             ['Planejamentos', 'This (Não alterar)', 'Transações']
         )
         return month
     
     async def get_plan_by_month(self, month_id) -> dict:
-        return self.__ej_finance_access.get_planning_by_month(month_id)
+        return self.__template_access.get_planning_by_month(month_id)
     
     async def get_transactions(
         self, 
@@ -114,7 +114,7 @@ class NotionTool:
         cursor: str,
         page_size: int,
     ) -> dict:
-        return self.__ej_finance_access.new_get_transactions(
+        return self.__template_access.new_get_transactions(
             name,
             has_paid,
             card_account_enter_id,

@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import urllib.parse
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
@@ -16,6 +16,69 @@ class BaseTemplateAccessInterface(ABC):
             for user_db in user_databases
         }
         self.cache = {}
+
+    @abstractmethod
+    def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
+        pass
+
+    @abstractmethod
+    def new_get_transactions(
+        self,
+        name: str|None,
+        has_paid: bool|None,
+        card_account_enter_id: str|None,
+        card_account_out_id: str|None,
+        category_id: str|None,
+        macro_category_id: str|None,
+        month_id: str|None,
+        transaction_type: str|None,
+        cursor: str| None,
+        page_size: int
+    ) -> dict:
+        pass
+
+    @abstractmethod
+    def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
+        pass
+
+    @abstractmethod
+    def get_current_month(self) -> dict:
+        pass
+    
+    @abstractmethod
+    def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
+        pass
+
+    @abstractmethod
+    def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True):
+        pass
+
+    @abstractmethod
+    def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True):
+        pass
+    
+    @abstractmethod
+    def create_planning(
+        self,
+        name,
+        month_id,
+        category_id,
+        amount,
+        text 
+    ):
+        pass
+
+    @abstractmethod
+    def create_card(self, name: str, initial_balance: float):
+        pass
+
+    @abstractmethod
+    def create_month(self, name: str, start_date:str, finish_date:str):
+        pass
+
+    @abstractmethod
+    def get_planning_by_month(self, month_id) -> dict:
+        pass
     
     def __get_properties(self, database: NotionDatabaseEnum) -> dict:
         if 'properties' in self.databases[database.value]:

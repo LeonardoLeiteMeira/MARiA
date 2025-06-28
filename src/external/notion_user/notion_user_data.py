@@ -1,5 +1,5 @@
 from external.enum import NotionDatabaseEnum, UserDataTypes
-from external import EjFinanceAccess
+from external import BaseTemplateAccessInterface
 
 
 class UserData:
@@ -10,8 +10,8 @@ class UserData:
     is_loaded: bool
 
 class NotionUserData:
-    def __init__(self, ej_finance_access: EjFinanceAccess):
-        self.ej_finance_access = ej_finance_access
+    def __init__(self, template_access: BaseTemplateAccessInterface):
+        self.template_access = template_access
         self.user_data = UserData()
         self.user_data.is_loaded = False
         self.__class__._initialized = True
@@ -20,10 +20,10 @@ class NotionUserData:
         if self.user_data.is_loaded:
             return self.user_data
 
-        self.user_data.cards = self.ej_finance_access.get_simple_data(NotionDatabaseEnum.CARDS)
-        self.user_data.categories = self.ej_finance_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
-        self.user_data.macroCategories = self.ej_finance_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
-        self.user_data.months = self.ej_finance_access.get_simple_data(NotionDatabaseEnum.MONTHS)
+        self.user_data.cards = self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
+        self.user_data.categories = self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
+        self.user_data.macroCategories = self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
+        self.user_data.months = self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
 
         self.user_data.is_loaded = True
 
