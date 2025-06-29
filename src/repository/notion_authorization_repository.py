@@ -19,7 +19,7 @@ class NotionAuthorizationRepository(BaseRepository):
             .values(
                 user_id=auth.user_id,
                 bot_id=auth.bot_id,
-                access_token=auth._access_token,
+                _access_token=auth._access_token,
                 workspace_id=auth.workspace_id,
                 workspace_name=auth.workspace_name,
                 workspace_icon=auth.workspace_icon,
