@@ -30,18 +30,32 @@ class NotionAuthorizationApplication:
         owner_type = owner.get("type", "workspace")
         owner_id = owner.get(f"{owner_type}_id")
 
-        record = NotionAuthorizationModel(
-            id=uuid.uuid4(),
-            user_id=user_id,
-            bot_id=payload.get("bot_id"),
-            workspace_id=payload.get("workspace_id"),
-            workspace_name=payload.get("workspace_name"),
-            workspace_icon=payload.get("workspace_icon"),
-            owner_type=OwnerType(owner_type),
-            owner_id=owner_id,
-        )
-        record.access_token = payload.get("access_token")
-        await self.__notion_auth_domain.save(record)
+        bot_id = payload.get("bot_id")
+        record = await self.__notion_auth_domain.get_by_bot_id(bot_id)
+
+        if record:
+            record.user_id = user_id
+            record.workspace_id = payload.get("workspace_id")
+            record.workspace_name = payload.get("workspace_name")
+            record.workspace_icon = payload.get("workspace_icon")
+            record.owner_type = OwnerType(owner_type)
+            record.owner_id = owner_id
+            record.access_token = payload.get("access_token")
+            await self.__notion_auth_domain.update(record)
+        else:
+            record = NotionAuthorizationModel(
+                id=uuid.uuid4(),
+                user_id=user_id,
+                bot_id=bot_id,
+                workspace_id=payload.get("workspace_id"),
+                workspace_name=payload.get("workspace_name"),
+                workspace_icon=payload.get("workspace_icon"),
+                owner_type=OwnerType(owner_type),
+                owner_id=owner_id,
+            )
+            record.access_token = payload.get("access_token")
+            await self.__notion_auth_domain.save(record)
+
         return record
 
     async def __get_user_notion_auth(self, auth_code:str):
