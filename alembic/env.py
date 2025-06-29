@@ -21,7 +21,7 @@ from config import get_settings
 config = context.config
 
 settings = get_settings()
-database_conn_string = settings.database_connection_uri_maria_new
+database_conn_string = settings.database_connection_uri_maria_async
 config.set_main_option("sqlalchemy.url", database_conn_string)
 
 # Interpret the config file for Python logging.
