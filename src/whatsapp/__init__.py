@@ -65,7 +65,7 @@
 #     async with checkpointer_manager as checkpointer:
 #         await checkpointer.setup()
         
-#         graph_builder = await mariaGraph.build_graph()
+#         graph_builder = await mariaGraph.get_state_graph()
 #         app.state.graph = graph_builder.compile(checkpointer=checkpointer)
 #         app.state.checkpointer = checkpointer
 #         yield

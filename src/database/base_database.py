@@ -20,7 +20,7 @@ class BaseDatabase:
 
     def __start_engine(self):
         settings = get_settings()
-        database_conn_string = settings.database_connection_uri_maria_new
+        database_conn_string = settings.database_connection_uri_maria_async
 
         self.engine = create_async_engine(
             database_conn_string,

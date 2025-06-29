@@ -1,20 +1,35 @@
+from dto import UserAnswerDataDTO
+from repository.db_models.notion_database_model import NotionDatabaseModel
+from .graph import MariaGraph
+from contextlib import _AsyncGeneratorContextManager
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
 from domain import UserDomain
 from repository import UserModel, ThreadModel
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 
 class MariaInteraction:
-    def __init__(self, graph: CompiledStateGraph, user_domain: UserDomain):
-        self.__graph = graph
+    def __init__(self, user_domain: UserDomain, maria_graph: MariaGraph, checkpointer_manager: _AsyncGeneratorContextManager[AsyncPostgresSaver]):
         self.__user_domain = user_domain
+        self.__checkpointer = checkpointer_manager
+        self.__maria_graph = maria_graph
 
     async def get_maria_answer(self, user: UserModel, user_input: str) -> str:
         current_thread = await self.__get_current_thread(user.id)
         thread_id_str = str(current_thread.id)
         config = {"configurable": {"thread_id": thread_id_str}}
         user_input_with_name = f"{user.name}: {user_input}"
-        result = await self.__graph.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
-        messages = result["messages"]
+
+        async with self.__checkpointer as checkpointer:
+            await checkpointer.setup()
+            user_notion_databases = await self.__user_domain.get_user_notion_databases_taged(user.id)
+
+            user_answer_data = self.__get_user_answer_data(user, user_notion_databases)
+            state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
+
+            compiled = state_graph.compile(checkpointer=checkpointer)
+            result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
+            messages = result["messages"]
 
         resp = messages[-1].content
         return resp
@@ -26,3 +41,10 @@ class MariaInteraction:
         else:
             current_thread = user_threads[0]
         return current_thread
+    
+    def __get_user_answer_data(self, user: UserModel, user_notion_databases: list[NotionDatabaseModel]) -> UserAnswerDataDTO:
+        return UserAnswerDataDTO(
+            access_token=user.notion_authorization.access_token,
+            user_databases=user_notion_databases,
+            use_default_template=user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
+        )

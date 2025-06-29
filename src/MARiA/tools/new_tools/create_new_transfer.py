@@ -3,28 +3,32 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from MARiA.notion_repository import NotionUserData, notion_user_data, notion_access
-from MARiA.notion_repository.notion_user_data import UserDataTypes
 from pydantic import create_model, Field
-from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
+
+from MARiA.tools.new_tools.tool_interface import ToolInterface
+from external import NotionUserData, NotionTool
+from external.enum import UserDataTypes
+
 
 class CreateNewTransfer(BaseTool, ToolInterface):
     name: str = "criar_nova_transferencia"
     description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
     args_schema: Type[BaseModel] = None
-    _notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self._notion_user_data = notion_user_data
+        self.__notion_user_data = notion_user_data
+        self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateNewTransfer':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewTransfer':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
@@ -61,7 +65,7 @@ class CreateNewTransfer(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewTransfer(notion_user_data=notion_user_data)
+        tool = CreateNewTransfer(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -75,11 +79,11 @@ class CreateNewTransfer(BaseTool, ToolInterface):
             out_of = parms['args']['out_of']
             month = parms['args']['month']
 
-            month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            enter_in = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
-            out_of = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
+            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+            enter_in = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
+            out_of = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
 
-            notion_access.create_transfer_transaction(
+            await self.__notion_tool.create_transfer(
                 name,
                 month_id,
                 amount,
@@ -98,24 +102,24 @@ class CreateNewTransfer(BaseTool, ToolInterface):
                 tool_call_id=parms['id'],
             )
         
-if __name__ == "__main__":
+# if __name__ == "__main__":
 
-    import asyncio
+#     import asyncio
 
-    async def test():
-        tool = await CreateNewTransfer.instantiate_tool(notion_user_data)
-        await tool.ainvoke(
-            {
-                'args': {
-                    'name':'Teste',
-                    'amount':400,
-                    'date':'2025-05-23',
-                    'card_or_account':'NuConta',
-                    'category':'Diversos',
-                    'macro_category':'Não Essencial',
-                    'month':'2025 - Maio',
-                }
-            },
-            {}
-        )
-    asyncio.run(test())
+#     async def test():
+#         tool = await CreateNewTransfer.instantiate_tool(notion_user_data)
+#         await tool.ainvoke(
+#             {
+#                 'args': {
+#                     'name':'Teste',
+#                     'amount':400,
+#                     'date':'2025-05-23',
+#                     'card_or_account':'NuConta',
+#                     'category':'Diversos',
+#                     'macro_category':'Não Essencial',
+#                     'month':'2025 - Maio',
+#                 }
+#             },
+#             {}
+#         )
+#     asyncio.run(test())

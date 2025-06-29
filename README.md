@@ -27,7 +27,7 @@ She can create new transactions and read diferents notion databases.
 - [x] Update de informação
 - [x] Fazer um planejamento
 
-- [ ] Escrever4 aqui proximos passos
+- [ ] Escrever aqui proximos passos
 
 
 

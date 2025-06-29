@@ -10,8 +10,8 @@ class ThreadModel(Base):
 
     id:Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
     user_id:Mapped[str] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
-    created_at:Mapped[datetime] = mapped_column(TIMESTAMP)
-    updated_at:Mapped[datetime] = mapped_column(TIMESTAMP) 
+    created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
+    updated_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now, onupdate=datetime.now) 
 
     def __repr__(self):
         return f"Id:{self.id} - UserId{self.user_id}"

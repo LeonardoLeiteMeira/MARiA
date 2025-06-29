@@ -3,8 +3,8 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from MARiA.notion_repository import NotionUserData, notion_user_data, notion_access
-from MARiA.notion_repository.notion_user_data import UserDataTypes
+from external import NotionTool, NotionUserData
+from external.enum import UserDataTypes
 from pydantic import create_model, Field
 from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
@@ -13,18 +13,20 @@ class CreateNewIncome(BaseTool, ToolInterface):
     name: str = "criar_nova_transacao_de_entrada"
     description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
     args_schema: Type[BaseModel] = None
-    _notion_user_data: NotionUserData = PrivateAttr()
+    __notion_user_data: NotionUserData = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, **data):
+    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self._notion_user_data = notion_user_data
+        self.__notion_user_data = notion_user_data
+        self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData) -> 'CreateNewIncome':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewIncome':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
@@ -53,7 +55,7 @@ class CreateNewIncome(BaseTool, ToolInterface):
             ),
         )
 
-        tool = CreateNewIncome(notion_user_data=notion_user_data)
+        tool = CreateNewIncome(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -66,10 +68,10 @@ class CreateNewIncome(BaseTool, ToolInterface):
             month = parms['args']['month']
             hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
 
-            month_id = await self._notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_id = await self._notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
+            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+            card_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
 
-            notion_access.create_in_transaction(
+            await self.__notion_tool.create_income(
                 name = name,
                 month_id = month_id,
                 amount = amount,
