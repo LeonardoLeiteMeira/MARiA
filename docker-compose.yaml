@@ -18,8 +18,9 @@ services:
     env_file:
       - .env
     depends_on:
-      evolution-api:
-        condition: service_healthy 
+      - evolution-api
+    #   evolution-api:
+    #     condition: service_healthy 
     restart: always
     ports:
       - "8000:8000"
