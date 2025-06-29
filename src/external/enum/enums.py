@@ -8,11 +8,6 @@ class NotionDatabaseEnum(Enum):
     MACRO_CATEGORIES = "types"
     PLANNING = "planning"
 
-class TransactionType(Enum):
-    INCOME = 'Entrada'
-    OUTCOME = 'Saída'
-    TRANSFER = 'Movimentação'
-
 class UserDataTypes(Enum):
     CATEGORIES = "categories"
     MACRO_CATEGORIES= "macroCategories"

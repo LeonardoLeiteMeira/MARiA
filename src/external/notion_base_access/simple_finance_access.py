@@ -2,13 +2,22 @@ from enum import Enum
 from datetime import datetime
 import urllib.parse
 
-from ..enum import NotionDatabaseEnum, TransactionType
+from ..enum import NotionDatabaseEnum
 from .notion_external import NotionExternal
 from .base_template_access import BaseTemplateAccessInterface
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 
+class TransactionType(Enum):
+    INCOME = 'Entrada'
+    OUTCOME = 'Saida'
+    TRANSFER = 'Movimentação Interna'
+    PAY_CREDIT_CARD = 'Pagar fatura cartão'
+
 class SimpleFinanceAccess(BaseTemplateAccessInterface):
+    def get_transaction_enum(self):
+        return TransactionType
+
     def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]

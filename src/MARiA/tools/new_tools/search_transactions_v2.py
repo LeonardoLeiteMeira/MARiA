@@ -7,7 +7,7 @@ from pydantic import create_model, Field, PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionUserData, NotionTool
-from external.enum import TransactionType, UserDataTypes
+from external.enum import UserDataTypes
 
 class SearchTransactionV2(BaseTool, ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
@@ -28,6 +28,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'SearchTransactionV2':
         user_data = await notion_user_data.get_user_base_data()
+        transaction_types = notion_tool.ger_transaction_types()
 
         from enum import Enum
         CardEnum = Enum(
@@ -72,7 +73,7 @@ class SearchTransactionV2(BaseTool, ToolInterface):
                 Field(..., description="Filtrar o Mês"),
             ),
             transaction_type=(
-                TransactionType|None,
+                transaction_types | None,
                 Field(..., description="Filtrar o tipo de transação"),
             ),
             cursor=(str | None, Field(..., description="Ao fazer uma busca, se tiver mais registros esse atributo podera ser retornado, e seja solicitado mais dados para a mesma consulta, envie esse cursor junto para pegar a proxima pagina.")),

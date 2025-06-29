@@ -1,1 +1,1 @@
-from .enums import NotionDatabaseEnum, TransactionType, UserDataTypes
+from .enums import NotionDatabaseEnum, UserDataTypes

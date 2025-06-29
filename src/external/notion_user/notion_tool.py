@@ -126,3 +126,6 @@ class NotionTool:
             cursor,
             page_size
         )
+    
+    def ger_transaction_types(self):
+        return self.__template_access.get_transaction_enum()

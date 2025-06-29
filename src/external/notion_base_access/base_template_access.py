@@ -3,7 +3,7 @@ import urllib.parse
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 from .notion_external import NotionExternal
-from ..enum import NotionDatabaseEnum, TransactionType
+from ..enum import NotionDatabaseEnum
 
 
 class BaseTemplateAccessInterface(ABC):
@@ -35,6 +35,10 @@ class BaseTemplateAccessInterface(ABC):
         cursor: str| None,
         page_size: int
     ) -> dict:
+        pass
+
+    @abstractmethod
+    def get_transaction_enum(self):
         pass
 
     @abstractmethod
