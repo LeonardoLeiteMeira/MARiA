@@ -24,6 +24,7 @@ class MessageApplication:
 
         user = await self.__user_domain.get_user_by_phone_number(phone_number)
         if not user:
+            print(f"{phone_number}: user_name")
             await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')
             return
         
