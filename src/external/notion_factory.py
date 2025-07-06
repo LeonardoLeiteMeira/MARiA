@@ -1,4 +1,4 @@
-from notion_client import Client
+from notion_client import AsyncClient
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 from .notion_base_access.notion_external import NotionExternal
@@ -58,7 +58,7 @@ class NotionFactory:
 
     def __create_access_classes(self):
         if self.__notion_client == None:
-            self.__notion_client = Client(auth=self.__access_token)
+            self.__notion_client = AsyncClient(auth=self.__access_token)
 
         if self.__notion_external == None:
             self.__notion_external = NotionExternal(self.__notion_client)

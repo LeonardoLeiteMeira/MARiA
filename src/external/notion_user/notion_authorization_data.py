@@ -5,4 +5,4 @@ class NotionAuthorizationData:
         self.__notion_external = notion_external
 
     async def get_all_databases(self):
-        return self.__notion_external.get_all_databases()
+        return await self.__notion_external.get_all_databases()
