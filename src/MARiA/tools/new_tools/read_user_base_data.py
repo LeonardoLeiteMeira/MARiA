@@ -10,7 +10,7 @@ from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 from .tool_interface import ToolInterface
 
-class ReadUserBaseData(BaseTool, ToolInterface):
+class ReadUserBaseData(ToolInterface):
     name: str = "ler_dados_base_do_usuario"
     description: str = "Acesso a dados como, categorias, meses, cartoes, constas e mais. As informações cadastradas pelo usuário são acessíveis por aqui."
     args_schema: Type[BaseModel] = None

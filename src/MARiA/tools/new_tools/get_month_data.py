@@ -10,7 +10,7 @@ from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionTool, NotionUserData
 from external.enum import UserDataTypes
 
-class GetMonthData(BaseTool, ToolInterface):
+class GetMonthData(ToolInterface):
     name: str = "buscar_dados_mes"
     description: str = "Busca todos os dados de um mês especifico. Inclui os totais planejado, gasto, receitas, valores previstos e concluidos e mais."
     args_schema: Type[BaseModel] = None

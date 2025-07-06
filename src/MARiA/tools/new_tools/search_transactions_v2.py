@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
@@ -9,7 +8,7 @@ from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 
-class SearchTransactionV2(BaseTool, ToolInterface):
+class SearchTransactionV2(ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
     description: str = "Fazer busca de transacoes com base nas informacoes que o usuario passar. Use apenas as informações que o usuário passar, o que ele não passar deixe como None"
     args_schema: Type[BaseModel] = None

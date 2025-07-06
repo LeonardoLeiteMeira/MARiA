@@ -9,7 +9,7 @@ from pydantic import PrivateAttr
 from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionUserData, NotionTool
 
-class CreateNewMonth(BaseTool, ToolInterface):
+class CreateNewMonth(ToolInterface):
     name: str = "criar_novo_mes"
     description: str = "Cria um novo mes para realizar a gestão financeira."
     args_schema: Type[BaseModel] = None

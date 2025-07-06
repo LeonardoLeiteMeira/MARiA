@@ -11,7 +11,7 @@ from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 
 
-class CreateNewTransfer(BaseTool, ToolInterface):
+class CreateNewTransfer(ToolInterface):
     name: str = "criar_nova_transferencia"
     description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
     args_schema: Type[BaseModel] = None
