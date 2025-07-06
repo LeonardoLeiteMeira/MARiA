@@ -5,6 +5,3 @@ from langchain_core.messages import HumanMessage
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
-    final_Trial_messages: Annotated[list, add_messages]
-    is_trial: bool
-    user_input: HumanMessage
