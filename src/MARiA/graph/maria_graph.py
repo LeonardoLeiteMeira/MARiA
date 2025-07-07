@@ -1,22 +1,26 @@
 from langgraph.graph import StateGraph, END, START
+from langchain_core.messages import SystemMessage
 
 from MARiA.agents import AgentBase
 from dto import UserAnswerDataDTO
 from .state import State
 
 class MariaGraph:
-    def __init__(self, agent: AgentBase):
+    def __init__(self, agent: AgentBase, initial_prompt: str):
         self.main_agent = agent
+        self.prompt = initial_prompt
     
     async def get_state_graph(self, user_answer_data: UserAnswerDataDTO) -> StateGraph:
         await self.main_agent.create_agent(user_answer_data)
 
         state_graph = StateGraph(State)
         
+        state_graph.add_node("start_node", self.__start_message)
         state_graph.add_node("llm_node", self.__llm_node)
         state_graph.add_node("tools", self.__tool_node)
 
-        state_graph.add_edge(START, "llm_node")
+        state_graph.add_edge(START, "start_node")
+        state_graph.add_edge("start_node", "llm_node")
         state_graph.add_edge('llm_node', END)
         state_graph.add_edge('tools', 'llm_node')
         state_graph.add_conditional_edges(
@@ -26,6 +30,14 @@ class MariaGraph:
         )
 
         return state_graph
+    
+    async def __start_message(self, state: State):
+        messages = state["messages"]
+        if len(messages) != 0:
+            return {"messages": [state["user_input"]]}
+        
+        system = SystemMessage(self.prompt)
+        return {"messages": [system, state["user_input"]]}
 
     async def __llm_node(self, state: State):
         """ Node with chatbot logic """
@@ -50,10 +62,6 @@ class MariaGraph:
         return {"messages": outputs}
     
     def __router(self, state: State):
-        """
-        Use in the conditional_edge to route to the ToolNode if the last message
-        has tool calls. Otherwise, route to the end.
-        """
         if isinstance(state, list):
             ai_message = state[-1]
         elif messages := state.get("messages", []):

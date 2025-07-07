@@ -46,7 +46,7 @@ class ReadUserBaseData(ToolInterface):
                 resp.append(getattr(data, user_data))
 
             return ToolMessage(
-                content=resp,
+                content={resp},
                 tool_call_id=parms['id'],
             )
         except Exception as e:

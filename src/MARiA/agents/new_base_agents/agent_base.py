@@ -10,13 +10,11 @@ from langchain.chat_models import init_chat_model
 
 class AgentBase:
     def __init__(self, 
-            prompt: str,
             tools:list[ToolInterface],
             notion_factory: NotionFactory,
             model: str | None = None
         ):
         self.model_name = model or "openai:gpt-4.1" 
-        self.prompt = prompt
         self.tools = tools
         self.tools_by_name = {}
         self.__notion_factory = notion_factory
@@ -35,5 +33,5 @@ class AgentBase:
             self.tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
 
-        llm = init_chat_model(self.model_name)
+        llm = init_chat_model(self.model_name, temperature=0.2)
         self.agent = llm.bind_tools(instanciated_tools)

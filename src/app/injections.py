@@ -1,8 +1,6 @@
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import Callable
 
 from fastapi import Depends
-from langgraph.graph.state import CompiledStateGraph
-from notion_client import Client
 
 from application import MessageApplication, NotionAuthorizationApplication
 from domain import UserDomain, NotionAuthorizationDomain
@@ -11,7 +9,7 @@ from MARiA.agents import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2)
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
 from external import NotionFactory
@@ -51,9 +49,9 @@ def create_agente_base() -> Callable[[], AgentBase]:
             GetPlanByMonth,
             DeleteData,
             ReadUserBaseData,
+            GetMonthData
         ]
         agent = AgentBase(
-            prompt=prompt_main_agent,
             tools=tools,
             notion_factory=notion_factory
         )
@@ -62,7 +60,7 @@ def create_agente_base() -> Callable[[], AgentBase]:
 
 def create_maria_graph() -> Callable[[], MariaGraph]:
     def dependency(agent_base = Depends(create_agente_base())):
-        return MariaGraph(agent_base)
+        return MariaGraph(agent_base, prompt_main_agent)
     return dependency
 
 
