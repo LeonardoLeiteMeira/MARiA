@@ -9,7 +9,7 @@ from pydantic import create_model, Field
 from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
 
-class CreateNewIncome(BaseTool, ToolInterface):
+class CreateNewIncome(ToolInterface):
     name: str = "criar_nova_transacao_de_entrada"
     description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
     args_schema: Type[BaseModel] = None

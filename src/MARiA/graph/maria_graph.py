@@ -1,49 +1,73 @@
-from typing import Literal
-from langgraph.graph import StateGraph, END
-from langgraph.types import Command
-from langchain_core.messages import SystemMessage, HumanMessage
+from langgraph.graph import StateGraph, END, START
+from langchain_core.messages import SystemMessage
+
 from MARiA.agents import AgentBase
 from dto import UserAnswerDataDTO
-from repository import NotionDatabaseModel
 from .state import State
 
 class MariaGraph:
-    def __init__(self, agent: AgentBase):
+    def __init__(self, agent: AgentBase, initial_prompt: str):
         self.main_agent = agent
+        self.prompt = initial_prompt
     
     async def get_state_graph(self, user_answer_data: UserAnswerDataDTO) -> StateGraph:
         await self.main_agent.create_agent(user_answer_data)
 
         state_graph = StateGraph(State)
         
-        state_graph.add_node("start_router", self.__start_router)
-        # state_graph.add_node("verify_feedback_state", self.__verify_feedback_state)
-        state_graph.add_node("chatbot", self.__chatbot)
-        # state_graph.add_node("collect_email", self.__collect_email)
-        state_graph.add_node("finish", self.__finish)
+        state_graph.add_node("start_node", self.__start_message)
+        state_graph.add_node("llm_node", self.__llm_node)
+        state_graph.add_node("tools", self.__tool_node)
 
-        state_graph.set_entry_point("start_router") 
-        state_graph.set_finish_point("finish")
+        state_graph.add_edge(START, "start_node")
+        state_graph.add_edge("start_node", "llm_node")
+        state_graph.add_edge('llm_node', END)
+        state_graph.add_edge('tools', 'llm_node')
+        state_graph.add_conditional_edges(
+            'llm_node',
+            self.__router,
+            {'tools': 'tools', END: END}
+        )
 
         return state_graph
+    
+    async def __start_message(self, state: State):
+        messages = state["messages"]
+        if len(messages) != 0:
+            return {"messages": [state["user_input"]]}
         
-    async def __start_router(self, state: State) -> Command[Literal["chatbot"]]:
-        """ Node to start graph """
-        last_user_msg: HumanMessage = state["user_input"]
-        return Command(goto="chatbot", update={"messages": last_user_msg})
+        system = SystemMessage(self.prompt)
+        return {"messages": [system, state["user_input"]]}
 
-    async def __chatbot(self, state: State) -> Command[Literal[END]]: # type: ignore
+    async def __llm_node(self, state: State):
         """ Node with chatbot logic """
         messages = state["messages"]
-        chain_output = await self.main_agent.agent.ainvoke({"messages": messages})
-        new_messages: list = chain_output["messages"]
-        return Command(
-            goto=END,
-            update={
-                "messages": new_messages,
-            }
-        )
+        chain_output = await self.main_agent.agent.ainvoke(messages)
+        return {"messages": [chain_output]}
+
+    async def __tool_node(self, state: State):
+        if messages := state.get("messages", []):
+            message = messages[-1]
+        else:
+            raise ValueError("No message found in input")
+        outputs = []
+        for tool_call in message.tool_calls:
+            tool_to_call = self.main_agent.tools_by_name[tool_call["name"]]
+            tool_result = await tool_to_call.ainvoke(
+                {'args': tool_call["args"], 'id': tool_call["id"]}
+            )
+            outputs.append(
+                tool_result
+            )
+        return {"messages": outputs}
     
-    async def __finish(self, state:State):
-        """ Final Node of the graph """
-        return state
+    def __router(self, state: State):
+        if isinstance(state, list):
+            ai_message = state[-1]
+        elif messages := state.get("messages", []):
+            ai_message = messages[-1]
+        else:
+            raise ValueError(f"No messages found in input state to tool_edge: {state}")
+        if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
+            return "tools"
+        return END

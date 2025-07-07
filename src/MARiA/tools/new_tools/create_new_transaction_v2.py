@@ -11,7 +11,7 @@ from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 
 
-class CreateNewOutTransactionV2(BaseTool, ToolInterface):
+class CreateNewOutTransactionV2(ToolInterface):
     name: str = "criar_nova_transacao_de_saida"
     description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
     args_schema: Type[BaseModel] = None

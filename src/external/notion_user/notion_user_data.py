@@ -20,10 +20,10 @@ class NotionUserData:
         if self.user_data.is_loaded:
             return self.user_data
 
-        self.user_data.cards = self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
-        self.user_data.categories = self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
-        self.user_data.macroCategories = self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
-        self.user_data.months = self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
+        self.user_data.cards = await self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
+        self.user_data.categories = await self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
+        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
+        self.user_data.months = await self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
 
         self.user_data.is_loaded = True
 

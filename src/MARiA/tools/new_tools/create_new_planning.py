@@ -10,7 +10,7 @@ from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionTool, NotionUserData
 from external.enum import UserDataTypes
 
-class CreateNewPlanning(BaseTool, ToolInterface):
+class CreateNewPlanning(ToolInterface):
     name: str = "criar_novo_planejamento"
     description: str = "Criar um novo planejamento associado um mes"
     args_schema: Type[BaseModel] = None

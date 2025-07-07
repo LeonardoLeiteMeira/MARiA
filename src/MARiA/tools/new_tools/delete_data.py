@@ -10,7 +10,7 @@ from external import NotionUserData, NotionTool
 from .tool_interface import ToolInterface
 
 
-class DeleteData(BaseTool, ToolInterface):
+class DeleteData(ToolInterface):
     name: str = "deletar_dados_solicitado"
     description: str = "Apaga qualquer informação solicitada, basta passar o Id corretamente. Pode ser utilizada para atualizar também, apagando o registro anterior e criando um novo atualizado."
     args_schema: Type[BaseModel] = None

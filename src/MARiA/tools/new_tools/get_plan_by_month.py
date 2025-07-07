@@ -10,7 +10,7 @@ from MARiA.tools.new_tools.tool_interface import ToolInterface
 from external import NotionUserData, NotionTool
 from external.enum import UserDataTypes
 
-class GetPlanByMonth(BaseTool, ToolInterface):
+class GetPlanByMonth(ToolInterface):
     name: str = "buscar_planejamento_por_mes"
     description: str = "Busca um planejamento de um mes em especifico."
     args_schema: Type[BaseModel] = None

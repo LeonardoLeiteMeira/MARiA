@@ -9,7 +9,7 @@ from pydantic import PrivateAttr
 from external import NotionTool, NotionUserData
 from .tool_interface import ToolInterface
 
-class CreateCard(BaseTool, ToolInterface):
+class CreateCard(ToolInterface):
     name: str = "criar_nova_conta_ou_cartao"
     description: str = "Cria uma nova conta ou cartão para registrar entras e saidas"
     args_schema: Type[BaseModel] = None

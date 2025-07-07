@@ -28,6 +28,7 @@ class MariaInteraction:
             state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
 
             compiled = state_graph.compile(checkpointer=checkpointer)
+
             result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
             messages = result["messages"]
 
