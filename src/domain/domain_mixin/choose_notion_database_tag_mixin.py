@@ -1,5 +1,5 @@
-from external.models.notion_base_database import NotionBaseDatabase
-from external.enum import NotionDatabaseEnum
+from external.notion.models.notion_base_database import NotionBaseDatabase
+from external.notion.enum import NotionDatabaseEnum
 
 class ChooseNotionDatabaseTagMixin:
     def select_database_tag(self, database: NotionBaseDatabase) -> NotionDatabaseEnum | None:

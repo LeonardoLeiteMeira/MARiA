@@ -5,14 +5,14 @@ from fastapi import Depends
 from application import MessageApplication, NotionAuthorizationApplication
 from domain import UserDomain, NotionAuthorizationDomain
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
-from MARiA.agents import AgentBase, prompt_main_agent
+from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
-from external import NotionFactory
+from external.notion import NotionFactory
 from config import get_settings
 
 from .custom_state import CustomState

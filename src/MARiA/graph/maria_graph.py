@@ -1,9 +1,10 @@
 from langgraph.graph import StateGraph, END, START
 from langchain_core.messages import SystemMessage
 
-from MARiA.agents import AgentBase
-from dto import UserAnswerDataDTO
+from ..agent_base import AgentBase
 from .state import State
+
+from dto import UserAnswerDataDTO
 
 class MariaGraph:
     def __init__(self, agent: AgentBase, initial_prompt: str):
