@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from external import NotionTool, NotionUserData
+from external.notion import NotionTool, NotionUserData
 from .tool_interface import ToolInterface
 
 class CreateCard(ToolInterface):

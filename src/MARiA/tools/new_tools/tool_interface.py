@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from langchain_core.tools import BaseTool
-from external import NotionTool, NotionUserData
+from external.notion import NotionTool, NotionUserData
 
 class ToolInterface(BaseTool, ABC):
     name: str 

@@ -7,8 +7,8 @@ from pydantic import PrivateAttr
 from pydantic import create_model, Field
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from external import NotionUserData, NotionTool
-from external.enum import UserDataTypes
+from external.notion import NotionUserData, NotionTool
+from external.notion.enum import UserDataTypes
 
 class GetPlanByMonth(ToolInterface):
     name: str = "buscar_planejamento_por_mes"

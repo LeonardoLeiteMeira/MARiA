@@ -1,5 +1,5 @@
 from notion_client import AsyncClient
-from external.models import NotionProperties, NotionBaseDatabase
+from ..models import NotionProperties, NotionBaseDatabase
 
 class NotionExternal:
     def __init__(self, notion_client: AsyncClient):

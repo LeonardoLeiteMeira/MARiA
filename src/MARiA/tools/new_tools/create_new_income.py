@@ -3,8 +3,8 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from external import NotionTool, NotionUserData
-from external.enum import UserDataTypes
+from external.notion import NotionTool, NotionUserData
+from external.notion.enum import UserDataTypes
 from pydantic import create_model, Field
 from MARiA.tools.new_tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr

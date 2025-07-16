@@ -12,7 +12,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
-from external import NotionFactory
+from external.notion import NotionFactory
 from config import get_settings
 
 from .custom_state import CustomState
