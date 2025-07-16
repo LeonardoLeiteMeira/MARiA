@@ -5,8 +5,8 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field, PrivateAttr
 
 from MARiA.tools.new_tools.tool_interface import ToolInterface
-from external import NotionUserData, NotionTool
-from external.enum import UserDataTypes
+from external.notion import NotionUserData, NotionTool
+from external.notion.enum import UserDataTypes
 
 class SearchTransactionV2(ToolInterface):
     name: str = "buscar_transacoes_com_parametros"

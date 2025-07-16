@@ -1,5 +1,5 @@
-from external.enum import NotionDatabaseEnum, UserDataTypes
-from external import BaseTemplateAccessInterface
+from ..enum import NotionDatabaseEnum, UserDataTypes
+from .. import BaseTemplateAccessInterface
 
 
 class UserData:

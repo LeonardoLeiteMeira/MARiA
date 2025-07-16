@@ -6,8 +6,8 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from external import NotionUserData, NotionTool
-from external.enum import UserDataTypes
+from external.notion import NotionUserData, NotionTool
+from external.notion.enum import UserDataTypes
 from .tool_interface import ToolInterface
 
 class ReadUserBaseData(ToolInterface):

@@ -4,7 +4,7 @@ import uuid
 from config import get_settings
 from domain import NotionAuthorizationDomain, UserDomain
 from repository import NotionAuthorizationModel, OwnerType
-from external import NotionFactory
+from external.notion import NotionFactory
 
 
 class NotionAuthorizationApplication:
