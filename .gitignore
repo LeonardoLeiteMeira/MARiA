@@ -16,3 +16,5 @@ Thumbs.db
 compose.env
 
 maria1.pem
+
+/jupyter_test/checkpoint.db
