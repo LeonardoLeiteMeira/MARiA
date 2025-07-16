@@ -6,14 +6,14 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from MARiA.tools.new_tools.tool_interface import ToolInterface
+from MARiA.tools.tool_interface import ToolInterface
 from external.notion import NotionUserData, NotionTool
 from external.notion.enum import UserDataTypes
 
 
-class CreateNewTransfer(ToolInterface):
-    name: str = "criar_nova_transferencia"
-    description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
+class CreateNewOutTransactionV2(ToolInterface):
+    name: str = "criar_nova_transacao_de_saida"
+    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
     args_schema: Type[BaseModel] = None
     __notion_user_data: NotionUserData = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
@@ -28,17 +28,21 @@ class CreateNewTransfer(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewTransfer':
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewOutTransactionV2':
         user_data = await notion_user_data.get_user_base_data()
 
         from enum import Enum
-        EnterInEnum = Enum(
-            "CardInEnum",
+        CardEnum = Enum(
+            "CardEnum",
             {card["Name"].upper(): card["Name"] for card in user_data.cards['data']},
         )
-        OutOfEnum = Enum(
-            "CardInEnum",
-            {card["Name"].upper(): card["Name"] for card in user_data.cards['data']},
+        CategoriesEnum = Enum(
+            "CategoryEnum",
+            {category["Name"].upper(): category["Name"] for category in user_data.categories['data']},
+        )
+        MacroCategoriesEnum = Enum(
+            "macroCategoryEnum",
+            {macro["Name"].upper(): macro["Name"] for macro in user_data.macroCategories['data']},
         )
         MonthsEnum = Enum(
             "MonthEnum",
@@ -50,14 +54,18 @@ class CreateNewTransfer(ToolInterface):
             name=(str, Field(..., description="Nome escolhido para a transação")),
             amount=(float, Field(..., description="Valor da transação")),
             date=(str, Field(..., description="Data ISO da transação")),
-            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. O default é True.")),
-            enter_in=(
-                EnterInEnum,
-                Field(..., description="Para onde o dinheiro está indo. Pode ser uma conta ou um cartão."),
+            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. O default é True")),
+            card_or_account=(
+                CardEnum,
+                Field(..., description="Cartão ou conta utilizada na saída"),
             ),
-            out_of=(
-                OutOfEnum,
-                Field(..., description="Para onde o dinheiro esta indo. Constuma ser sempre uma conta corrente."),
+            category=(
+                CategoriesEnum,
+                Field(..., description="Categoria que classifica essa saída"),
+            ),
+            macro_category=(
+                MacroCategoriesEnum,
+                Field(..., description="Categoria macro da saída"),
             ),
             month=(
                 MonthsEnum,
@@ -65,7 +73,7 @@ class CreateNewTransfer(ToolInterface):
             ),
         )
 
-        tool = CreateNewTransfer(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = CreateNewOutTransactionV2(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -74,22 +82,25 @@ class CreateNewTransfer(ToolInterface):
             name = parms['args']['name']
             amount = parms['args']['amount']
             date = parms['args']['date']
-            hasPaid = parms['args']['hasPaid']
-            enter_in = parms['args']['enter_in']
-            out_of = parms['args']['out_of']
+            card_or_account = parms['args']['card_or_account']
+            category = parms['args']['category']
+            macro_category = parms['args']['macro_category']
             month = parms['args']['month']
+            hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
 
             month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            enter_in = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
-            out_of = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
+            card_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
+            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
+            marco_category_id = await self.__notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
 
-            await self.__notion_tool.create_transfer(
+            await self.__notion_tool.create_expense(
                 name,
                 month_id,
                 amount,
                 date,
-                enter_in,
-                out_of,
+                card_id,
+                category_id,
+                marco_category_id,
                 hasPaid
             )
             return ToolMessage(
@@ -107,7 +118,7 @@ class CreateNewTransfer(ToolInterface):
 #     import asyncio
 
 #     async def test():
-#         tool = await CreateNewTransfer.instantiate_tool(notion_user_data)
+#         tool = await CreateNewOutTransactionV2.instantiate_tool(notion_user_data)
 #         await tool.ainvoke(
 #             {
 #                 'args': {

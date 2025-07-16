@@ -6,7 +6,7 @@ from langchain_core.runnables import RunnableConfig
 from external.notion import NotionTool, NotionUserData
 from external.notion.enum import UserDataTypes
 from pydantic import create_model, Field
-from MARiA.tools.new_tools.tool_interface import ToolInterface
+from MARiA.tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
 
 class CreateNewIncome(ToolInterface):

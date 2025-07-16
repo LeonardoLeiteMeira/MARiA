@@ -6,13 +6,13 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
-from external.notion import NotionUserData, NotionTool
+from MARiA.tools.tool_interface import ToolInterface
+from external.notion import NotionTool, NotionUserData
 from external.notion.enum import UserDataTypes
-from .tool_interface import ToolInterface
 
-class ReadUserBaseData(ToolInterface):
-    name: str = "ler_dados_base_do_usuario"
-    description: str = "Acesso a dados como, categorias, meses, cartoes, constas e mais. As informações cadastradas pelo usuário são acessíveis por aqui."
+class GetMonthData(ToolInterface):
+    name: str = "buscar_dados_mes"
+    description: str = "Busca todos os dados de um mês especifico. Inclui os totais planejado, gasto, receitas, valores previstos e concluidos e mais."
     args_schema: Type[BaseModel] = None
     __notion_user_data: NotionUserData = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
@@ -22,31 +22,42 @@ class ReadUserBaseData(ToolInterface):
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
 
-    def _run(self, name: str, *args, **kwargs) -> ToolMessage:
+    def _run(self, *args, **kwargs) -> ToolMessage:
         pass
 
+
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'ReadUserBaseData':
-        InputModel = create_model(
-            "ReadUserBaseDataInput",
-            user_datas=(list[UserDataTypes], Field(..., description="Dados a serem lidos")),
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'GetMonthData':
+        user_data = await notion_user_data.get_user_base_data()
+
+        from enum import Enum
+        MonthsEnum = Enum(
+            "MonthEnum",
+            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
         )
 
-        tool = ReadUserBaseData(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        InputModel = create_model(
+            "GetMonthInputData",
+            month=(
+                MonthsEnum|None,
+                Field(..., description="Filtrar o Mês"),
+            )
+        )
+
+        tool = GetMonthData(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            user_datas = parms['args']['user_datas']
-            data = await self.__notion_user_data.get_user_base_data()
+            month = parms['args']['month']
 
-            resp = []
-            for user_data in user_datas:
-                resp.append(getattr(data, user_data))
+            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+
+            month = await self.__notion_tool.get_month(month_id)
 
             return ToolMessage(
-                content={resp},
+                content=month,
                 tool_call_id=parms['id'],
             )
         except Exception as e:

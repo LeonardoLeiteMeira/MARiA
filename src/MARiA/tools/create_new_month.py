@@ -3,16 +3,15 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from pydantic import PrivateAttr
 from pydantic import create_model, Field
+from pydantic import PrivateAttr
 
-from MARiA.tools.new_tools.tool_interface import ToolInterface
+from MARiA.tools.tool_interface import ToolInterface
 from external.notion import NotionUserData, NotionTool
-from external.notion.enum import UserDataTypes
 
-class GetPlanByMonth(ToolInterface):
-    name: str = "buscar_planejamento_por_mes"
-    description: str = "Busca um planejamento de um mes em especifico."
+class CreateNewMonth(ToolInterface):
+    name: str = "criar_novo_mes"
+    description: str = "Cria um novo mes para realizar a gestão financeira."
     args_schema: Type[BaseModel] = None
     __notion_user_data: NotionUserData = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
@@ -27,37 +26,32 @@ class GetPlanByMonth(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'GetPlanByMonth':
-        user_data = await notion_user_data.get_user_base_data()
-
-        from enum import Enum
-        MonthsEnum = Enum(
-            "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
-        )
-
+    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewMonth':
         InputModel = create_model(
-            "GetPlanByMonthInput",
-            month=(
-                MonthsEnum|None,
-                Field(..., description="Filtrar o Mês"),
-            )
+            "CreateNewMonthInput",
+            name=(str, Field(..., description="Nome escolhido para a transação")),
+            start_date=(str, Field(..., description="Data referencia de inicio para a gestão do mes. Formato ISO!")),
+            finish_date=(str, Field(..., description="Data referencia de final para a gestão do mes. Formato ISO!")),
         )
 
-        tool = GetPlanByMonth(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = CreateNewMonth(notion_user_data=notion_user_data, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            month = parms['args']['month']
+            name = parms['args']['name']
+            start_date = parms['args']['start_date']
+            finish_date = parms['args']['finish_date']
 
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-
-            month_plan = await self.__notion_tool.get_plan_by_month(month_id)
+            await self.__notion_tool.create_month(
+                name,
+                start_date,
+                finish_date
+            )
 
             return ToolMessage(
-                content=month_plan,
+                content="Criado com sucesso",
                 tool_call_id=parms['id'],
             )
         except Exception as e:

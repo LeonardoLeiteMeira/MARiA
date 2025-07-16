@@ -4,7 +4,7 @@ from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field, PrivateAttr
 
-from MARiA.tools.new_tools.tool_interface import ToolInterface
+from MARiA.tools.tool_interface import ToolInterface
 from external.notion import NotionUserData, NotionTool
 from external.notion.enum import UserDataTypes
 
