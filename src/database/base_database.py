@@ -27,6 +27,8 @@ class BaseDatabase:
             echo=settings.sqlalchemy_echo,
             pool_size=10,
             max_overflow=0,
+            pool_pre_ping=True,
+            pool_recycle=1800
         )
 
     def __start_session_maker(self):
