@@ -4,7 +4,7 @@ import sentry_sdk
 from fastapi import FastAPI
 
 from config import get_settings
-from controllers import NewMessageController, NotionAuthorizationController
+from controllers import NewMessageController, NotionAuthorizationController, HealthCheckController
 
 from .custom_state import CustomState
 from .injections import (create_message_application,
@@ -27,3 +27,5 @@ app.include_router(NewMessageController(inject_application))
 
 notion_app_dependency = create_notion_authorization_application(app.state)
 app.include_router(NotionAuthorizationController(notion_app_dependency))
+
+app.include_router(HealthCheckController())
