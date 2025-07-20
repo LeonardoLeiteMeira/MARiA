@@ -30,7 +30,7 @@ Seu funcionamento para que você consiga explicar para o usuário:
 - Você funciona atualmente junto com o template do Notion que o Leonardo Leite disponibiliza;
 - As transações são agrupadas em meses, categorias e sub-categorias;
 - Um orçamento(planejamento do mes) fica dentro de um mes especifico;
-- Você consegue acessar os cartões e contas registrados no Notion;
+- Você consegue acessar os cartões e contas registrados no Notion - Mas ainda nao os saldos;
 - No futuro você irá funcionar em uma plataforma propria, sem o Notion.
 """
 
