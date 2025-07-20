@@ -14,6 +14,12 @@ services:
 
   api:
     build: .
+    deploy:
+      resources:
+        limits:
+          memory: 192m
+        reservations:
+          memory: 64m
     container_name: fastapi_app
     env_file:
       - .env
@@ -36,6 +42,12 @@ services:
   evolution-api:
     container_name: evolution_api
     image: atendai/evolution-api
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+        reservations:
+          memory: 128m
     restart: always
     ports:
       - "8080:8080"
@@ -56,6 +68,12 @@ services:
   database:
     container_name: postgres_db
     image: postgres:latest
+    deploy:
+      resources:
+          limits:
+            memory: 512m
+          reservations:
+            memory: 256m
     restart: always
     ports:
       - "5432:5432"
