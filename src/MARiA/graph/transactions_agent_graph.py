@@ -7,7 +7,10 @@ from ..agent_base import AgentBase
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (TransactionOperationEnum, CreateNewIncome)
+from ..tools import (TransactionOperationEnum, CreateNewIncome, CreateCard, CreateNewMonth,
+                         CreateNewOutTransactionV2, CreateNewPlanning,
+                         CreateNewTransfer, DeleteData, GetPlanByMonth,
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData)
 
 class TransactionsAgentGraph:
     def __init__(self):
@@ -43,17 +46,28 @@ class TransactionsAgentGraph:
         operation_type:TransactionOperationEnum = state['args'].get('operation_type')
         
         match (operation_type):
+            #TODO adicionar a de pedir dados e cancelar para voltar para o grafo principal
             case TransactionOperationEnum.CREATE_INCOME.value:
-                tools = [CreateNewIncome] #TODO adicionar a de pedir dados e cancelar
+                tools = [CreateNewIncome]
                 self.agent = AgentBase(tools)
-            # case TransactionOperationEnum.CREATE_OUTCOME.VALUE:
-            # case TransactionOperationEnum.CREATE_TRANSFER.VALUE:
-            # case TransactionOperationEnum.PAY_CREDIT_CARD.VALUE:
-            # case TransactionOperationEnum.QUERY_DATA.VALUE:
-            # case TransactionOperationEnum.UPDATE_DATA.VALUE:
-            #     pass
-            
-            # TODO adicionas as outras operacoes
+            case TransactionOperationEnum.CREATE_OUTCOME.VALUE:
+                tools = [CreateNewOutTransactionV2]
+                self.agent = AgentBase(tools)
+            case TransactionOperationEnum.PAY_CREDIT_CARD.VALUE | TransactionOperationEnum.CREATE_TRANSFER.VALUE:
+                tools = [CreateNewTransfer]
+                self.agent = AgentBase(tools)
+            case TransactionOperationEnum.QUERY_DATA.VALUE:
+                tools = [SearchTransactionV2]
+                self.agent = AgentBase(tools)
+            case TransactionOperationEnum.UPDATE_DATA.VALUE:
+                tools = [
+                    SearchTransactionV2,
+                    CreateNewIncome,
+                    CreateNewOutTransactionV2,
+                    CreateNewTransfer,
+                    DeleteData
+                ]
+                self.agent = AgentBase(tools)
         
         return Command(
             goto='build_agent'
