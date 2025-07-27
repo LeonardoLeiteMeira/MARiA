@@ -75,8 +75,8 @@ services:
           reservations:
             memory: 256m
     restart: always
-    ports:
-      - "5432:5432"
+    # ports:
+    #   - "5432:5432"
     env_file:
       - .env
     volumes:
