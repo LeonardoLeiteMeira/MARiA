@@ -59,3 +59,6 @@ class UserDomain(ChooseNotionDatabaseTagMixin):
     async def get_user_notion_databases_taged(self, user_id:str):
         databases = await self.__notion_database_repo.get_user_databases(user_id)
         return databases
+    
+    async def select_all_users(self):
+        return await self.__user_repository.get_all_users()

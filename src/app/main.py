@@ -28,4 +28,4 @@ app.include_router(NewMessageController(inject_application))
 notion_app_dependency = create_notion_authorization_application(app.state)
 app.include_router(NotionAuthorizationController(notion_app_dependency))
 
-app.include_router(HealthCheckController())
+app.include_router(HealthCheckController(inject_application))
