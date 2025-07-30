@@ -1,12 +1,14 @@
-from dto import UserAnswerDataDTO
-from repository.db_models.notion_database_model import NotionDatabaseModel
-from .graph import MariaGraph
 from contextlib import _AsyncGeneratorContextManager
 from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from langgraph.types import Command
+
+from .graph import MariaGraph
+from dto import UserAnswerDataDTO
 from domain import UserDomain
 from repository import UserModel, ThreadModel
-from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
+from repository.db_models.notion_database_model import NotionDatabaseModel
 
 class MariaInteraction:
     def __init__(self, user_domain: UserDomain, maria_graph: MariaGraph, checkpointer_manager: _AsyncGeneratorContextManager[AsyncPostgresSaver]):
@@ -28,10 +30,22 @@ class MariaInteraction:
             state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
 
             compiled = state_graph.compile(checkpointer=checkpointer)
+            snapshot = await compiled.aget_state(config, subgraphs=True)
 
-            result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
+            interrupts = tuple(
+                intr
+                for task in getattr(snapshot, "tasks", ())
+                for intr in getattr(task, "interrupts", ())
+            )
+
+            if interrupts:
+                cmd = Command(resume=user_input_with_name)
+                result = await compiled.ainvoke(cmd, config=config, debug=True)
+            else:
+                result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
             messages = result["messages"]
 
+        #TODO quando for interrupt nao posso pegar a ultima mensagem, tenho que pegar a query do interrupt
         resp = messages[-1].content
         return resp
     

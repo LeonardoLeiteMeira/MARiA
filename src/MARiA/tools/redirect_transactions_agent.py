@@ -17,11 +17,11 @@ class TransactionOperationEnum(Enum):
 
 class RedirectTransactionsAgent(ToolInterface):
     name: str = "transactions_agent"
-    description: str = "Agente responsavel por lidar com tudo relacionado a transacoes. Criar gastos, transferencias, receitas, alem de conseguir listar as transações de acordo com a solicitação do usuário."
+    description: str = "Agentes responsaveis por lidar com tudo relacionado a transações - Cada Operação é um agente. Criar gastos, transferencias, receitas, além de conseguir listar as transações de acordo com a solicitação do usuário."
     args_schema: Type[BaseModel] = create_model(
         "RedirectTransactionsAgentInput",
         query=(str, Field(..., description="Descricao exata do que o usuario quer. Seja bem especifico e inclua detalhes relevantes para que esse agente entenda bem o que deve ser feito, informando não apenas dados que o usuário passou mas também dados do sistem (id por exemplo), quando for relevante.")),
-        operation_type=(TransactionOperationEnum, Field(..., description="Informe qual a operação que deve ser realizada por esse agente dentre as opções"))
+        operation_type=(TransactionOperationEnum, Field(..., description="Informe qual o agente em especifico que deve ser selecionado dentre as opções."))
     )
     tool_type: ToolType = ToolType.AGENT_REDIRECT
 

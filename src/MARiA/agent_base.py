@@ -17,6 +17,9 @@ class AgentBase:
         self.model_name = model or "openai:gpt-4.1" 
         self.tools = tools
         self.tools_by_name = {}
+        self.agent = None
+        self.agent_with_tools = None
+        self.agent_with_structured_output = None
 
     #TODO remover
     async def create_agent(self, user_answer_data: UserAnswerDataDTO, notion_factory: NotionFactory):
@@ -36,7 +39,7 @@ class AgentBase:
         self.agent = init_chat_model(self.model_name, temperature=0.2)
         self.agent_with_tools = self.agent.bind_tools(instanciated_tools)
 
-    async def create_new_agent(self, notion_user_data: NotionUserData, notion_tool: NotionTool):
+    async def create_new_agent(self, notion_user_data: NotionUserData, notion_tool: NotionTool, force_tool_call: bool = False):
         instanciated_tools = []
 
         for Tool in self.tools:
@@ -45,4 +48,12 @@ class AgentBase:
             instanciated_tools.append(tool_created)
 
         self.agent = init_chat_model(self.model_name, temperature=0.2)
-        self.agent_with_tools = self.agent.bind_tools(instanciated_tools)
+
+        self.agent_with_tools = self.agent.bind_tools(instanciated_tools, tool_choice='any') if force_tool_call else self.agent.bind_tools(instanciated_tools)
+
+    async def set_structured_output(self, structured_model):
+        if self.agent == None:
+            raise "AgentBase - Agent not Initialized"
+        
+        if self.agent_with_tools != None:
+            self.agent_with_structured_output = self.agent_with_tools.with_str

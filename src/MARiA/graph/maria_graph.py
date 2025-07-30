@@ -9,7 +9,7 @@ from external.notion import NotionFactory
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (TransactionOperationEnum, CreateNewIncome, ToolType)
+from ..tools import ToolType
 from .transactions_agent_graph import TransactionsAgentGraph
 
 
