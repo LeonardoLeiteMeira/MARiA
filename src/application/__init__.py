@@ -1,2 +1,3 @@
 from .message_application import MessageApplication
 from .notion_authorization_application import NotionAuthorizationApplication
+from .auth_application import AuthApplication
