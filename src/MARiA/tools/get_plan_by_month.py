@@ -61,6 +61,8 @@ class GetPlanByMonth(ToolInterface):
                 tool_call_id=parms['id'],
             )
         except Exception as e:
+            print("Erro ao carregar o planejamento do mes")
+            print(e)
             return ToolMessage(
                 content=f"Ocorreu um erro na execução. Verifique os dados e tente novamente. Segue o erro para ajudar a entender: {e}",
                 tool_call_id=parms['id'],
