@@ -16,7 +16,7 @@ def create_jwt_dependency(app_dependency: Callable[[], AuthApplication]):
 
         token = auth_header.split()[1]
         try:
-            user = app.validate_token(token)
+            user = await app.validate_token(token)
         except ValueError as exc:
             raise HTTPException(status_code=401, detail=str(exc)) from exc
 

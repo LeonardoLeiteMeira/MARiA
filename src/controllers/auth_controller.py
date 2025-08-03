@@ -11,23 +11,23 @@ class AuthController(APIRouter):
         super().__init__(prefix="/auth")
 
         @self.post("/signup")
-        def signup(
+        async def signup(
             data: OAuth2PasswordRequestForm = Depends(),
             app: AuthApplication = Depends(app_dependency),
         ):
             try:
-                app.signup(data.username, data.password)
+                await app.signup(data.username, data.password)
             except ValueError as exc:
                 raise HTTPException(status_code=400, detail=str(exc))
             return {"detail": "created"}
 
         @self.post("/login")
-        def login(
+        async def login(
             form: OAuth2PasswordRequestForm = Depends(),
             app: AuthApplication = Depends(app_dependency),
         ):
             try:
-                access_token = app.login(form.username, form.password)
+                access_token = await app.login(form.username, form.password)
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -37,6 +37,9 @@ class AuthController(APIRouter):
             return {"access_token": access_token, "token_type": "bearer"}
 
         @self.post("/logout")
-        def logout(token: str, app: AuthApplication = Depends(app_dependency)):
-            app.logout(token)
+        async def logout(
+            token: str,
+            app: AuthApplication = Depends(app_dependency),
+        ):
+            await app.logout(token)
             return {"detail": "revoked"}

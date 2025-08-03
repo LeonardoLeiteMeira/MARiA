@@ -21,31 +21,31 @@ class AuthApplication:
     def __init__(self, domain: AuthDomain):
         self._domain = domain
 
-    def signup(self, username: str, password: str) -> None:
-        user = self._domain.get_user_by_email(username)
+    async def signup(self, username: str, password: str) -> None:
+        user = await self._domain.get_user_by_email(username)
         if not user:
             raise ValueError("User not registered")
         if user.password:
             raise ValueError("User already registered")
         user.password = hash_password(password)
-        self._domain.save_user(user)
+        await self._domain.save_user(user)
 
-    def login(self, username: str, password: str) -> str:
-        user = self._domain.get_user_by_email(username)
+    async def login(self, username: str, password: str) -> str:
+        user = await self._domain.get_user_by_email(username)
         if not user or not verify_password(password, user.password):
             raise ValueError("Invalid credentials")
         return self._create_access_token(user)
 
-    def logout(self, token: str) -> None:
+    async def logout(self, token: str) -> None:
         payload = decode_token(token)
         expires = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
-        self._domain.revoke_token(payload["jti"], expires)
+        await self._domain.revoke_token(payload["jti"], expires)
 
-    def validate_token(self, token: str):
+    async def validate_token(self, token: str):
         payload = decode_token(token)
-        if self._domain.is_token_revoked(payload["jti"]):
+        if await self._domain.is_token_revoked(payload["jti"]):
             raise ValueError("Token revoked")
-        user = self._domain.get_user_by_id(UUID(payload["user_id"]))
+        user = await self._domain.get_user_by_id(UUID(payload["user_id"]))
         if not user:
             raise ValueError("User not found")
         return user

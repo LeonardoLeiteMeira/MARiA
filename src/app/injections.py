@@ -19,7 +19,6 @@ from external.notion import NotionFactory
 from config import get_settings
 
 from .custom_state import CustomState
-from app.db.session import get_db
 
 settings = get_settings()
 
@@ -141,22 +140,22 @@ def create_notion_authorization_application(
     return dependency
 
 
-def create_auth_repository() -> Callable[[], AuthRepository]:
-    def dependency(db=Depends(get_db)):
-        return AuthRepository(db)
+def create_auth_repository(appState: CustomState) -> Callable[[], AuthRepository]:
+    def dependency():
+        return AuthRepository(appState.database)
 
     return dependency
 
 
-def create_auth_domain() -> Callable[[], AuthDomain]:
-    def dependency(repo=Depends(create_auth_repository())):
+def create_auth_domain(appState: CustomState) -> Callable[[], AuthDomain]:
+    def dependency(repo=Depends(create_auth_repository(appState))):
         return AuthDomain(repo)
 
     return dependency
 
 
-def create_auth_application() -> Callable[[], AuthApplication]:
-    def dependency(domain=Depends(create_auth_domain())) -> AuthApplication:
+def create_auth_application(appState: CustomState) -> Callable[[], AuthApplication]:
+    def dependency(domain=Depends(create_auth_domain(appState))) -> AuthApplication:
         return AuthApplication(domain)
 
     return dependency

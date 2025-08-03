@@ -32,7 +32,7 @@ if settings.is_production:
 app = FastAPI(lifespan=lifespan)
 app.state = cast(CustomState, app.state)
 
-auth_app_dependency = create_auth_application()
+auth_app_dependency = create_auth_application(app.state)
 jwt_dependency = create_jwt_dependency(auth_app_dependency)
 inject_application = create_message_application(app.state)
 app.include_router(NewMessageController(inject_application))
