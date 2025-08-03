@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from database.configs.base import BaseModel
 
-class UserItemModel(BaseModel):
+class PluggyItemModel(BaseModel):
     __tablename__ = "pluggy_items"
 
     id: Mapped[uuid.UUID] = mapped_column(

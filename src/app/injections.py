@@ -4,8 +4,7 @@ from fastapi import Depends
 
 from application import MessageApplication, NotionAuthorizationApplication
 from application.auth_application import AuthApplication
-from domain import UserDomain, NotionAuthorizationDomain
-from domain.auth_domain import AuthDomain
+from domain import UserDomain, NotionAuthorizationDomain, PluggyItemDomain, AuthDomain
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
@@ -14,7 +13,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
-from repository.auth_repository import AuthRepository
+from repository import AuthRepository, PluggyItemRepository
 from external.notion import NotionFactory
 from external.pluggy import PluggyAuthLoader
 from config import get_settings
@@ -73,6 +72,11 @@ def create_user_repository(appState: CustomState) -> Callable[[], UserRepository
         return UserRepository(appState.database)
     return dependency
 
+def create_pluggy_item_repository(appState: CustomState) -> Callable[[], PluggyItemRepository]:
+    def dependency():
+        return PluggyItemRepository(appState.database)
+    return dependency
+
 def create_notion_database_repository(appState: CustomState) -> Callable[[], UserDomain]:
     def dependency():
         return NotionDatabaseRepository(appState.database)
@@ -87,6 +91,10 @@ def create_user_domain(appState: CustomState) -> Callable[[], UserDomain]:
 
     return dependency
 
+def create_pluggy_item_domain(appState: CustomState):
+    def dep(repo=Depends(create_pluggy_item_repository(appState)),):
+        return PluggyItemDomain(repo)
+    return dep
 
 def create_maria_interaction(appState: CustomState) -> Callable[[], MariaInteraction]:
     async def dependency(
