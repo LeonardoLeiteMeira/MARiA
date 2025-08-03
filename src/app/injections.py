@@ -16,6 +16,7 @@ from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
 from repository.auth_repository import AuthRepository
 from external.notion import NotionFactory
+from external.pluggy import PluggyAuthLoader
 from config import get_settings
 
 from .custom_state import CustomState
@@ -158,4 +159,10 @@ def create_auth_application(appState: CustomState) -> Callable[[], AuthApplicati
     def dependency(domain=Depends(create_auth_domain(appState))) -> AuthApplication:
         return AuthApplication(domain)
 
+    return dependency
+
+def  create_pluggy_auth_loader() ->  Callable[[], PluggyAuthLoader]:
+    def dependency() -> PluggyAuthLoader:
+        return PluggyAuthLoader(settings)
+    
     return dependency
