@@ -3,7 +3,9 @@ from collections.abc import Callable
 from fastapi import Depends
 
 from application import MessageApplication, NotionAuthorizationApplication
+from application.auth_application import AuthApplication
 from domain import UserDomain, NotionAuthorizationDomain
+from domain.auth_domain import AuthDomain
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
@@ -12,6 +14,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
+from repository.auth_repository import AuthRepository
 from external.notion import NotionFactory
 from config import get_settings
 
@@ -133,5 +136,26 @@ def create_notion_authorization_application(
         notion_factory=Depends(create_notion_factory())
     ) -> NotionAuthorizationApplication:
         return NotionAuthorizationApplication(domain, user_domain, notion_factory)
+
+    return dependency
+
+
+def create_auth_repository(appState: CustomState) -> Callable[[], AuthRepository]:
+    def dependency():
+        return AuthRepository(appState.database)
+
+    return dependency
+
+
+def create_auth_domain(appState: CustomState) -> Callable[[], AuthDomain]:
+    def dependency(repo=Depends(create_auth_repository(appState))):
+        return AuthDomain(repo)
+
+    return dependency
+
+
+def create_auth_application(appState: CustomState) -> Callable[[], AuthApplication]:
+    def dependency(domain=Depends(create_auth_domain(appState))) -> AuthApplication:
+        return AuthApplication(domain)
 
     return dependency

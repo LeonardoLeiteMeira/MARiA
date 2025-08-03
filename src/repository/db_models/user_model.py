@@ -15,7 +15,8 @@ class UserModel(Base):
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
     email: Mapped[str] = mapped_column(String, nullable=True)
-    phone_number:Mapped[str] = mapped_column(String, nullable=False)
+    phone_number: Mapped[str] = mapped_column(String, nullable=False)
+    password: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP,  default=datetime.now, onupdate=datetime.now)
 

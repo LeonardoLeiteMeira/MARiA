@@ -13,7 +13,6 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1] / "src"))
 
-from database.configs.base import BaseModel
 from config import get_settings
 
 # this is the Alembic Config object, which provides
