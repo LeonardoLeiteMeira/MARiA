@@ -25,7 +25,6 @@ def upgrade() -> None:
         "pluggy_items",
         sa.Column('id', sa.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column('user_id', sa.UUID(as_uuid=True), sa.ForeignKey('users.id'), nullable=False),
-        sa.Column('item_id', sa.UUID(as_uuid=True), nullable=False),
         sa.Column('connector', postgresql.JSONB, nullable=False),
         sa.Column('products', sa.ARRAY(sa.String()), nullable=False),
         sa.Column('execution_status', sa.String(), nullable=False),

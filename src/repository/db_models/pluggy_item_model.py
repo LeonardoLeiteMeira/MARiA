@@ -20,10 +20,6 @@ class PluggyItemModel(BaseModel):
         ForeignKey("users.id"),
         nullable=False
     )
-    item_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        nullable=False
-    )
     connector: Mapped[dict] = mapped_column(
         JSONB,
         nullable=False

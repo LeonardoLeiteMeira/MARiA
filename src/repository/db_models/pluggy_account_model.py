@@ -20,10 +20,6 @@ class PluggyAccountModel(BaseModel):
         ForeignKey('users.id'),
         nullable=False
     )
-    account_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        nullable=False
-    )
     name: Mapped[str] = mapped_column(
         String,
         nullable=False

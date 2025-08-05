@@ -26,8 +26,6 @@ def upgrade() -> None:
         sa.Column('id', sa.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column('user_id', sa.UUID(as_uuid=True), sa.ForeignKey('users.id'), nullable=False),
         sa.Column('account_id', sa.UUID(as_uuid=True), sa.ForeignKey('pluggy_accounts.id'), nullable=False),
-        sa.Column('pluggy_account_id', sa.UUID(as_uuid=True), nullable=False),
-        sa.Column('transaction_id', sa.UUID(as_uuid=True), nullable=False),
         sa.Column('amount', sa.NUMERIC, nullable=False),
         sa.Column('balance', sa.NUMERIC, nullable=False),
         sa.Column('category', sa.String(), nullable=False),

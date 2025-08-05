@@ -25,14 +25,6 @@ class PluggyTransactionModel(BaseModel):
         ForeignKey('pluggy_accounts.id'),
         nullable=False
     )
-    pluggy_account_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        nullable=False
-    )
-    transaction_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        nullable=False
-    )
     amount: Mapped[float] = mapped_column(
         NUMERIC,
         nullable=False

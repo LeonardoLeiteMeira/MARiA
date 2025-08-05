@@ -54,7 +54,6 @@ class OpenFinanceApplication:
 
         await self.__pluggy_item_domain.create_accounts(created_accounts)
         await self.load_transactions(created_accounts, item_id)
-        # se for do tipo 'CREDIT' chamar o get credit card bills
 
     async def load_transactions(self, accounts: list[PluggyAccountModel], item_id: str):
         api_key = await self.__get_api_key()
