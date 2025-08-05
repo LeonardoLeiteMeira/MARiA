@@ -120,8 +120,12 @@ def create_message_application(
     return dependency
 
 def create_open_finance_application(appState: CustomState) -> Callable[[], OpenFinanceApplication]:
-    def dep(pluggy_item_domain=Depends(create_pluggy_item_domain(appState))):
-        return OpenFinanceApplication(pluggy_item_domain)
+    def dep(
+        pluggy_item_domain=Depends(create_pluggy_item_domain(appState)),
+        pluggy_auth_loader=Depends(create_pluggy_auth_loader()),
+    ):
+        return OpenFinanceApplication(pluggy_item_domain, pluggy_auth_loader)
+
     return dep
 
 def create_notion_authorization_repository(

@@ -1,5 +1,14 @@
 import uuid
-from repository import PluggyItemModel, PluggyAccountModel, PluggyItemRepository, PluggyTransactionModel, PluggyCardBillModel
+from repository import (
+    PluggyItemModel,
+    PluggyAccountModel,
+    PluggyItemRepository,
+    PluggyTransactionModel,
+    PluggyCardBillModel,
+    PluggyInvestmentModel,
+    PluggyInvestmentTransactionModel,
+    PluggyLoanModel,
+)
 
 class PluggyItemDomain:
     def __init__(self, repository: PluggyItemRepository):
@@ -21,3 +30,12 @@ class PluggyItemDomain:
 
     async def create_bills(self, bills: list[PluggyCardBillModel]):
         await self.__repository.create_bills(bills)
+
+    async def create_investments(self, investments: list[PluggyInvestmentModel]):
+        await self.__repository.create_investments(investments)
+
+    async def create_investment_transactions(self, transactions: list[PluggyInvestmentTransactionModel]):
+        await self.__repository.create_investment_transactions(transactions)
+
+    async def create_loans(self, loans: list[PluggyLoanModel]):
+        await self.__repository.create_loans(loans)
