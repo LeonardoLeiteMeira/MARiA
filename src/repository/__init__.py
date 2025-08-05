@@ -7,6 +7,7 @@ from .db_models.notion_database_model import NotionDatabaseModel
 from .db_models.pluggy_transactions_model import PluggyTransactionModel
 from .db_models.revoked_token_model import RevokedToken
 from .db_models.pluggy_account_model import PluggyAccountModel
+from .db_models.pluggy_card_bill_model import PluggyCardBillModel
 from .notion_authorization_repository import NotionAuthorizationRepository
 from .user_repository import UserRepository
 from .notion_database_repository import NotionDatabaseRepository
@@ -27,5 +28,6 @@ __all__ = [
     "PluggyItemModel",
     "PluggyItemRepository",
     "PluggyAccountModel",
-    "PluggyTransactionModel"
+    "PluggyTransactionModel",
+    "PluggyCardBillModel"
 ]

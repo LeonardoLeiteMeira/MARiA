@@ -2,6 +2,7 @@ from .base_repository import BaseRepository
 from .db_models.pluggy_item_model import PluggyItemModel
 from .db_models.pluggy_account_model import PluggyAccountModel
 from .db_models.pluggy_transactions_model import PluggyTransactionModel
+from .db_models.pluggy_card_bill_model import PluggyCardBillModel
 
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 
@@ -29,4 +30,9 @@ class PluggyItemRepository(BaseRepository):
     async def create_transactions(self, transactions: list[PluggyTransactionModel]):
         async with self.session() as session:
             session.add_all(transactions)
+            await session.commit()
+
+    async def create_bills(self, bills: list[PluggyCardBillModel]):
+        async with self.session() as session:
+            session.add_all(bills)
             await session.commit()
