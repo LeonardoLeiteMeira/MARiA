@@ -1,11 +1,13 @@
 from collections.abc import Callable
 
-from fastapi import APIRouter, Request, Depends
+from fastapi import APIRouter, Request, Depends, Body
 
 from external.pluggy import PluggyAuthLoader
+from repository import PluggyItemModel
+from application import OpenFinanceApplication
 
 class OpenFinanceConnectionController(APIRouter):
-    def __init__(self, jwt_dependency: Callable, pluggy_auth_dependency: Callable):
+    def __init__(self, jwt_dependency: Callable, pluggy_auth_dependency: Callable, open_finance_app: Callable):
         super().__init__(
             prefix='/open-finance',
             dependencies=[Depends(jwt_dependency)]
@@ -25,9 +27,10 @@ class OpenFinanceConnectionController(APIRouter):
             pass
 
         @self.post("/item-from-widget")
-        async def receive_item_from_widget():
-            pass
-        
+        async def receive_item_from_widget(item_data: dict = Body(...), open_finance_app:OpenFinanceApplication = Depends(open_finance_app)):
+            pluggy_item = PluggyItemModel.from_request_body(item_data)
+            await open_finance_app.create_new_item(pluggy_item)
+
 #         {
 #     "item": {
 #         "id": "290b6757-72e9-44bf-8fe9-60e09a6a833a",

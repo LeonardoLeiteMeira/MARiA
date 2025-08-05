@@ -3,7 +3,7 @@ from collections.abc import Callable
 from fastapi import Depends
 
 from application import MessageApplication, NotionAuthorizationApplication
-from application.auth_application import AuthApplication
+from application import AuthApplication, OpenFinanceApplication
 from domain import UserDomain, NotionAuthorizationDomain, PluggyItemDomain, AuthDomain
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
@@ -118,6 +118,11 @@ def create_message_application(
         return MessageApplication(user_domain, maria_interaction, message_service)
 
     return dependency
+
+def create_open_finance_application(appState: CustomState) -> Callable[[], OpenFinanceApplication]:
+    def dep(pluggy_item_domain=Depends(create_pluggy_item_domain(appState))):
+        return OpenFinanceApplication(pluggy_item_domain)
+    return dep
 
 def create_notion_authorization_repository(
     appState: CustomState,

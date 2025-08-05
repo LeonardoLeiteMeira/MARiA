@@ -36,7 +36,7 @@ class PluggyItemModel(BaseModel):
         JSONB,
         nullable=False
     )
-    executionStatus: Mapped[str] = mapped_column(
+    execution_status: Mapped[str] = mapped_column(
         String,
         nullable=False
     )
@@ -44,7 +44,7 @@ class PluggyItemModel(BaseModel):
         String,
         nullable=False
     )
-    lastUpdatedAt: Mapped[datetime] = mapped_column(
+    last_updated_at: Mapped[datetime] = mapped_column(
         DateTime,
         nullable=False
     )
@@ -66,3 +66,20 @@ class PluggyItemModel(BaseModel):
 
     def __repr__(self):
         return f"<UserItemModel(id={self.id}, user_id={self.user_id}, status={self.status})>"
+    
+    @classmethod
+    def from_request_body(cls, data: dict, user_id:str) -> 'PluggyItemModel':
+        item = PluggyItemModel()
+        item.user_id = uuid.UUID(user_id)
+        item.item_id = data['item']['id']
+        item.connector = data['item']['connector']
+        item.products = data['item']['products']
+        item.execution_status = data['item']['executionStatus']
+        item.status = data['item']['status']
+        item.last_updated_at = data['item']['lastUpdatedAt']
+        item.created_at = data['item']['createdAt']
+        item.updated_at = data['item']['updatedAt']
+        item.connected_at = datetime.now()
+        item.complementary_data = data['item']
+
+        return item

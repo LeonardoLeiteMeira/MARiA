@@ -21,7 +21,8 @@ from .injections import (
     create_message_application,
     create_notion_authorization_application,
     create_auth_application,
-    create_pluggy_auth_loader
+    create_pluggy_auth_loader,
+    create_open_finance_application
 )
 from .lifespan import lifespan
 
@@ -60,4 +61,4 @@ app.include_router(NotionAuthorizationController(notion_app_dependency))
 app.include_router(HealthCheckController(inject_application))
 app.include_router(AuthController(auth_app_dependency))
 app.include_router(TestAuthController(jwt_dependency))
-app.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader()))
+app.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader(), create_open_finance_application()))
