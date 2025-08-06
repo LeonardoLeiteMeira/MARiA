@@ -13,7 +13,7 @@ class PluggyItemRepository(BaseRepository):
     async def get_pluggy_item_by_item_id(self, item_id: str) -> PluggyItemModel | None:
         stmt = (
             select(PluggyItemModel)
-            .where(PluggyItemModel.item_id == item_id) 
+            .where(PluggyItemModel.id == item_id) 
             .execution_options(synchronize_session="fetch")
         )
         async with self.session() as session:

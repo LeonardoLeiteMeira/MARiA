@@ -44,7 +44,7 @@ class PluggyInvestmentTransactionModel(BaseModel):
     )
     movement_type: Mapped[str] = mapped_column(
         String,
-        nullable=False,
+        nullable=True,
     )
     description: Mapped[str | None] = mapped_column(
         String,

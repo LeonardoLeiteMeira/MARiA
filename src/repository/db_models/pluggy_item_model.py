@@ -66,15 +66,15 @@ class PluggyItemModel(BaseModel):
     @classmethod
     def from_request_body(cls, data: dict, user_id:str) -> 'PluggyItemModel':
         item = PluggyItemModel()
+        item.id = data['item']['id']
         item.user_id = uuid.UUID(user_id)
-        item.item_id = data['item']['id']
         item.connector = data['item']['connector']
-        item.products = data['item']['products']
+        item.products = data['item']['connector']['products']
         item.execution_status = data['item']['executionStatus']
         item.status = data['item']['status']
-        item.last_updated_at = data['item']['lastUpdatedAt']
-        item.created_at = data['item']['createdAt']
-        item.updated_at = data['item']['updatedAt']
+        item.last_updated_at = datetime.strptime(data['item']['lastUpdatedAt'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        item.created_at = datetime.strptime(data['item']['createdAt'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        item.updated_at = datetime.strptime(data['item']['updatedAt'], "%Y-%m-%dT%H:%M:%S.%fZ")
         item.connected_at = datetime.now()
         item.complementary_data = data['item']
 

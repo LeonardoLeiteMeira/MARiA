@@ -28,7 +28,7 @@ def upgrade() -> None:
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('type', sa.String(), nullable=False),
         sa.Column('subtype', sa.String(), nullable=True),
-        sa.Column('balance', sa.NUMERIC, nullable=False),
+        sa.Column('balance', sa.NUMERIC, nullable=True),
         sa.Column('complementary_data', postgresql.JSONB, nullable=False),
     )
 
@@ -41,7 +41,7 @@ def upgrade() -> None:
         sa.Column('value', sa.NUMERIC, nullable=False),
         sa.Column('quantity', sa.NUMERIC, nullable=False),
         sa.Column('type', sa.String(), nullable=False),
-        sa.Column('movement_type', sa.String(), nullable=False),
+        sa.Column('movement_type', sa.String(), nullable=True),
         sa.Column('description', sa.String(), nullable=True),
         sa.Column('complementary_data', postgresql.JSONB, nullable=False),
     )
@@ -50,11 +50,11 @@ def upgrade() -> None:
         'pluggy_loans',
         sa.Column('id', sa.UUID(as_uuid=True), primary_key=True, nullable=False),
         sa.Column('user_id', sa.UUID(as_uuid=True), sa.ForeignKey('users.id'), nullable=False),
-        sa.Column('contract_number', sa.String(), nullable=False),
+        sa.Column('contract_number', sa.String(), nullable=True),
         sa.Column('product_name', sa.String(), nullable=False),
         sa.Column('type', sa.String(), nullable=False),
         sa.Column('contract_amount', sa.NUMERIC, nullable=False),
-        sa.Column('currency_code', sa.String(), nullable=False),
+        sa.Column('currency_code', sa.String(), nullable=True),
         sa.Column('complementary_data', postgresql.JSONB, nullable=False),
     )
 

@@ -27,8 +27,9 @@ class OpenFinanceConnectionController(APIRouter):
             pass
 
         @self.post("/item-from-widget")
-        async def receive_item_from_widget(item_data: dict = Body(...), open_finance_app:OpenFinanceApplication = Depends(open_finance_app)):
-            pluggy_item = PluggyItemModel.from_request_body(item_data)
+        async def receive_item_from_widget(request: Request, item_data: dict = Body(...), open_finance_app:OpenFinanceApplication = Depends(open_finance_app)):
+            user = request.state.user
+            pluggy_item = PluggyItemModel.from_request_body(item_data, str(user.id))
             await open_finance_app.create_new_item(pluggy_item)
 
 #         {

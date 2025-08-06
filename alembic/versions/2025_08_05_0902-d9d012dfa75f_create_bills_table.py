@@ -27,7 +27,7 @@ def upgrade() -> None:
         sa.Column('account_id', sa.UUID(as_uuid=True), sa.ForeignKey('pluggy_accounts.id'), nullable=False),
         sa.Column('user_id', sa.UUID(as_uuid=True), sa.ForeignKey('users.id'), nullable=False),
         sa.Column('total_amount', sa.NUMERIC, nullable=False),
-        sa.Column('minimum_payment_amount', sa.NUMERIC, nullable=False),
+        sa.Column('minimum_payment_amount', sa.NUMERIC, nullable=True),
         sa.Column('complementary_data', postgresql.JSONB, nullable=False),
     )
     pass

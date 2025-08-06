@@ -32,7 +32,7 @@ class PluggyCardBillModel(BaseModel):
     )
     minimum_payment_amount: Mapped[float] = mapped_column(
         NUMERIC,
-        nullable=False
+        nullable=True
     )
     complementary_data: Mapped[Dict[str, Any]] = mapped_column(
         JSONB,

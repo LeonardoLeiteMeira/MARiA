@@ -61,6 +61,7 @@ class OpenFinanceApplication:
 
         await self.__pluggy_item_domain.create_accounts(created_accounts)
         await self.load_transactions(created_accounts, item_id)
+        await self.load_credit_card_bills(created_accounts)
 
     async def load_transactions(self, accounts: list[PluggyAccountModel], item_id: str):
         api_key = await self.__get_api_key()
@@ -98,7 +99,6 @@ class OpenFinanceApplication:
             if acc.type != "CREDIT":
                 continue
             account_id = str(acc.id)
-            acc_bills = []
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"https://api.pluggy.ai/bills?accountId={account_id}", headers={"X-API-KEY": api_key})
                 bills = response.json().get("results", [])
@@ -112,7 +112,7 @@ class OpenFinanceApplication:
                 bill_model.minimum_payment_amount = bill['minimumPaymentAmount']
                 bill_model.complementary_data = bill
 
-                acc_bills.append(bill)
+                all_bills.append(bill_model)
 
         
         if len(all_bills) > 0:
@@ -135,11 +135,11 @@ class OpenFinanceApplication:
             inv_model = PluggyInvestmentModel()
             inv_model.id = inv["id"]
             inv_model.user_id = updated_pluggy_item.user_id
-            inv_model.code = inv.get("code")
-            inv_model.name = inv.get("name")
-            inv_model.type = inv.get("type")
-            inv_model.subtype = inv.get("subtype")
-            inv_model.balance = inv.get("balance", 0)
+            inv_model.code = inv["code"]
+            inv_model.name = inv["name"]
+            inv_model.type = inv["type"]
+            inv_model.subtype = inv["subtype"]
+            inv_model.balance = inv["balance"]
             inv_model.complementary_data = inv
             investments.append(inv_model)
 
@@ -165,12 +165,12 @@ class OpenFinanceApplication:
                 trx_model.id = trx["id"]
                 trx_model.user_id = inv.user_id
                 trx_model.investment_id = inv.id
-                trx_model.amount = trx.get("amount", 0)
-                trx_model.value = trx.get("value", 0)
-                trx_model.quantity = trx.get("quantity", 0)
-                trx_model.type = trx.get("type")
-                trx_model.movement_type = trx.get("movementType")
-                trx_model.description = trx.get("description")
+                trx_model.amount = trx["amount"]
+                trx_model.value = trx["value"]
+                trx_model.quantity = trx["quantity"]
+                trx_model.type = trx["type"]
+                trx_model.movement_type = trx["movementType"]
+                trx_model.description = trx["description"]
                 trx_model.complementary_data = trx
                 all_transactions.append(trx_model)
 

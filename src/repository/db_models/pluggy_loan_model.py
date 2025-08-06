@@ -23,7 +23,7 @@ class PluggyLoanModel(BaseModel):
     )
     contract_number: Mapped[str] = mapped_column(
         String,
-        nullable=False,
+        nullable=True,
     )
     product_name: Mapped[str] = mapped_column(
         String,
@@ -39,7 +39,7 @@ class PluggyLoanModel(BaseModel):
     )
     currency_code: Mapped[str] = mapped_column(
         String,
-        nullable=False,
+        nullable=True,
     )
     complementary_data: Mapped[Dict[str, Any]] = mapped_column(
         JSONB,
