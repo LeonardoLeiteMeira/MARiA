@@ -39,3 +39,21 @@ class PluggyItemDomain:
 
     async def create_loans(self, loans: list[PluggyLoanModel]):
         await self.__repository.create_loans(loans)
+
+    async def get_accounts(self, user_id: uuid.UUID) -> list[PluggyAccountModel]:
+        return await self.__repository.get_accounts_by_user(user_id)
+
+    async def get_transactions(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyTransactionModel]:
+        return await self.__repository.get_transactions_by_account(user_id, account_id)
+
+    async def get_bills(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyCardBillModel]:
+        return await self.__repository.get_bills_by_account(user_id, account_id)
+
+    async def get_investments(self, user_id: uuid.UUID) -> list[PluggyInvestmentModel]:
+        return await self.__repository.get_investments_by_user(user_id)
+
+    async def get_investment_transactions(self, user_id: uuid.UUID, investment_id: uuid.UUID) -> list[PluggyInvestmentTransactionModel]:
+        return await self.__repository.get_investment_transactions(user_id, investment_id)
+
+    async def get_loans(self, user_id: uuid.UUID) -> list[PluggyLoanModel]:
+        return await self.__repository.get_loans_by_user(user_id)

@@ -9,6 +9,8 @@ from .db_models.pluggy_loan_model import PluggyLoanModel
 
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 
+import uuid
+
 class PluggyItemRepository(BaseRepository):
     async def get_pluggy_item_by_item_id(self, item_id: str) -> PluggyItemModel | None:
         stmt = (
@@ -54,3 +56,48 @@ class PluggyItemRepository(BaseRepository):
         async with self.session() as session:
             session.add_all(loans)
             await session.commit()
+
+    async def get_accounts_by_user(self, user_id: uuid.UUID) -> list[PluggyAccountModel]:
+        stmt = select(PluggyAccountModel).where(PluggyAccountModel.user_id == user_id)
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
+
+    async def get_transactions_by_account(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyTransactionModel]:
+        stmt = select(PluggyTransactionModel).where(
+            PluggyTransactionModel.user_id == user_id,
+            PluggyTransactionModel.account_id == account_id,
+        )
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
+
+    async def get_bills_by_account(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyCardBillModel]:
+        stmt = select(PluggyCardBillModel).where(
+            PluggyCardBillModel.user_id == user_id,
+            PluggyCardBillModel.account_id == account_id,
+        )
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
+
+    async def get_investments_by_user(self, user_id: uuid.UUID) -> list[PluggyInvestmentModel]:
+        stmt = select(PluggyInvestmentModel).where(PluggyInvestmentModel.user_id == user_id)
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
+
+    async def get_investment_transactions(self, user_id: uuid.UUID, investment_id: uuid.UUID) -> list[PluggyInvestmentTransactionModel]:
+        stmt = select(PluggyInvestmentTransactionModel).where(
+            PluggyInvestmentTransactionModel.user_id == user_id,
+            PluggyInvestmentTransactionModel.investment_id == investment_id,
+        )
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
+
+    async def get_loans_by_user(self, user_id: uuid.UUID) -> list[PluggyLoanModel]:
+        stmt = select(PluggyLoanModel).where(PluggyLoanModel.user_id == user_id)
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
