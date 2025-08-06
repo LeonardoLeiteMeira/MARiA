@@ -205,6 +205,24 @@ class OpenFinanceApplication:
             await self.__pluggy_item_domain.create_loans(loans)
 
 
+    async def get_accounts(self, user_id: uuid.UUID) -> list[PluggyAccountModel]:
+        return await self.__pluggy_item_domain.get_accounts(user_id)
+
+    async def get_account_transactions(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyTransactionModel]:
+        return await self.__pluggy_item_domain.get_transactions(user_id, account_id)
+
+    async def get_card_bills(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyCardBillModel]:
+        return await self.__pluggy_item_domain.get_bills(user_id, account_id)
+
+    async def get_investments(self, user_id: uuid.UUID) -> list[PluggyInvestmentModel]:
+        return await self.__pluggy_item_domain.get_investments(user_id)
+
+    async def get_investment_transactions(self, user_id: uuid.UUID, investment_id: uuid.UUID) -> list[PluggyInvestmentTransactionModel]:
+        return await self.__pluggy_item_domain.get_investment_transactions(user_id, investment_id)
+
+    async def get_loans(self, user_id: uuid.UUID) -> list[PluggyLoanModel]:
+        return await self.__pluggy_item_domain.get_loans(user_id)
+
     async def __get_api_key(self):
         date_now = datetime.now()
         if self.__pluggy_api_key == None or date_now - self.__pluggy_api_key['created_at'] > timedelta(minutes=30):
