@@ -20,8 +20,8 @@ class PluggyTransactionResponse(BaseModel):
     user_id: UUID
     account_id: UUID
     amount: float
-    balance: float
-    category: str
+    balance: float | None
+    category: str | None
     description: str
     status: str
     type: str
