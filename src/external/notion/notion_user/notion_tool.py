@@ -20,7 +20,7 @@ class NotionTool:
             amount = amount,
             date = date,
             card_id = card_id,
-            hasPaid = hasPaid,
+            status = hasPaid,
         )
 
     async def create_expense(self,name: str,
