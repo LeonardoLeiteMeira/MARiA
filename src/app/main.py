@@ -37,10 +37,11 @@ if settings.is_production:
 app = FastAPI(lifespan=lifespan)
 app.state = cast(CustomState, app.state)
 
-# TODO: ajustar antes de fazer merge
-origins = [
-    "http://localhost:8081"
-]
+
+origins = ['*']
+# origins = [
+#     "http://localhost:8081"
+# ]
 
 app.add_middleware(
     CORSMiddleware,
