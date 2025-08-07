@@ -30,7 +30,6 @@ def upgrade() -> None:
         sa.Column('minimum_payment_amount', sa.NUMERIC, nullable=True),
         sa.Column('complementary_data', postgresql.JSONB, nullable=False),
     )
-    pass
 
 
 def downgrade() -> None:
