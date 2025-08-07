@@ -48,7 +48,4 @@ class CreateCard(ToolInterface):
                 tool_call_id=parms['id'],
             )
         except Exception as e:
-            return ToolMessage(
-                content=f"Ocorreu um erro na execução. Verifique os dados e tente novamente. Segue o erro para ajudar a entender: {e}",
-                tool_call_id=parms['id'],
-            )
+            return self.handle_tool_exception(e, parms['id'])
