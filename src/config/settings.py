@@ -17,6 +17,9 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = None
     evo_send_message_endpoint: str | None = None
 
+    pluggy_client_id: str | None = None
+    pluggy_client_secret: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="allow"
     )

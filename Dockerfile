@@ -33,9 +33,10 @@ COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/alembic ./alembic
 COPY --from=builder /app/alembic.ini ./alembic.ini
+COPY log_config.yaml ./ 
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/src
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",  "--log-config", "log_config.yaml"]

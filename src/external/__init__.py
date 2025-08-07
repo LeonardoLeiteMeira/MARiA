@@ -1,5 +1,5 @@
 """External services package."""
 
-from . import notion
+from . import notion, pluggy
 
-__all__ = ["notion"]
+__all__ = ["notion", "pluggy"]
