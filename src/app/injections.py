@@ -3,7 +3,8 @@ from collections.abc import Callable
 from fastapi import Depends
 
 from application import MessageApplication, NotionAuthorizationApplication
-from domain import UserDomain, NotionAuthorizationDomain
+from application import AuthApplication, OpenFinanceApplication
+from domain import UserDomain, NotionAuthorizationDomain, PluggyItemDomain, AuthDomain
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
@@ -12,7 +13,9 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
+from repository import AuthRepository, PluggyItemRepository
 from external.notion import NotionFactory
+from external.pluggy import PluggyAuthLoader
 from config import get_settings
 
 from .custom_state import CustomState
@@ -63,6 +66,11 @@ def create_user_repository(appState: CustomState) -> Callable[[], UserRepository
         return UserRepository(appState.database)
     return dependency
 
+def create_pluggy_item_repository(appState: CustomState) -> Callable[[], PluggyItemRepository]:
+    def dependency():
+        return PluggyItemRepository(appState.database)
+    return dependency
+
 def create_notion_database_repository(appState: CustomState) -> Callable[[], UserDomain]:
     def dependency():
         return NotionDatabaseRepository(appState.database)
@@ -77,6 +85,10 @@ def create_user_domain(appState: CustomState) -> Callable[[], UserDomain]:
 
     return dependency
 
+def create_pluggy_item_domain(appState: CustomState):
+    def dep(repo=Depends(create_pluggy_item_repository(appState)),):
+        return PluggyItemDomain(repo)
+    return dep
 
 def create_maria_interaction(appState: CustomState) -> Callable[[], MariaInteraction]:
     async def dependency(
@@ -100,6 +112,15 @@ def create_message_application(
         return MessageApplication(user_domain, maria_interaction, message_service)
 
     return dependency
+
+def create_open_finance_application(appState: CustomState) -> Callable[[], OpenFinanceApplication]:
+    def dep(
+        pluggy_item_domain=Depends(create_pluggy_item_domain(appState)),
+        pluggy_auth_loader=Depends(create_pluggy_auth_loader()),
+    ):
+        return OpenFinanceApplication(pluggy_item_domain, pluggy_auth_loader)
+
+    return dep
 
 def create_notion_authorization_repository(
     appState: CustomState,
@@ -128,4 +149,31 @@ def create_notion_authorization_application(
     ) -> NotionAuthorizationApplication:
         return NotionAuthorizationApplication(domain, user_domain, notion_factory)
 
+    return dependency
+
+
+def create_auth_repository(appState: CustomState) -> Callable[[], AuthRepository]:
+    def dependency():
+        return AuthRepository(appState.database)
+
+    return dependency
+
+
+def create_auth_domain(appState: CustomState) -> Callable[[], AuthDomain]:
+    def dependency(repo=Depends(create_auth_repository(appState))):
+        return AuthDomain(repo)
+
+    return dependency
+
+
+def create_auth_application(appState: CustomState) -> Callable[[], AuthApplication]:
+    def dependency(domain=Depends(create_auth_domain(appState))) -> AuthApplication:
+        return AuthApplication(domain)
+
+    return dependency
+
+def  create_pluggy_auth_loader() ->  Callable[[], PluggyAuthLoader]:
+    def dependency() -> PluggyAuthLoader:
+        return PluggyAuthLoader(settings)
+    
     return dependency

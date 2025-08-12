@@ -84,6 +84,14 @@ class UserRepository(BaseRepository):
             data = await session.execute(stmt)
             await session.commit()
             return data
+        
+    async def get_all_users(self):
+        async with self.session() as session:
+            stmt = (
+                select(UserModel)
+            )
+            cursor = await session.execute(stmt)
+            return cursor.scalars().all()
     
 
 

@@ -5,13 +5,14 @@ from collections.abc import Callable, Awaitable
 
 
 class HealthCheckController(APIRouter):
-    def __init__(self):
+    def __init__(self, service_dependency_injected: Callable[[], Awaitable[MessageApplication]]):
         super().__init__()
 
-        @self.post("/")
-        async def healh_check():
+        @self.get("/")
+        async def health_check(message_application: MessageApplication = Depends(service_dependency_injected),):
             try:
-                return JSONResponse(status_code=200, content={"status":"Application runningß"})
+                is_health = await message_application.check_db_conn()
+                return JSONResponse(status_code=200, content={"status":is_health})
             except Exception as ex:
                 print("\nERROR HAS OCCURRED")
                 print(ex)

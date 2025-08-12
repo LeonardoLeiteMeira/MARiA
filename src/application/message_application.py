@@ -51,3 +51,9 @@ class MessageApplication:
 
         base_url = f"https://www.notion.so/install-integration?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&state={user_id}"
         return base_url
+    
+    async def check_db_conn(self):
+        data = await self.__user_domain.select_all_users()
+        if(len(data) > 0):
+            return True;
+        return False
