@@ -25,18 +25,17 @@ class MariaGraph:
 
         await self.main_agent.create_agent(user_answer_data, self.__notion_factory) 
 
-        transaction_agent = TransactionsAgentGraph()
-        transaction_agent.set_notion_factory(self.__notion_factory)
-        transactions_agent_graph = await transaction_agent.get_state_graph()
-        transactions_agent = transactions_agent_graph.compile()
+        # transaction_agent = TransactionsAgentGraph()
+        # transaction_agent.set_notion_factory(self.__notion_factory)
+        # transactions_agent_graph = await transaction_agent.get_state_graph()
+        # transactions_agent = transactions_agent_graph.compile()
 
         state_graph = StateGraph(State)
         
         state_graph.add_node("start_node", self.__start_message)
         state_graph.add_node("main_maria_node", self.main_maria_node)
         state_graph.add_node("tools", self.__tool_node)
-        state_graph.add_node("transactions_agent", transactions_agent)
-
+        # state_graph.add_node("transactions_agent", transactions_agent)
 
         state_graph.add_edge(START, "start_node")
         state_graph.add_edge("start_node", "main_maria_node")
@@ -47,7 +46,7 @@ class MariaGraph:
             {'tools': 'tools', END: END}
         )
 
-        state_graph.add_edge('transactions_agent', 'main_maria_node')
+        # state_graph.add_edge('transactions_agent', 'main_maria_node')
 
         return state_graph
     
@@ -76,7 +75,7 @@ class MariaGraph:
             return "tools"
         return END
 
-    async def __tool_node(self, state: State) -> Command[Literal["main_maria_node", "transactions_agent"]]:
+    async def __tool_node(self, state: State): # -> Command[Literal["main_maria_node", "transactions_agent"]]:
         if messages := state.get("messages", []):
             message = messages[-1]
         else:

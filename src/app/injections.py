@@ -40,6 +40,13 @@ def create_message_service() -> Callable[[], MessageService]:
 def create_agente_base() -> Callable[[], AgentBase]:
     def dependency():
         tools = [
+            #Tools do transaction agent
+            SearchTransactionV2,
+            CreateNewIncome,
+            CreateNewOutTransactionV2,
+            CreateNewTransfer,
+            #=====
+
             CreateCard,
             CreateNewMonth,
             CreateNewPlanning,
@@ -47,7 +54,7 @@ def create_agente_base() -> Callable[[], AgentBase]:
             DeleteData,
             ReadUserBaseData,
             GetMonthData,
-            RedirectTransactionsAgent
+            # RedirectTransactionsAgent
         ]
         agent = AgentBase(
             tools=tools

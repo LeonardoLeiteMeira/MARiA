@@ -45,7 +45,7 @@ class MariaInteraction:
                 result = await compiled.ainvoke({"user_input": HumanMessage(user_input_with_name)}, config=config, debug=True)
             messages = result["messages"]
 
-        #TODO quando for interrupt nao posso pegar a ultima mensagem, tenho que pegar a query do interrupt
+        #TODO WIP Multi-agent quando for interrupt nao posso pegar a ultima mensagem, tenho que pegar a query do interrupt
         resp = messages[-1].content
         return resp
     
