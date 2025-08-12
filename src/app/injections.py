@@ -10,7 +10,7 @@ from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2, GetMonthData)
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
 from messaging import MessageService, MessageServiceDev
 from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
 from repository import AuthRepository, PluggyItemRepository
@@ -38,32 +38,33 @@ def create_message_service() -> Callable[[], MessageService]:
 
 
 def create_agente_base() -> Callable[[], AgentBase]:
-    def dependency(
-        notion_factory = Depends(create_notion_factory())
-    ):
+    def dependency():
         tools = [
-            CreateNewTransfer,
-            CreateNewOutTransactionV2,
-            CreateNewIncome,
+            #Tools do transaction agent
             SearchTransactionV2,
+            CreateNewIncome,
+            CreateNewOutTransactionV2,
+            CreateNewTransfer,
+            #=====
+
             CreateCard,
             CreateNewMonth,
             CreateNewPlanning,
             GetPlanByMonth,
             DeleteData,
             ReadUserBaseData,
-            GetMonthData
+            GetMonthData,
+            # RedirectTransactionsAgent
         ]
         agent = AgentBase(
-            tools=tools,
-            notion_factory=notion_factory
+            tools=tools
         )
         return agent
     return dependency
 
 def create_maria_graph() -> Callable[[], MariaGraph]:
-    def dependency(agent_base = Depends(create_agente_base())):
-        return MariaGraph(agent_base, prompt_main_agent)
+    def dependency(agent_base = Depends(create_agente_base()), notion_factory = Depends(create_notion_factory())):
+        return MariaGraph(agent_base, prompt_main_agent, notion_factory)
     return dependency
 
 

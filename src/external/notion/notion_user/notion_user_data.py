@@ -3,11 +3,11 @@ from .. import BaseTemplateAccessInterface
 
 
 class UserData:
-    cards: dict
-    categories: dict
-    macroCategories: dict
-    months: dict
-    is_loaded: bool
+    cards: dict = None
+    categories: dict = None
+    macroCategories: dict = None
+    months: dict = None
+    is_loaded: bool = None
 
 class NotionUserData:
     def __init__(self, template_access: BaseTemplateAccessInterface):
@@ -16,6 +16,7 @@ class NotionUserData:
         self.user_data.is_loaded = False
         self.__class__._initialized = True
 
+    #TODO remover para ter um metodo para cada dado
     async def get_user_base_data(self) -> UserData:
         if self.user_data.is_loaded:
             return self.user_data
@@ -44,4 +45,26 @@ class NotionUserData:
         
         return None
     
+    async def get_user_cards(self):
+        if getattr(self.user_data, 'cards', None):
+            return self.user_data.cards
+        self.user_data.cards = await self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
+        return self.user_data.cards
 
+    async def get_user_categories(self):
+        if getattr(self.user_data, 'categories', None):
+            return self.user_data.categories
+        self.user_data.categories = await self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
+        return self.user_data.categories
+
+    async def get_user_macro_categories(self):
+        if getattr(self.user_data, 'macroCategories', None):
+            return self.user_data.macroCategories
+        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
+        return self.user_data.macroCategories
+
+    async def get_user_months(self):
+        if getattr(self.user_data, 'months', None):
+            return self.user_data.months
+        self.user_data.months = await self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
+        return self.user_data.months

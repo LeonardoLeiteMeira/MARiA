@@ -5,4 +5,6 @@ from langchain_core.messages import HumanMessage
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
+    transactions_agent_messages: Annotated[list, add_messages]
     user_input: str
+    args: dict

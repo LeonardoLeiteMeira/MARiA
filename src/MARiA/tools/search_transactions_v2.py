@@ -26,25 +26,28 @@ class SearchTransactionV2(ToolInterface):
 
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'SearchTransactionV2':
-        user_data = await notion_user_data.get_user_base_data()
+        cards = await notion_user_data.get_user_cards()
+        categories = await notion_user_data.get_user_categories()
+        macroCategories = await notion_user_data.get_user_macro_categories()
+        months = await notion_user_data.get_user_months()
         transaction_types = notion_tool.ger_transaction_types()
 
         from enum import Enum
         CardEnum = Enum(
             "CardEnum",
-            {card["Name"].upper(): card["Name"] for card in user_data.cards['data']},
+            {card["Name"].upper(): card["Name"] for card in cards['data']},
         )
         CategoriesEnum = Enum(
             "CategoryEnum",
-            {category["Name"].upper(): category["Name"] for category in user_data.categories['data']},
+            {category["Name"].upper(): category["Name"] for category in categories['data']},
         )
         MacroCategoriesEnum = Enum(
             "macroCategoryEnum",
-            {macro["Name"].upper(): macro["Name"] for macro in user_data.macroCategories['data']},
+            {macro["Name"].upper(): macro["Name"] for macro in macroCategories['data']},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
+            {month["Name"].upper(): month["Name"] for month in months['data']},
         )
 
         InputModel = create_model(

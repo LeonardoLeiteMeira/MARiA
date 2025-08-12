@@ -12,7 +12,7 @@ class NotionTool:
         amount: float,
         date: str,
         card_id: str,
-        hasPaid: bool
+        hasPaid: bool = True
     ):
         await self.__template_access.create_in_transaction(
             name = name,

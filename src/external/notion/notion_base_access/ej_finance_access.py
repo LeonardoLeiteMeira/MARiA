@@ -143,7 +143,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             status=status
         )
        
-    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True):
+    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True, hasPaid: bool = True):
         await self.__create_new_transaction(
             name=name,
             month_id=month_id,
