@@ -24,6 +24,7 @@ user_account_type = sa.Enum(
 
 def upgrade() -> None:
     """Upgrade schema."""
+    user_account_type.drop(op.get_bind(), checkfirst=True)
     user_account_type.create(op.get_bind(), checkfirst=True)
     op.create_table(
         'accounts',
