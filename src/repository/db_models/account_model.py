@@ -39,7 +39,7 @@ class AccountModel(BaseModel):
         onupdate=datetime.now
     )
     type: Mapped[AccountType] = mapped_column(
-        SqlEnum(AccountType, name='account_type'),
+        SqlEnum(AccountType, name='user_account_type'),
         nullable=False
     )
     opening_balance_cents: Mapped[float] = mapped_column(

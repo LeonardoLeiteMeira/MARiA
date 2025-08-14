@@ -15,8 +15,8 @@ from .db_models.management_period_model import ManagementPeriodModel
 from .db_models.category_model import CategoryModel
 from .db_models.macro_category_model import MacroCategoryModel
 from .db_models.management_planning_model import ManagementPlanningModel
-from .db_models.account_model import AccountModel
-from .db_models.transaction_model import TransactionModel
+from .db_models.account_model import AccountModel, AccountType
+from .db_models.transaction_model import TransactionModel, TransactionType
 from .notion_authorization_repository import NotionAuthorizationRepository
 from .user_repository import UserRepository
 from .notion_database_repository import NotionDatabaseRepository
@@ -47,5 +47,7 @@ __all__ = [
     "MacroCategoryModel",
     "ManagementPlanningModel",
     "AccountModel",
+    "AccountType",
     "TransactionModel",
+    "TransactionType",
 ]
