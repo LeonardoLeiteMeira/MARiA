@@ -18,7 +18,7 @@ down_revision: Union[str, None] = 'd19b4a200b17'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-transaction_type = sa.Enum('INCOME', 'EXPENSE', 'TRANSFER', name='transaction_type', create_type=False)
+transaction_type = sa.Enum('INCOME', 'EXPENSE', 'TRANSFER', name='transaction_type')
 
 
 def upgrade() -> None:
@@ -46,3 +46,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_table('transactions')
+    op.execute("DROP TYPE IF EXISTS transaction_type")

@@ -18,7 +18,7 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 user_account_type = sa.Enum(
-    'CREDIT_CARD', 'CHECKING', 'SAVINGS', 'WALLET', name='user_account_type', create_type=False,  
+    'CREDIT_CARD', 'CHECKING', 'SAVINGS', 'WALLET', name='user_account_type' 
 )
 
 
@@ -40,3 +40,4 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_table('accounts')
+    op.execute("DROP TYPE IF EXISTS user_account_type")
