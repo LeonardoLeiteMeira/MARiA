@@ -18,14 +18,12 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 user_account_type = sa.Enum(
-    'CREDIT_CARD', 'CHECKING', 'SAVINGS', 'WALLET', name='user_account_type'
+    'CREDIT_CARD', 'CHECKING', 'SAVINGS', 'WALLET', name='user_account_type', create_type=False,  
 )
 
 
 def upgrade() -> None:
     """Upgrade schema."""
-    user_account_type.drop(op.get_bind(), checkfirst=True)
-    user_account_type.create(op.get_bind(), checkfirst=True)
     op.create_table(
         'accounts',
         sa.Column('id', sa.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text('gen_random_uuid()')),
@@ -42,4 +40,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_table('accounts')
-    user_account_type.drop(op.get_bind(), checkfirst=True)

@@ -18,12 +18,11 @@ down_revision: Union[str, None] = 'd19b4a200b17'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
-transaction_type = sa.Enum('INCOME', 'EXPENSE', 'TRANSFER', name='transaction_type')
+transaction_type = sa.Enum('INCOME', 'EXPENSE', 'TRANSFER', name='transaction_type', create_type=False)
 
 
 def upgrade() -> None:
     """Upgrade schema."""
-    transaction_type.create(op.get_bind(), checkfirst=True)
     op.create_table(
         'transactions',
         sa.Column('id', sa.UUID(as_uuid=True), primary_key=True, nullable=False, server_default=sa.text('gen_random_uuid()')),
@@ -47,4 +46,3 @@ def upgrade() -> None:
 def downgrade() -> None:
     """Downgrade schema."""
     op.drop_table('transactions')
-    transaction_type.drop(op.get_bind(), checkfirst=True)
