@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from application import ManagementPeriodApplication
 from .request_models.management_period import ManagementPeriodRequest
@@ -25,7 +25,7 @@ class ManagementPeriodController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create(data)
 
-        @self.put("/{period_id}", response_model=ManagementPeriodResponse)
+        @self.put("/{period_id}")
         async def update_period(
             period_id: UUID,
             request: Request,
@@ -33,7 +33,9 @@ class ManagementPeriodController(APIRouter):
             app: ManagementPeriodApplication = Depends(app_dependency),
         ):
             data.user_id = request.state.user.id
-            return await app.update(period_id, data)
+            await app.update(period_id, data)
+            # respond with 201 to indicate successful update without returning body
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/{period_id}")
         async def delete_period(

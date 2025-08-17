@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from application import ManagementPlanningApplication
 from .request_models.management_planning import ManagementPlanningRequest
@@ -24,7 +24,7 @@ class ManagementPlanningController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create(data)
 
-        @self.put("/{planning_id}", response_model=ManagementPlanningResponse)
+        @self.put("/{planning_id}")
         async def update_planning(
             planning_id: UUID,
             request: Request,
@@ -32,7 +32,9 @@ class ManagementPlanningController(APIRouter):
             app: ManagementPlanningApplication = Depends(app_dependency),
         ):
             data.user_id = request.state.user.id
-            return await app.update(planning_id, data)
+            await app.update(planning_id, data)
+            # explicit 201 status code without returning the updated entity
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/{planning_id}")
         async def delete_planning(

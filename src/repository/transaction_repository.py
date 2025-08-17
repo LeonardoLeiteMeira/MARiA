@@ -1,7 +1,7 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.transaction_model import TransactionModel
@@ -16,13 +16,22 @@ class TransactionRepository(BaseRepository):
     async def update(self, transaction: TransactionModel):
         if transaction.id is None:
             raise Exception("transaction id is not defined")
+
+        mapper = inspect(TransactionModel)
+        cols = [c.key for c in mapper.attrs]
+        data = {
+            c: getattr(transaction, c)
+            for c in cols
+            if c not in ("id", "user_id") and getattr(transaction, c) is not None
+        }
+
         stmt = (
             update(TransactionModel)
             .where(
                 TransactionModel.id == transaction.id,
                 TransactionModel.user_id == transaction.user_id,
             )
-            .values(transaction)
+            .values(**data)
         )
         async with self.session() as session:
             await session.execute(stmt)

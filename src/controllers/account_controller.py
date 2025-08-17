@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from application import AccountApplication
 from .request_models.account import AccountRequest
@@ -24,7 +24,7 @@ class AccountController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create(data)
 
-        @self.put("/{account_id}", response_model=AccountResponse)
+        @self.put("/{account_id}")
         async def update_account(
             account_id: UUID,
             request: Request,
@@ -33,7 +33,9 @@ class AccountController(APIRouter):
         ):
             # ensure update targets resource owned by current user
             data.user_id = request.state.user.id
-            return await app.update(account_id, data)
+            await app.update(account_id, data)
+            # return creation status to signal successful update without body
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/{account_id}")
         async def delete_account(

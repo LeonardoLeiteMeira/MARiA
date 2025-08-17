@@ -1,7 +1,7 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.management_planning_model import ManagementPlanningModel
@@ -16,13 +16,22 @@ class ManagementPlanningRepository(BaseRepository):
     async def update(self, planning: ManagementPlanningModel):
         if planning.id is None:
             raise Exception("management planning id is not defined")
+
+        mapper = inspect(ManagementPlanningModel)
+        cols = [c.key for c in mapper.attrs]
+        data = {
+            c: getattr(planning, c)
+            for c in cols
+            if c not in ("id", "user_id") and getattr(planning, c) is not None
+        }
+
         stmt = (
             update(ManagementPlanningModel)
             .where(
                 ManagementPlanningModel.id == planning.id,
                 ManagementPlanningModel.user_id == planning.user_id,
             )
-            .values(planning)
+            .values(**data)
         )
         async with self.session() as session:
             await session.execute(stmt)

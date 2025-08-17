@@ -1,7 +1,7 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.category_model import CategoryModel
@@ -16,13 +16,23 @@ class CategoryRepository(BaseRepository):
     async def update(self, category: CategoryModel):
         if category.id is None:
             raise Exception("category id is not defined")
+
+        # Build dict of updatable fields, ignoring identifiers and nulls
+        mapper = inspect(CategoryModel)
+        cols = [c.key for c in mapper.attrs]
+        data = {
+            c: getattr(category, c)
+            for c in cols
+            if c not in ("id", "user_id") and getattr(category, c) is not None
+        }
+
         stmt = (
             update(CategoryModel)
             .where(
                 CategoryModel.id == category.id,
                 CategoryModel.user_id == category.user_id,
             )
-            .values(category)
+            .values(**data)
         )
         async with self.session() as session:
             await session.execute(stmt)

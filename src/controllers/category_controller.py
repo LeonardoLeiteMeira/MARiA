@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from application import CategoryApplication
 from .request_models.category import CategoryRequest
@@ -25,7 +25,7 @@ class CategoryController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create_category(data)
 
-        @self.put("/categories/{category_id}", response_model=CategoryResponse)
+        @self.put("/categories/{category_id}")
         async def update_category(
             category_id: UUID,
             request: Request,
@@ -34,7 +34,9 @@ class CategoryController(APIRouter):
         ):
             # replace user supplied in payload by authenticated user
             data.user_id = request.state.user.id
-            return await app.update_category(category_id, data)
+            await app.update_category(category_id, data)
+            # return 201 to acknowledge update without returning body
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/categories/{category_id}")
         async def delete_category(
@@ -82,7 +84,7 @@ class CategoryController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create_macro_category(data)
 
-        @self.put("/macro-categories/{macro_id}", response_model=MacroCategoryResponse)
+        @self.put("/macro-categories/{macro_id}")
         async def update_macro_category(
             macro_id: UUID,
             request: Request,
@@ -90,7 +92,9 @@ class CategoryController(APIRouter):
             app: CategoryApplication = Depends(app_dependency),
         ):
             data.user_id = request.state.user.id
-            return await app.update_macro_category(macro_id, data)
+            await app.update_macro_category(macro_id, data)
+            # signal success with 201 status without serializing model
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/macro-categories/{macro_id}")
         async def delete_macro_category(

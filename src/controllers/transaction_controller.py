@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
 from application import TransactionApplication
 from .request_models.transaction import TransactionRequest
@@ -24,7 +24,7 @@ class TransactionController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create(data)
 
-        @self.put("/{transaction_id}", response_model=TransactionResponse)
+        @self.put("/{transaction_id}")
         async def update_transaction(
             transaction_id: UUID,
             request: Request,
@@ -32,7 +32,9 @@ class TransactionController(APIRouter):
             app: TransactionApplication = Depends(app_dependency),
         ):
             data.user_id = request.state.user.id
-            return await app.update(transaction_id, data)
+            await app.update(transaction_id, data)
+            # returning 201 to acknowledge update without sending entity back
+            return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/{transaction_id}")
         async def delete_transaction(

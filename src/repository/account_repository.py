@@ -1,7 +1,7 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.account_model import AccountModel
@@ -16,13 +16,23 @@ class AccountRepository(BaseRepository):
     async def update(self, account: AccountModel):
         if account.id is None:
             raise Exception("account id is not defined")
+
+        # Convert model instance into a dict excluding immutable identifiers
+        mapper = inspect(AccountModel)
+        cols = [c.key for c in mapper.attrs]
+        data = {
+            c: getattr(account, c)
+            for c in cols
+            if c not in ("id", "user_id") and getattr(account, c) is not None
+        }
+
         stmt = (
             update(AccountModel)
             .where(
                 AccountModel.id == account.id,
                 AccountModel.user_id == account.user_id,
             )
-            .values(account)
+            .values(**data)
         )
         async with self.session() as session:
             await session.execute(stmt)
