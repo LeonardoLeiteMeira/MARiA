@@ -18,7 +18,10 @@ class CategoryRepository(BaseRepository):
             raise Exception("category id is not defined")
         stmt = (
             update(CategoryModel)
-            .where(CategoryModel.id == category.id)
+            .where(
+                CategoryModel.id == category.id,
+                CategoryModel.user_id == category.user_id,
+            )
             .values(category)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class CategoryRepository(BaseRepository):
             raise Exception("category id is not defined")
         stmt = (
             delete(CategoryModel)
-            .where(CategoryModel.id == category.id)
+            .where(
+                CategoryModel.id == category.id,
+                CategoryModel.user_id == category.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)

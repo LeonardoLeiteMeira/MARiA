@@ -18,7 +18,10 @@ class TransactionRepository(BaseRepository):
             raise Exception("transaction id is not defined")
         stmt = (
             update(TransactionModel)
-            .where(TransactionModel.id == transaction.id)
+            .where(
+                TransactionModel.id == transaction.id,
+                TransactionModel.user_id == transaction.user_id,
+            )
             .values(transaction)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class TransactionRepository(BaseRepository):
             raise Exception("transaction id is not defined")
         stmt = (
             delete(TransactionModel)
-            .where(TransactionModel.id == transaction.id)
+            .where(
+                TransactionModel.id == transaction.id,
+                TransactionModel.user_id == transaction.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)

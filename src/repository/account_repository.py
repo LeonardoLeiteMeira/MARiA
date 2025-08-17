@@ -18,7 +18,10 @@ class AccountRepository(BaseRepository):
             raise Exception("account id is not defined")
         stmt = (
             update(AccountModel)
-            .where(AccountModel.id == account.id)
+            .where(
+                AccountModel.id == account.id,
+                AccountModel.user_id == account.user_id,
+            )
             .values(account)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class AccountRepository(BaseRepository):
             raise Exception("account id is not defined")
         stmt = (
             delete(AccountModel)
-            .where(AccountModel.id == account.id)
+            .where(
+                AccountModel.id == account.id,
+                AccountModel.user_id == account.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)

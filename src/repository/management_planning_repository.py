@@ -18,7 +18,10 @@ class ManagementPlanningRepository(BaseRepository):
             raise Exception("management planning id is not defined")
         stmt = (
             update(ManagementPlanningModel)
-            .where(ManagementPlanningModel.id == planning.id)
+            .where(
+                ManagementPlanningModel.id == planning.id,
+                ManagementPlanningModel.user_id == planning.user_id,
+            )
             .values(planning)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class ManagementPlanningRepository(BaseRepository):
             raise Exception("management planning id is not defined")
         stmt = (
             delete(ManagementPlanningModel)
-            .where(ManagementPlanningModel.id == planning.id)
+            .where(
+                ManagementPlanningModel.id == planning.id,
+                ManagementPlanningModel.user_id == planning.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)

@@ -2,9 +2,29 @@ from collections.abc import Callable
 
 from fastapi import Depends
 
-from application import MessageApplication, NotionAuthorizationApplication
-from application import AuthApplication, OpenFinanceApplication
-from domain import UserDomain, NotionAuthorizationDomain, PluggyItemDomain, AuthDomain
+from application import (
+    MessageApplication,
+    NotionAuthorizationApplication,
+    AuthApplication,
+    OpenFinanceApplication,
+    ManagementPeriodApplication,
+    CategoryApplication,
+    ManagementPlanningApplication,
+    AccountApplication,
+    TransactionApplication,
+)
+from domain import (
+    UserDomain,
+    NotionAuthorizationDomain,
+    PluggyItemDomain,
+    AuthDomain,
+    ManagementPeriodDomain,
+    CategoryDomain,
+    MacroCategoryDomain,
+    ManagementPlanningDomain,
+    AccountDomain,
+    TransactionDomain,
+)
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
 from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
@@ -12,8 +32,19 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
 from messaging import MessageService, MessageServiceDev
-from repository import UserRepository, NotionAuthorizationRepository, NotionDatabaseRepository
-from repository import AuthRepository, PluggyItemRepository
+from repository import (
+    UserRepository,
+    NotionAuthorizationRepository,
+    NotionDatabaseRepository,
+    AuthRepository,
+    PluggyItemRepository,
+    ManagementPeriodRepository,
+    CategoryRepository,
+    MacroCategoryRepository,
+    ManagementPlanningRepository,
+    AccountRepository,
+    TransactionRepository,
+)
 from external.notion import NotionFactory
 from external.pluggy import PluggyAuthLoader
 from config import get_settings
@@ -156,6 +187,117 @@ def create_notion_authorization_application(
     ) -> NotionAuthorizationApplication:
         return NotionAuthorizationApplication(domain, user_domain, notion_factory)
 
+    return dependency
+
+
+# ===== Management Period dependencies =====================================
+def create_management_period_repository(appState: CustomState) -> Callable[[], ManagementPeriodRepository]:
+    def dependency():
+        return ManagementPeriodRepository(appState.database)
+    return dependency
+
+
+def create_management_period_domain(appState: CustomState) -> Callable[[], ManagementPeriodDomain]:
+    def dependency(repo=Depends(create_management_period_repository(appState))):
+        return ManagementPeriodDomain(repo)
+    return dependency
+
+
+def create_management_period_application(appState: CustomState) -> Callable[[], ManagementPeriodApplication]:
+    def dependency(domain=Depends(create_management_period_domain(appState))) -> ManagementPeriodApplication:
+        return ManagementPeriodApplication(domain)
+    return dependency
+
+
+# ===== Category & Macro Category dependencies ==============================
+def create_category_repository(appState: CustomState) -> Callable[[], CategoryRepository]:
+    def dependency():
+        return CategoryRepository(appState.database)
+    return dependency
+
+
+def create_macro_category_repository(appState: CustomState) -> Callable[[], MacroCategoryRepository]:
+    def dependency():
+        return MacroCategoryRepository(appState.database)
+    return dependency
+
+
+def create_category_domain(appState: CustomState) -> Callable[[], CategoryDomain]:
+    def dependency(repo=Depends(create_category_repository(appState))):
+        return CategoryDomain(repo)
+    return dependency
+
+
+def create_macro_category_domain(appState: CustomState) -> Callable[[], MacroCategoryDomain]:
+    def dependency(repo=Depends(create_macro_category_repository(appState))):
+        return MacroCategoryDomain(repo)
+    return dependency
+
+
+def create_category_application(appState: CustomState) -> Callable[[], CategoryApplication]:
+    def dependency(
+        category_domain=Depends(create_category_domain(appState)),
+        macro_domain=Depends(create_macro_category_domain(appState)),
+    ) -> CategoryApplication:
+        return CategoryApplication(category_domain, macro_domain)
+
+    return dependency
+
+
+# ===== Management Planning dependencies ====================================
+def create_management_planning_repository(appState: CustomState) -> Callable[[], ManagementPlanningRepository]:
+    def dependency():
+        return ManagementPlanningRepository(appState.database)
+    return dependency
+
+
+def create_management_planning_domain(appState: CustomState) -> Callable[[], ManagementPlanningDomain]:
+    def dependency(repo=Depends(create_management_planning_repository(appState))):
+        return ManagementPlanningDomain(repo)
+    return dependency
+
+
+def create_management_planning_application(appState: CustomState) -> Callable[[], ManagementPlanningApplication]:
+    def dependency(domain=Depends(create_management_planning_domain(appState))) -> ManagementPlanningApplication:
+        return ManagementPlanningApplication(domain)
+    return dependency
+
+
+# ===== Account dependencies =================================================
+def create_account_repository(appState: CustomState) -> Callable[[], AccountRepository]:
+    def dependency():
+        return AccountRepository(appState.database)
+    return dependency
+
+
+def create_account_domain(appState: CustomState) -> Callable[[], AccountDomain]:
+    def dependency(repo=Depends(create_account_repository(appState))):
+        return AccountDomain(repo)
+    return dependency
+
+
+def create_account_application(appState: CustomState) -> Callable[[], AccountApplication]:
+    def dependency(domain=Depends(create_account_domain(appState))) -> AccountApplication:
+        return AccountApplication(domain)
+    return dependency
+
+
+# ===== Transaction dependencies ===========================================
+def create_transaction_repository(appState: CustomState) -> Callable[[], TransactionRepository]:
+    def dependency():
+        return TransactionRepository(appState.database)
+    return dependency
+
+
+def create_transaction_domain(appState: CustomState) -> Callable[[], TransactionDomain]:
+    def dependency(repo=Depends(create_transaction_repository(appState))):
+        return TransactionDomain(repo)
+    return dependency
+
+
+def create_transaction_application(appState: CustomState) -> Callable[[], TransactionApplication]:
+    def dependency(domain=Depends(create_transaction_domain(appState))) -> TransactionApplication:
+        return TransactionApplication(domain)
     return dependency
 
 

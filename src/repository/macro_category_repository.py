@@ -18,7 +18,10 @@ class MacroCategoryRepository(BaseRepository):
             raise Exception("macro category id is not defined")
         stmt = (
             update(MacroCategoryModel)
-            .where(MacroCategoryModel.id == macro_category.id)
+            .where(
+                MacroCategoryModel.id == macro_category.id,
+                MacroCategoryModel.user_id == macro_category.user_id,
+            )
             .values(macro_category)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class MacroCategoryRepository(BaseRepository):
             raise Exception("macro category id is not defined")
         stmt = (
             delete(MacroCategoryModel)
-            .where(MacroCategoryModel.id == macro_category.id)
+            .where(
+                MacroCategoryModel.id == macro_category.id,
+                MacroCategoryModel.user_id == macro_category.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)

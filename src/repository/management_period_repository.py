@@ -18,7 +18,10 @@ class ManagementPeriodRepository(BaseRepository):
             raise Exception("management period id is not defined")
         stmt = (
             update(ManagementPeriodModel)
-            .where(ManagementPeriodModel.id == management_period.id)
+            .where(
+                ManagementPeriodModel.id == management_period.id,
+                ManagementPeriodModel.user_id == management_period.user_id,
+            )
             .values(management_period)
         )
         async with self.session() as session:
@@ -30,7 +33,10 @@ class ManagementPeriodRepository(BaseRepository):
             raise Exception("management period id is not defined")
         stmt = (
             delete(ManagementPeriodModel)
-            .where(ManagementPeriodModel.id == management_period.id)
+            .where(
+                ManagementPeriodModel.id == management_period.id,
+                ManagementPeriodModel.user_id == management_period.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)
