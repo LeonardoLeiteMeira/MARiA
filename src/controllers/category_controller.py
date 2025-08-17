@@ -46,12 +46,13 @@ class CategoryController(APIRouter):
             await app.delete_category(category_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/categories/user/{user_id}", response_model=list[CategoryResponse])
+        @self.get("/categories/user", response_model=list[CategoryResponse])
         async def get_categories_by_user(
-            user_id: UUID,
+            request: Request,
             app: CategoryApplication = Depends(app_dependency),
         ):
-            return await app.get_categories_by_user(user_id)
+            # list only categories owned by the authenticated user
+            return await app.get_categories_by_user(request.state.user.id)
 
         @self.get("/categories/{category_id}", response_model=CategoryResponse)
         async def get_category(
@@ -100,12 +101,13 @@ class CategoryController(APIRouter):
             await app.delete_macro_category(macro_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/macro-categories/user/{user_id}", response_model=list[MacroCategoryResponse])
+        @self.get("/macro-categories/user", response_model=list[MacroCategoryResponse])
         async def get_macro_by_user(
-            user_id: UUID,
+            request: Request,
             app: CategoryApplication = Depends(app_dependency),
         ):
-            return await app.get_macro_categories_by_user(user_id)
+            # fetch macro categories for the authenticated user only
+            return await app.get_macro_categories_by_user(request.state.user.id)
 
         @self.get("/macro-categories/{macro_id}", response_model=MacroCategoryResponse)
         async def get_macro_category(
