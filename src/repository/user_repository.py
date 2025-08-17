@@ -19,7 +19,6 @@ class UserRepository(BaseRepository):
             update(UserModel)
             .where(UserModel.id == user.id)
             .values(user)
-            .execution_options(synchronize_session="fetch")
         )
         async with self.session() as session:
             await session.execute(stmt)
@@ -28,8 +27,7 @@ class UserRepository(BaseRepository):
     async def get_user_by_id(self, user_id:str) -> UserModel | None:
         stmt = (
             select(UserModel)
-            .where(UserModel.id == user_id) 
-            .execution_options(synchronize_session="fetch")
+            .where(UserModel.id == user_id)
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
@@ -42,7 +40,6 @@ class UserRepository(BaseRepository):
             select(UserModel)
             .options(joinedload(UserModel.notion_authorization))
             .where(UserModel.phone_number == phone_number)
-            .execution_options(synchronize_session="fetch")
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)

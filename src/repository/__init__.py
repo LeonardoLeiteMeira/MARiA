@@ -22,6 +22,12 @@ from .user_repository import UserRepository
 from .notion_database_repository import NotionDatabaseRepository
 from .auth_repository import AuthRepository
 from .pluggy_item_repository import PluggyItemRepository
+from .management_period_repository import ManagementPeriodRepository
+from .category_repository import CategoryRepository
+from .macro_category_repository import MacroCategoryRepository
+from .management_planning_repository import ManagementPlanningRepository
+from .account_repository import AccountRepository
+from .transaction_repository import TransactionRepository
 
 __all__ = [
     "UserRepository",
@@ -50,4 +56,10 @@ __all__ = [
     "AccountType",
     "TransactionModel",
     "TransactionType",
+    "ManagementPeriodRepository",
+    "CategoryRepository",
+    "MacroCategoryRepository",
+    "ManagementPlanningRepository",
+    "AccountRepository",
+    "TransactionRepository",
 ]

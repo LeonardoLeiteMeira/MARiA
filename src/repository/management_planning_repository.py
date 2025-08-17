@@ -1,0 +1,54 @@
+from typing import Sequence
+import uuid
+
+from sqlalchemy import select, update, delete
+
+from .base_repository import BaseRepository
+from .db_models.management_planning_model import ManagementPlanningModel
+
+
+class ManagementPlanningRepository(BaseRepository):
+    async def create(self, planning: ManagementPlanningModel):
+        async with self.session() as session:
+            session.add(planning)
+            await session.commit()
+
+    async def update(self, planning: ManagementPlanningModel):
+        if planning.id is None:
+            raise Exception("management planning id is not defined")
+        stmt = (
+            update(ManagementPlanningModel)
+            .where(ManagementPlanningModel.id == planning.id)
+            .values(planning)
+        )
+        async with self.session() as session:
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete(self, planning: ManagementPlanningModel):
+        if planning.id is None:
+            raise Exception("management planning id is not defined")
+        stmt = (
+            delete(ManagementPlanningModel)
+            .where(ManagementPlanningModel.id == planning.id)
+        )
+        async with self.session() as session:
+            await session.execute(stmt)
+            await session.commit()
+
+    async def get_by_id(self, planning_id: uuid.UUID) -> ManagementPlanningModel | None:
+        stmt = (
+            select(ManagementPlanningModel)
+            .where(ManagementPlanningModel.id == planning_id)
+        )
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return cursor.scalars().first()
+
+    async def get_by_ids(self, planning_ids: Sequence[uuid.UUID]) -> list[ManagementPlanningModel]:
+        if not planning_ids:
+            return []
+        stmt = select(ManagementPlanningModel).where(ManagementPlanningModel.id.in_(planning_ids))
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())
