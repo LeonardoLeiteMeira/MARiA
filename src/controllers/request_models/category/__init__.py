@@ -6,6 +6,6 @@ from pydantic import BaseModel
 class CategoryRequest(BaseModel):
     """Payload for creating or updating categories or macro categories."""
 
-    user_id: UUID
     name: str
+    user_id: UUID | None = None
     icon: str | None = None

@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 
 from application import CategoryApplication
 from .request_models.category import CategoryRequest
@@ -17,17 +17,23 @@ class CategoryController(APIRouter):
         # --- Category endpoints -----------------------------------------
         @self.post("/categories", response_model=CategoryResponse)
         async def create_category(
+            request: Request,
             data: CategoryRequest,
             app: CategoryApplication = Depends(app_dependency),
         ):
+            user = request.state.user
+            data.user_id = str(user.id)
             return await app.create_category(data)
 
         @self.put("/categories/{category_id}", response_model=CategoryResponse)
         async def update_category(
+            request: Request,
             category_id: UUID,
             data: CategoryRequest,
             app: CategoryApplication = Depends(app_dependency),
         ):
+            user = request.state.user
+            data.user_id = str(user.id)
             return await app.update_category(category_id, data)
 
         @self.delete("/categories/{category_id}")
