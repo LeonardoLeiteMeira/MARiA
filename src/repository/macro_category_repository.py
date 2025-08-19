@@ -1,7 +1,7 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.macro_category_model import MacroCategoryModel
@@ -16,10 +16,22 @@ class MacroCategoryRepository(BaseRepository):
     async def update(self, macro_category: MacroCategoryModel):
         if macro_category.id is None:
             raise Exception("macro category id is not defined")
+
+        mapper = inspect(MacroCategoryModel)
+        cols = [c.key for c in mapper.attrs]
+        data = {
+            c: getattr(macro_category, c)
+            for c in cols
+            if c not in ("id", "user_id") and getattr(macro_category, c) is not None
+        }
+
         stmt = (
             update(MacroCategoryModel)
-            .where(MacroCategoryModel.id == macro_category.id)
-            .values(macro_category)
+            .where(
+                MacroCategoryModel.id == macro_category.id,
+                MacroCategoryModel.user_id == macro_category.user_id,
+            )
+            .values(**data)
         )
         async with self.session() as session:
             await session.execute(stmt)
@@ -30,7 +42,10 @@ class MacroCategoryRepository(BaseRepository):
             raise Exception("macro category id is not defined")
         stmt = (
             delete(MacroCategoryModel)
-            .where(MacroCategoryModel.id == macro_category.id)
+            .where(
+                MacroCategoryModel.id == macro_category.id,
+                MacroCategoryModel.user_id == macro_category.user_id,
+            )
         )
         async with self.session() as session:
             await session.execute(stmt)
