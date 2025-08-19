@@ -67,3 +67,9 @@ class ManagementPeriodRepository(BaseRepository):
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
+
+    async def get_by_user_id(self, user_id: uuid.UUID) -> list[ManagementPeriodModel]:
+        stmt = select(ManagementPeriodModel).where(ManagementPeriodModel.user_id == user_id)
+        async with self.session() as session:
+            cursor = await session.execute(stmt)
+            return list(cursor.scalars().all())

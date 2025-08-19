@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from application import TransactionApplication
 from .request_models.transaction import TransactionRequest
@@ -57,8 +57,8 @@ class TransactionController(APIRouter):
 
         @self.get("/", response_model=list[TransactionResponse])
         async def get_transactions(
-            ids: list[UUID] | None = Query(default=None),
+            request: Request,
             app: TransactionApplication = Depends(app_dependency),
         ):
-            ids = ids or []
-            return await app.get_by_ids(ids)
+            # return only transactions that belong to the authenticated user
+            return await app.get_by_user_id(request.state.user.id)

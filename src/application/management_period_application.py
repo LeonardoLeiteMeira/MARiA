@@ -39,3 +39,6 @@ class ManagementPeriodApplication:
 
     async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
         return await self._domain.get_by_ids(period_ids)
+
+    async def get_by_user_id(self, user_id: UUID) -> list[ManagementPeriodModel]:
+        return await self._domain.get_by_user_id(user_id)

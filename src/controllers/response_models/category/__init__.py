@@ -23,3 +23,19 @@ class MacroCategoryResponse(BaseModel):
     icon: str | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class CategoryListResponse(BaseModel):
+    """Wrapper for category list responses allowing future metadata expansion."""
+
+    data: list[CategoryResponse]
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class MacroCategoryListResponse(BaseModel):
+    """Wrapper for macro category list responses enabling pagination metadata."""
+
+    data: list[MacroCategoryResponse]
+
+    model_config = ConfigDict(from_attributes=True)

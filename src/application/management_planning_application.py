@@ -42,3 +42,6 @@ class ManagementPlanningApplication:
 
     async def get_by_ids(self, planning_ids: list[UUID]) -> list[ManagementPlanningModel]:
         return await self._domain.get_by_ids(planning_ids)
+
+    async def get_by_user_id(self, user_id: UUID) -> list[ManagementPlanningModel]:
+        return await self._domain.get_by_user_id(user_id)

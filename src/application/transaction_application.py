@@ -54,3 +54,6 @@ class TransactionApplication:
 
     async def get_by_ids(self, transaction_ids: list[UUID]) -> list[TransactionModel]:
         return await self._domain.get_by_ids(transaction_ids)
+
+    async def get_by_user_id(self, user_id: UUID) -> list[TransactionModel]:
+        return await self._domain.get_by_user_id(user_id)
