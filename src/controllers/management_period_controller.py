@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from application import ManagementPeriodApplication
 from .request_models.management_period import ManagementPeriodRequest
-from .response_models.management_period import ManagementPeriodResponse
+from .response_models.management_period import ManagementPeriodResponse, ManagementPeriodListResponse
 
 
 class ManagementPeriodController(APIRouter):
@@ -56,10 +56,11 @@ class ManagementPeriodController(APIRouter):
                 raise HTTPException(status_code=404, detail="management period not found")
             return periods[0]
 
-        @self.get("/", response_model=list[ManagementPeriodResponse])
+        @self.get("/", response_model=ManagementPeriodListResponse)
         async def get_periods(
             request: Request,
             app: ManagementPeriodApplication = Depends(app_dependency),
         ):
             # fetch only periods belonging to authenticated user
-            return await app.get_by_user_id(request.state.user.id)
+            periods = await app.get_by_user_id(request.state.user.id)
+            return ManagementPeriodListResponse(data=periods)

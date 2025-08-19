@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from application import ManagementPlanningApplication
 from .request_models.management_planning import ManagementPlanningRequest
-from .response_models.management_planning import ManagementPlanningResponse
+from .response_models.management_planning import ManagementPlanningResponse, ManagementPlanningListResponse
 
 
 class ManagementPlanningController(APIRouter):
@@ -55,10 +55,11 @@ class ManagementPlanningController(APIRouter):
                 raise HTTPException(status_code=404, detail="planning not found")
             return plannings[0]
 
-        @self.get("/", response_model=list[ManagementPlanningResponse])
+        @self.get("/", response_model=ManagementPlanningListResponse)
         async def get_plannings(
             request: Request,
             app: ManagementPlanningApplication = Depends(app_dependency),
         ):
             # return planning records owned by the current user only
-            return await app.get_by_user_id(request.state.user.id)
+            plannings = await app.get_by_user_id(request.state.user.id)
+            return ManagementPlanningListResponse(data=plannings)

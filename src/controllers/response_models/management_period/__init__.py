@@ -12,3 +12,11 @@ class ManagementPeriodResponse(BaseModel):
     end_date: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ManagementPeriodListResponse(BaseModel):
+    """Wrapper for management period collections enabling pagination metadata."""
+
+    data: list[ManagementPeriodResponse]
+
+    model_config = ConfigDict(from_attributes=True)

@@ -16,3 +16,11 @@ class AccountResponse(BaseModel):
     currency: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class AccountListResponse(BaseModel):
+    """Envelope for account collections enabling pagination metadata."""
+
+    data: list[AccountResponse]
+
+    model_config = ConfigDict(from_attributes=True)

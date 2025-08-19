@@ -16,3 +16,11 @@ class ManagementPlanningResponse(BaseModel):
     tags: List[str] | None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ManagementPlanningListResponse(BaseModel):
+    """Envelope for management planning lists allowing pagination metadata."""
+
+    data: list[ManagementPlanningResponse]
+
+    model_config = ConfigDict(from_attributes=True)

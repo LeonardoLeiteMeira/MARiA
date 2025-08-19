@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 
 from application import TransactionApplication
 from .request_models.transaction import TransactionRequest
-from .response_models.transaction import TransactionResponse
+from .response_models.transaction import TransactionResponse, TransactionListResponse
 
 
 class TransactionController(APIRouter):
@@ -55,10 +55,11 @@ class TransactionController(APIRouter):
                 raise HTTPException(status_code=404, detail="transaction not found")
             return trxs[0]
 
-        @self.get("/", response_model=list[TransactionResponse])
+        @self.get("/", response_model=TransactionListResponse)
         async def get_transactions(
             request: Request,
             app: TransactionApplication = Depends(app_dependency),
         ):
             # return only transactions that belong to the authenticated user
-            return await app.get_by_user_id(request.state.user.id)
+            trxs = await app.get_by_user_id(request.state.user.id)
+            return TransactionListResponse(data=trxs)

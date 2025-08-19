@@ -24,3 +24,11 @@ class TransactionResponse(BaseModel):
     currency: str
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class TransactionListResponse(BaseModel):
+    """Envelope for transaction list responses enabling future pagination metadata."""
+
+    data: list[TransactionResponse]
+
+    model_config = ConfigDict(from_attributes=True)

@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response,
 
 from application import AccountApplication
 from .request_models.account import AccountRequest
-from .response_models.account import AccountResponse
+from .response_models.account import AccountResponse, AccountListResponse
 
 
 class AccountController(APIRouter):
@@ -47,13 +47,14 @@ class AccountController(APIRouter):
             await app.delete(account_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/user", response_model=list[AccountResponse])
+        @self.get("/user", response_model=AccountListResponse)
         async def get_accounts_by_user(
             request: Request,
             app: AccountApplication = Depends(app_dependency),
         ):
             # retrieve accounts belonging to the authenticated user only
-            return await app.get_by_user_id(request.state.user.id)
+            accounts = await app.get_by_user_id(request.state.user.id)
+            return AccountListResponse(data=accounts)
 
         @self.get("/{account_id}", response_model=AccountResponse)
         async def get_account(
@@ -65,10 +66,11 @@ class AccountController(APIRouter):
                 raise HTTPException(status_code=404, detail="account not found")
             return accounts[0]
 
-        @self.get("/", response_model=list[AccountResponse])
+        @self.get("/", response_model=AccountListResponse)
         async def get_accounts(
             ids: list[UUID] | None = Query(default=None),
             app: AccountApplication = Depends(app_dependency),
         ):
             ids = ids or []
-            return await app.get_by_ids(ids)
+            accounts = await app.get_by_ids(ids)
+            return AccountListResponse(data=accounts)
