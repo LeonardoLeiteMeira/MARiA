@@ -1,11 +1,30 @@
 from collections.abc import Callable
 from uuid import UUID
+from typing import Annotated
+from pydantic import BaseModel
+from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 
 from application import TransactionApplication
 from .request_models.transaction import TransactionRequest
 from .response_models.transaction import TransactionResponse, TransactionListResponse
+
+class TransactionFilter(BaseModel):
+    test: list[str] = []
+
+    tags: list[str] = None
+    destination_account_id: str = None
+    source_account_id: str = None
+    management_period_id: str = None
+    type: any = None #TransactionType
+    macro_category_id: str = None
+    category_id: str = None
+    occurred_at_from: datetime = None
+    occurred_at_to: datetime = None
+    min_amount: float = None
+    max_amount: float = None
+    name: str = None
 
 
 class TransactionController(APIRouter):
@@ -59,7 +78,8 @@ class TransactionController(APIRouter):
         async def get_transactions(
             request: Request,
             app: TransactionApplication = Depends(app_dependency),
+            filter: Annotated[TransactionFilter, Query()] = None
         ):
-            # return only transactions that belong to the authenticated user
+            print(filter)
             trxs = await app.get_by_user_id(request.state.user.id)
             return TransactionListResponse(data=trxs)
