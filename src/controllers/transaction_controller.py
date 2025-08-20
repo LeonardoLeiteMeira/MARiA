@@ -26,6 +26,9 @@ class TransactionFilter(BaseModel):
     max_amount: float = None
     name: str = None
 
+# Olhar o fastapi-pagination para paginacao
+
+
 
 class TransactionController(APIRouter):
     """Controller exposing transaction endpoints."""
