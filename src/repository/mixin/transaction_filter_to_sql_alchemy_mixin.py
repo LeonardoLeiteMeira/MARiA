@@ -60,10 +60,16 @@ class TransactionFilterToSqlAlchemyMixin:
             else:
                 query = query.order_by(Transaction.occurred_at.asc())
 
+        return query
+    
+    def apply_pagination(
+        self,
+        query: Any,
+        filters: 'TransactionFilter'
+    ):
         size = filters.page_size
         page = filters.page
         query = query.limit(size).offset((page-1)*size)
-
 
         return query
     

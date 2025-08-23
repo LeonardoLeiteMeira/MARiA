@@ -30,5 +30,8 @@ class TransactionListResponse(BaseModel):
     """Envelope for transaction list responses enabling future pagination metadata."""
 
     data: list[TransactionResponse]
+    page: int
+    page_size: int
+    total_count: int
 
     model_config = ConfigDict(from_attributes=True)

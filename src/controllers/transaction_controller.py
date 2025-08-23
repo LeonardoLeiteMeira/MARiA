@@ -61,6 +61,10 @@ class TransactionController(APIRouter):
             filter: Annotated[TransactionFilter, Query()] = None
         ):
             filter.user_id = request.state.user.id
-            trxs = await app.get_user_transactions_with_filter(filter)
-            return TransactionListResponse(data=trxs)
-            # Olhar o fastapi-pagination para paginacao
+            transaction_list = await app.get_user_transactions_with_filter(filter)
+            return TransactionListResponse(
+                data=transaction_list.transactions,
+                page_size=transaction_list.page_size,
+                page=transaction_list.page,
+                total_count=transaction_list.total_count
+            )

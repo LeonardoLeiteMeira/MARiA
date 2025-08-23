@@ -1,7 +1,9 @@
 from typing import Sequence
 import uuid
 
-from sqlalchemy import select, update, delete, inspect
+from sqlalchemy import select, update, delete, inspect, func
+
+from dto import TransactionListDto
 
 from .base_repository import BaseRepository
 from .db_models.transaction_model import TransactionModel
@@ -72,9 +74,24 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> list[TransactionModel]:
+    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> TransactionListDto:
         stmt = select(TransactionModel)
         stmt = self.apply_transaction_filters(stmt, filter, TransactionModel)
         async with self.session() as session:
+            count_stmt = select(func.count()).select_from(stmt.subquery())
+            total_result = await session.execute(count_stmt)
+            total_count = total_result.scalar_one()
+
+            stmt = self.apply_pagination(stmt, filter)
             cursor = await session.execute(stmt)
-            return list(cursor.scalars().all())
+            transaction_list = list(cursor.scalars().all())
+
+            transaction_list_dto = TransactionListDto(
+                total_count,
+                page_size=len(transaction_list),
+                page=filter.page,
+                transactions=transaction_list
+            )
+
+            return transaction_list_dto
+
