@@ -8,9 +8,6 @@ from repository import TransactionType
 
 
 class TransactionRequest(BaseModel):
-    """Payload for creating or updating transactions."""
-
-    # user injected from JWT; prevents acting on behalf of others
     user_id: UUID | None = None
     name: str
     amount_cents: float
@@ -23,3 +20,21 @@ class TransactionRequest(BaseModel):
     destination_account_id: UUID | None = None
     tags: List[str] | None = None
     currency: str
+
+
+class TransactionFilter(BaseModel):
+    user_id: UUID = None
+    tags: list[str] = None
+    destination_account_id: list[str] = None
+    source_account_id: list[str] = None
+    management_period_id: list[str] = None
+    type: list[TransactionType] = None
+    macro_category_id: list[str] = None
+    category_id: list[str] = None
+    occurred_at_from: datetime = None
+    occurred_at_to: datetime = None
+    min_amount: float = None
+    max_amount: float = None
+    name: str = None
+
+

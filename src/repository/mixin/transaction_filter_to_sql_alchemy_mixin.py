@@ -1,0 +1,62 @@
+from datetime import timezone, datetime
+
+from typing import TYPE_CHECKING, Any
+if TYPE_CHECKING:
+    from ..db_models.transaction_model import TransactionModel
+    from controllers.request_models.transaction import TransactionFilter
+
+class TransactionFilterToSqlAlchemyMixin:
+    def apply_transaction_filters(
+        self,
+        query: Any,
+        filters: 'TransactionFilter',
+        Transaction: 'TransactionModel'
+    ) -> Any:
+        if filters.user_id is not None:
+            query = query.where(Transaction.user_id == filters.user_id)
+
+        if filters.destination_account_id:
+            query = query.where(Transaction.destination_account_id.in_(filters.destination_account_id))
+
+        if filters.source_account_id:
+            query = query.where(Transaction.source_account_id.in_(filters.source_account_id))
+
+        if filters.management_period_id:
+            query = query.where(Transaction.management_period_id.in_(filters.management_period_id))
+
+        if filters.type:
+            query = query.where(Transaction.type.in_(filters.type))
+
+        if filters.macro_category_id:
+            query = query.where(Transaction.macro_category_id.in_(filters.macro_category_id))
+
+        if filters.category_id:
+            query = query.where(Transaction.category_id.in_(filters.category_id))
+
+        if filters.tags:
+            query = query.where(Transaction.tags.op("&&")(filters.tags))
+
+        if filters.occurred_at_from is not None:
+            occurred_at_from = self.__fix_time_zone(filters.occurred_at_from)
+            query = query.where(Transaction.occurred_at > occurred_at_from)
+        if filters.occurred_at_to is not None:
+            occurred_at_to = self.__fix_time_zone(filters.occurred_at_to)
+            query = query.where(Transaction.occurred_at < occurred_at_to)
+
+        if filters.min_amount is not None:
+            query = query.where(Transaction.amount_cents > filters.min_amount)
+        if filters.max_amount is not None:
+            query = query.where(Transaction.amount_cents < filters.max_amount)
+
+        if filters.name:
+            if getattr(filters, "str_filter", "like") == "ilike":
+                query = query.where(Transaction.name.ilike(f"%{filters.name}%"))
+            else:
+                query = query.where(Transaction.name.like(f"%{filters.name}%"))
+
+        return query
+    
+    def __fix_time_zone(self, dateTime: datetime) -> datetime:
+        if dateTime and dateTime.tzinfo is None:
+            dateTime = dateTime.replace(tzinfo=timezone.utc)
+        return dateTime

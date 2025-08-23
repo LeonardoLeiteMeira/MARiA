@@ -5,9 +5,13 @@ from sqlalchemy import select, update, delete, inspect
 
 from .base_repository import BaseRepository
 from .db_models.transaction_model import TransactionModel
+from .mixin import TransactionFilterToSqlAlchemyMixin
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from controllers.request_models.transaction import TransactionFilter
 
-class TransactionRepository(BaseRepository):
+class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
     async def create(self, transaction: TransactionModel):
         async with self.session() as session:
             session.add(transaction)
@@ -68,8 +72,9 @@ class TransactionRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_user_id(self, user_id: uuid.UUID) -> list[TransactionModel]:
-        stmt = select(TransactionModel).where(TransactionModel.user_id == user_id)
+    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> list[TransactionModel]:
+        stmt = select(TransactionModel)
+        stmt = self.apply_transaction_filters(stmt, filter, TransactionModel)
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
