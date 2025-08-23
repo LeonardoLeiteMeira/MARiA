@@ -1,18 +1,16 @@
 from collections.abc import Callable
 from uuid import UUID
+from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 
 from application import ManagementPeriodApplication
-from .request_models.management_period import ManagementPeriodRequest
+from .request_models.management_period import ManagementPeriodRequest, ManagementPeriodFilter
 from .response_models.management_period import ManagementPeriodResponse, ManagementPeriodListResponse
 
 
 class ManagementPeriodController(APIRouter):
-    """HTTP interface for management period operations."""
-
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], ManagementPeriodApplication]):
-        # Apply JWT authentication to all routes
         super().__init__(prefix="/management-periods", dependencies=[Depends(jwt_dependency)])
 
         @self.post("/", response_model=ManagementPeriodResponse)
@@ -21,7 +19,6 @@ class ManagementPeriodController(APIRouter):
             data: ManagementPeriodRequest,
             app: ManagementPeriodApplication = Depends(app_dependency),
         ):
-            # attach current user to request payload
             data.user_id = request.state.user.id
             return await app.create(data)
 
@@ -34,7 +31,6 @@ class ManagementPeriodController(APIRouter):
         ):
             data.user_id = request.state.user.id
             await app.update(period_id, data)
-            # respond with 201 to indicate successful update without returning body
             return Response(status_code=status.HTTP_201_CREATED)
 
         @self.delete("/{period_id}")
@@ -60,7 +56,8 @@ class ManagementPeriodController(APIRouter):
         async def get_periods(
             request: Request,
             app: ManagementPeriodApplication = Depends(app_dependency),
+            filter: Annotated[ManagementPeriodFilter, Query()] = None
         ):
-            # fetch only periods belonging to authenticated user
-            periods = await app.get_by_user_id(request.state.user.id)
+            filter.user_id = request.state.user.id
+            periods = await app.get_by_filter(filter)
             return ManagementPeriodListResponse(data=periods)

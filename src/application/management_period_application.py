@@ -5,7 +5,7 @@ from domain import ManagementPeriodDomain
 from repository import ManagementPeriodModel
 
 if TYPE_CHECKING:
-    from controllers.request_models.management_period import ManagementPeriodRequest
+    from controllers.request_models.management_period import ManagementPeriodRequest, ManagementPeriodFilter
 
 
 class ManagementPeriodApplication:
@@ -40,5 +40,5 @@ class ManagementPeriodApplication:
     async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
         return await self._domain.get_by_ids(period_ids)
 
-    async def get_by_user_id(self, user_id: UUID) -> list[ManagementPeriodModel]:
-        return await self._domain.get_by_user_id(user_id)
+    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> list[ManagementPeriodModel]:
+        return await self._domain.get_by_filter(filter)

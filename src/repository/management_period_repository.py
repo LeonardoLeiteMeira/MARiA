@@ -1,7 +1,11 @@
 from typing import Sequence
 import uuid
+from typing import TYPE_CHECKING
 
 from sqlalchemy import select, update, delete, inspect
+
+if TYPE_CHECKING:
+    from controllers.request_models.management_period import ManagementPeriodFilter
 
 from .base_repository import BaseRepository
 from .db_models.management_period_model import ManagementPeriodModel
@@ -68,8 +72,8 @@ class ManagementPeriodRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_user_id(self, user_id: uuid.UUID) -> list[ManagementPeriodModel]:
-        stmt = select(ManagementPeriodModel).where(ManagementPeriodModel.user_id == user_id)
+    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> list[ManagementPeriodModel]:
+        stmt = select(ManagementPeriodModel).where(ManagementPeriodModel.user_id == filter.user_id)
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())

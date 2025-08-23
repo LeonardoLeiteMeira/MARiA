@@ -1,6 +1,10 @@
 from uuid import UUID
+from typing import TYPE_CHECKING
 
 from repository import ManagementPeriodRepository, ManagementPeriodModel
+
+if TYPE_CHECKING:
+    from controllers.request_models.management_period import ManagementPeriodFilter
 
 
 class ManagementPeriodDomain:
@@ -29,5 +33,5 @@ class ManagementPeriodDomain:
     async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
         return await self._repo.get_by_ids(period_ids)
 
-    async def get_by_user_id(self, user_id: UUID) -> list[ManagementPeriodModel]:
-        return await self._repo.get_by_user_id(user_id)
+    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> list[ManagementPeriodModel]:
+        return await self._repo.get_by_filter(filter)
