@@ -36,12 +36,12 @@ class TransactionFilterToSqlAlchemyMixin:
         if filters.tags:
             query = query.where(Transaction.tags.op("&&")(filters.tags))
 
-        if filters.occurred_at_from is not None:
-            occurred_at_from = self.__fix_time_zone(filters.occurred_at_from)
-            query = query.where(Transaction.occurred_at > occurred_at_from)
-        if filters.occurred_at_to is not None:
-            occurred_at_to = self.__fix_time_zone(filters.occurred_at_to)
-            query = query.where(Transaction.occurred_at < occurred_at_to)
+        if filters.occurred_at_min is not None:
+            occurred_at_min = self.__fix_time_zone(filters.occurred_at_min)
+            query = query.where(Transaction.occurred_at > occurred_at_min)
+        if filters.occurred_at_max is not None:
+            occurred_at_max = self.__fix_time_zone(filters.occurred_at_max)
+            query = query.where(Transaction.occurred_at < occurred_at_max)
 
         if filters.min_amount is not None:
             query = query.where(Transaction.amount_cents > filters.min_amount)
@@ -54,9 +54,16 @@ class TransactionFilterToSqlAlchemyMixin:
             else:
                 query = query.where(Transaction.name.like(f"%{filters.name}%"))
 
+        if filters.sort_order:
+            if filters.sort_order == 'desc':
+                query = query.order_by(Transaction.occurred_at.desc())
+            else:
+                query = query.order_by(Transaction.occurred_at.asc())
+
+
         return query
     
     def __fix_time_zone(self, dateTime: datetime) -> datetime:
-        if dateTime and dateTime.tzinfo is None:
-            dateTime = dateTime.replace(tzinfo=timezone.utc)
+        if dateTime.tzinfo is not None:
+            dateTime = dateTime.astimezone(timezone.utc).replace(tzinfo=None)
         return dateTime

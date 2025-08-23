@@ -1,6 +1,6 @@
 from datetime import datetime
 from uuid import UUID
-from typing import List
+from typing import List, Optional, Literal
 
 from pydantic import BaseModel
 
@@ -31,10 +31,11 @@ class TransactionFilter(BaseModel):
     type: list[TransactionType] = None
     macro_category_id: list[str] = None
     category_id: list[str] = None
-    occurred_at_from: datetime = None
-    occurred_at_to: datetime = None
+    occurred_at_min: datetime = None
+    occurred_at_max: datetime = None
     min_amount: float = None
     max_amount: float = None
     name: str = None
+    sort_order: Optional[Literal["asc", "desc"]] = "desc"
 
 
