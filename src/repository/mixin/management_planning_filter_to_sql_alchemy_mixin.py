@@ -27,16 +27,4 @@ class ManagementPlanningFilterToSqlAlchemyMixin:
             query = query.where(ManagementPlanning.tags.in_(filters.tags))
 
         return query
-    
 
-    # TODO Extrair para um lugar comum
-    def apply_pagination(
-        self,
-        query: Any,
-        filters: 'ManagementPlanningFilter'
-    ):
-        size = filters.page_size
-        page = filters.page
-        query = query.limit(size).offset((page-1)*size)
-
-        return query

@@ -59,17 +59,6 @@ class TransactionFilterToSqlAlchemyMixin:
 
         return query
     
-    def apply_pagination(
-        self,
-        query: Any,
-        filters: 'TransactionFilter'
-    ):
-        size = filters.page_size
-        page = filters.page
-        query = query.limit(size).offset((page-1)*size)
-
-        return query
-    
     def __fix_time_zone(self, dateTime: datetime) -> datetime:
         if dateTime.tzinfo is not None:
             dateTime = dateTime.astimezone(timezone.utc).replace(tzinfo=None)

@@ -38,19 +38,7 @@ class ManagementPeriodFilterToSqlAlchemyMixin:
                 query = query.order_by(ManagementPeriod.start_date.asc())
 
         return query
-    
 
-    # TODO Extrair para um lugar comum
-    def apply_pagination(
-        self,
-        query: Any,
-        filters: 'ManagementPeriodFilter'
-    ):
-        size = filters.page_size
-        page = filters.page
-        query = query.limit(size).offset((page-1)*size)
-
-        return query
     
     # TODO Extrair para um lugar comum
     def __fix_time_zone(self, dateTime: datetime) -> datetime:
