@@ -16,6 +16,6 @@ class ManagementPeriodFilter(BaseModel):
     start_date_min: datetime = None
     end_date_max: datetime = None
     end_date_min: datetime = None
-    order_stat_date: Optional[Literal['desc', 'asc']] = 'desc'
+    order_start_date: Optional[Literal['desc', 'asc']] = 'desc'
     page: int = 1
     page_size: int = 25

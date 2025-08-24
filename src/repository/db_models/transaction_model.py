@@ -1,19 +1,12 @@
 import uuid
 from datetime import datetime
-from enum import Enum
 
 from sqlalchemy import TIMESTAMP, String, ForeignKey, Numeric, Enum as SqlEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID, ARRAY
 
 from database.configs.base import BaseModel
-
-
-class TransactionType(str, Enum):
-    INCOME = 'INCOME'
-    EXPENSE = 'EXPENSE'
-    TRANSFER = 'TRANSFER'
-
+from dto.models import TransactionType
 
 class TransactionModel(BaseModel):
     __tablename__ = 'transactions'

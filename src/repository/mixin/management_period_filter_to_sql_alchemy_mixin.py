@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from controllers.request_models.management_period import ManagementPeriodFilter
 
 class ManagementPeriodFilterToSqlAlchemyMixin:
-    def apply_transaction_filters(
+    def apply_filters(
         self,
         query: Any,
         filters: 'ManagementPeriodFilter',
@@ -31,8 +31,8 @@ class ManagementPeriodFilterToSqlAlchemyMixin:
             end_date_min = self.__fix_time_zone(filters.end_date_min)
             query = query.where(ManagementPeriod.end_date > end_date_min)
 
-        if filters.order_stat_date:
-            if filters.sort_order == 'desc':
+        if filters.order_start_date:
+            if filters.order_start_date == 'desc':
                 query = query.order_by(ManagementPeriod.start_date.desc())
             else:
                 query = query.order_by(ManagementPeriod.start_date.asc())

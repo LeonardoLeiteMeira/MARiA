@@ -4,7 +4,7 @@ from typing import List, Optional, Literal
 
 from pydantic import BaseModel
 
-from repository import TransactionType
+from dto.models import TransactionType
 
 
 class TransactionRequest(BaseModel):

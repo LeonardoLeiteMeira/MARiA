@@ -1,13 +1,14 @@
 from collections.abc import Callable
 from uuid import UUID
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 
 from application import TransactionApplication
-from .request_models.transaction import TransactionRequest, TransactionFilter
-from .response_models.transaction import TransactionResponse, TransactionListResponse
+from dto import PaginatedDataListDto
+from dto.models import TransactionDto
 
+from .request_models.transaction import TransactionRequest, TransactionFilter
 
 class TransactionController(APIRouter):
     """Controller exposing transaction endpoints."""
@@ -15,7 +16,7 @@ class TransactionController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], TransactionApplication]):
         super().__init__(prefix="/transactions", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=TransactionResponse)
+        @self.post("/", response_model=TransactionDto)
         async def create_transaction(
             request: Request,
             data: TransactionRequest,
@@ -44,7 +45,7 @@ class TransactionController(APIRouter):
             await app.delete(transaction_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/{transaction_id}", response_model=TransactionResponse)
+        @self.get("/{transaction_id}", response_model=TransactionDto)
         async def get_transaction(
             transaction_id: UUID,
             app: TransactionApplication = Depends(app_dependency),
@@ -54,7 +55,8 @@ class TransactionController(APIRouter):
                 raise HTTPException(status_code=404, detail="transaction not found")
             return trxs[0]
 
-        @self.get("/", response_model=TransactionListResponse)
+        PaginatedTransactionsDto: TypeAlias = PaginatedDataListDto[TransactionDto]
+        @self.get("/", response_model=PaginatedTransactionsDto)
         async def get_transactions(
             request: Request,
             app: TransactionApplication = Depends(app_dependency),
@@ -62,9 +64,5 @@ class TransactionController(APIRouter):
         ):
             filter.user_id = request.state.user.id
             transaction_list = await app.get_user_transactions_with_filter(filter)
-            return TransactionListResponse(
-                data=transaction_list.transactions,
-                page_size=transaction_list.page_size,
-                page=transaction_list.page,
-                total_count=transaction_list.total_count
-            )
+            return transaction_list
+

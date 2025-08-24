@@ -1,19 +1,21 @@
 from collections.abc import Callable
 from uuid import UUID
-from typing import Annotated
+from typing import Annotated, TypeAlias
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 
 from application import ManagementPeriodApplication
+from dto.models import ManagementPeriodDto
+from dto import PaginatedDataListDto
+
 from .request_models.management_period import ManagementPeriodRequest, ManagementPeriodFilter
-from .response_models.management_period import ManagementPeriodResponse, ManagementPeriodListResponse
 
 
 class ManagementPeriodController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], ManagementPeriodApplication]):
         super().__init__(prefix="/management-periods", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=ManagementPeriodResponse)
+        @self.post("/", response_model=ManagementPeriodDto)
         async def create_period(
             request: Request,
             data: ManagementPeriodRequest,
@@ -42,7 +44,7 @@ class ManagementPeriodController(APIRouter):
             await app.delete(period_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/{period_id}", response_model=ManagementPeriodResponse)
+        @self.get("/{period_id}", response_model=ManagementPeriodDto)
         async def get_period(
             period_id: UUID,
             app: ManagementPeriodApplication = Depends(app_dependency),
@@ -52,7 +54,8 @@ class ManagementPeriodController(APIRouter):
                 raise HTTPException(status_code=404, detail="management period not found")
             return periods[0]
 
-        @self.get("/", response_model=ManagementPeriodListResponse)
+        PaginatedManagementPeriodDto: TypeAlias = PaginatedDataListDto[ManagementPeriodDto]
+        @self.get("/", response_model=PaginatedManagementPeriodDto)
         async def get_periods(
             request: Request,
             app: ManagementPeriodApplication = Depends(app_dependency),
@@ -60,4 +63,4 @@ class ManagementPeriodController(APIRouter):
         ):
             filter.user_id = request.state.user.id
             periods = await app.get_by_filter(filter)
-            return ManagementPeriodListResponse(data=periods)
+            return periods

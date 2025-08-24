@@ -3,7 +3,8 @@ from typing import TYPE_CHECKING
 
 from domain import TransactionDomain
 from repository import TransactionModel
-from dto import TransactionListDto
+from dto import PaginatedDataListDto
+from dto.models import TransactionDto
 
 if TYPE_CHECKING:
     from controllers.request_models.transaction import TransactionRequest, TransactionFilter
@@ -56,5 +57,5 @@ class TransactionApplication:
     async def get_by_ids(self, transaction_ids: list[UUID]) -> list[TransactionModel]:
         return await self._domain.get_by_ids(transaction_ids)
 
-    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> TransactionListDto:
+    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> PaginatedDataListDto[TransactionDto]:
         return await self._domain.get_user_transactions_with_filter(filter)

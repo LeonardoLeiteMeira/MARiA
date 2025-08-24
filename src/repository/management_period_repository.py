@@ -2,16 +2,20 @@ from typing import Sequence
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import select, update, delete, inspect
+from sqlalchemy import select, update, delete, inspect, func
+
+from dto import PaginatedDataListDto
+from dto.models import ManagementPeriodDto
 
 if TYPE_CHECKING:
     from controllers.request_models.management_period import ManagementPeriodFilter
 
 from .base_repository import BaseRepository
 from .db_models.management_period_model import ManagementPeriodModel
+from .mixin import ManagementPeriodFilterToSqlAlchemyMixin
 
 
-class ManagementPeriodRepository(BaseRepository):
+class ManagementPeriodRepository(BaseRepository, ManagementPeriodFilterToSqlAlchemyMixin):
     async def create(self, management_period: ManagementPeriodModel):
         async with self.session() as session:
             session.add(management_period)
@@ -22,11 +26,11 @@ class ManagementPeriodRepository(BaseRepository):
             raise Exception("management period id is not defined")
 
         mapper = inspect(ManagementPeriodModel)
-        cols = [c.key for c in mapper.attrs]
+        columns = [column.key for column in mapper.attrs]
         data = {
-            c: getattr(management_period, c)
-            for c in cols
-            if c not in ("id", "user_id") and getattr(management_period, c) is not None
+            column: getattr(management_period, column)
+            for column in columns
+            if column not in ("id", "user_id") and getattr(management_period, column) is not None
         }
 
         stmt = (
@@ -72,8 +76,25 @@ class ManagementPeriodRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> list[ManagementPeriodModel]:
-        stmt = select(ManagementPeriodModel).where(ManagementPeriodModel.user_id == filter.user_id)
+    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
+        stmt = select(ManagementPeriodModel)
+        stmt = self.apply_filters(stmt, filter, ManagementPeriodModel)
         async with self.session() as session:
+            count_stmt = select(func.count()).select_from(stmt.subquery())
+            total_result = await session.execute(count_stmt)
+            total_count = total_result.scalar_one()
+
+            stmt = self.apply_pagination(stmt, filter)
             cursor = await session.execute(stmt)
-            return list(cursor.scalars().all())
+            management_period_list = list(cursor.scalars().all())
+
+            management_period_list_dto = [ManagementPeriodDto.model_validate(model) for model in management_period_list]
+
+            return PaginatedDataListDto(
+                list_data=management_period_list_dto,
+                page=filter.page,
+                page_size=len(management_period_list),
+                total_count=total_count,
+            )
+
+            

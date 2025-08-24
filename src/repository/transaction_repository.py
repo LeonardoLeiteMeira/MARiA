@@ -3,7 +3,8 @@ import uuid
 
 from sqlalchemy import select, update, delete, inspect, func
 
-from dto import TransactionListDto
+from dto import PaginatedDataListDto
+from dto.models import TransactionDto
 
 from .base_repository import BaseRepository
 from .db_models.transaction_model import TransactionModel
@@ -74,7 +75,7 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> TransactionListDto:
+    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> PaginatedDataListDto[TransactionDto]:
         stmt = select(TransactionModel)
         stmt = self.apply_transaction_filters(stmt, filter, TransactionModel)
         async with self.session() as session:
@@ -86,12 +87,14 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
             cursor = await session.execute(stmt)
             transaction_list = list(cursor.scalars().all())
 
-            transaction_list_dto = TransactionListDto(
-                total_count,
-                page_size=len(transaction_list),
-                page=filter.page,
-                transactions=transaction_list
-            )
+        transaction_list_dto = [TransactionDto.model_validate(model) for model in transaction_list]
 
-            return transaction_list_dto
+        transaction_list_dto = PaginatedDataListDto(
+            total_count=total_count,
+            page_size=len(transaction_list),
+            page=filter.page,
+            list_data=transaction_list_dto
+        )
+
+        return transaction_list_dto
 

@@ -3,7 +3,7 @@ from uuid import UUID
 from pydantic import BaseModel, ConfigDict
 
 
-class ManagementPeriodResponse(BaseModel):
+class ManagementPeriodDto(BaseModel):
     id: UUID
     user_id: UUID
     created_at: datetime
@@ -13,10 +13,3 @@ class ManagementPeriodResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-
-class ManagementPeriodListResponse(BaseModel):
-    """Wrapper for management period collections enabling pagination metadata."""
-
-    data: list[ManagementPeriodResponse]
-
-    model_config = ConfigDict(from_attributes=True)

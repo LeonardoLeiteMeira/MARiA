@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING
 
 from domain import ManagementPeriodDomain
 from repository import ManagementPeriodModel
+from dto import PaginatedDataListDto
+from dto.models import ManagementPeriodDto
 
 if TYPE_CHECKING:
     from controllers.request_models.management_period import ManagementPeriodRequest, ManagementPeriodFilter
@@ -40,5 +42,5 @@ class ManagementPeriodApplication:
     async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
         return await self._domain.get_by_ids(period_ids)
 
-    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> list[ManagementPeriodModel]:
+    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._domain.get_by_filter(filter)
