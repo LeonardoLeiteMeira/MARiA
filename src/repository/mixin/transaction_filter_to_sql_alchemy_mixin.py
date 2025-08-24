@@ -49,10 +49,7 @@ class TransactionFilterToSqlAlchemyMixin:
             query = query.where(Transaction.amount_cents < filters.max_amount)
 
         if filters.name:
-            if getattr(filters, "str_filter", "like") == "ilike":
-                query = query.where(Transaction.name.ilike(f"%{filters.name}%"))
-            else:
-                query = query.where(Transaction.name.like(f"%{filters.name}%"))
+            query = query.where(Transaction.name.ilike(f"%{filters.name}%"))
 
         if filters.sort_order:
             if filters.sort_order == 'desc':

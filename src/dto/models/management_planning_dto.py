@@ -4,7 +4,7 @@ from typing import List
 from pydantic import BaseModel, ConfigDict
 
 
-class ManagementPlanningResponse(BaseModel):
+class ManagementPlanningDto(BaseModel):
     id: UUID
     user_id: UUID
     created_at: datetime
@@ -14,13 +14,5 @@ class ManagementPlanningResponse(BaseModel):
     management_period_id: UUID
     name: str | None
     tags: List[str] | None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class ManagementPlanningListResponse(BaseModel):
-    """Envelope for management planning lists allowing pagination metadata."""
-
-    data: list[ManagementPlanningResponse]
 
     model_config = ConfigDict(from_attributes=True)

@@ -1,6 +1,12 @@
 from uuid import UUID
+from typing import TYPE_CHECKING
 
 from repository import ManagementPlanningRepository, ManagementPlanningModel
+from dto.models import ManagementPlanningDto
+from dto import PaginatedDataListDto
+
+if TYPE_CHECKING:
+    from controllers.request_models.management_planning import ManagementPlanningFilter
 
 
 class ManagementPlanningDomain:
@@ -24,5 +30,5 @@ class ManagementPlanningDomain:
     async def get_by_ids(self, planning_ids: list[UUID]) -> list[ManagementPlanningModel]:
         return await self._repo.get_by_ids(planning_ids)
 
-    async def get_by_user_id(self, user_id: UUID) -> list[ManagementPlanningModel]:
-        return await self._repo.get_by_user_id(user_id)
+    async def get_by_user_id(self, filter: 'ManagementPlanningFilter') -> PaginatedDataListDto[ManagementPlanningDto]:
+        return await self._repo.get_by_user_id(filter)
