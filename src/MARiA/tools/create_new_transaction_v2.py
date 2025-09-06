@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
@@ -57,7 +56,7 @@ class CreateNewOutTransactionV2(ToolInterface):
             name=(str, Field(..., description="Nome escolhido para a transação")),
             amount=(float, Field(..., description="Valor da transação")),
             date=(str, Field(..., description="Data ISO da transação")),
-            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. O default é True")),
+            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. Se o usuário não informar, deve ser True!")),
             card_or_account=(
                 CardEnum,
                 Field(..., description="Cartão ou conta utilizada na saída"),
