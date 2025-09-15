@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from uuid import UUID
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 
@@ -20,14 +21,15 @@ class CategoryController(APIRouter):
         super().__init__(dependencies=[Depends(jwt_dependency)])
 
         # --- Category endpoints -----------------------------------------
-        @self.post("/categories", response_model=CategoryResponse)
+        @self.post("/categories", response_model=List[CategoryResponse])
         async def create_category(
             request: Request,
-            data: CategoryRequest,
+            data: List[CategoryRequest],
             app: CategoryApplication = Depends(app_dependency),
         ):
-            # enforce that category always belongs to authenticated user
-            data.user_id = request.state.user.id
+            user_id = request.state.user.id
+            for cat in data:
+                cat.user_id = user_id
             return await app.create_category(data)
 
         @self.put("/categories/{category_id}")

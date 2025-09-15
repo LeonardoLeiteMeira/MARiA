@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from domain import CategoryDomain, MacroCategoryDomain
 from repository import CategoryModel, MacroCategoryModel
@@ -16,9 +16,9 @@ class CategoryApplication:
         self._macro_category_domain = macro_category_domain
 
     # Category operations -------------------------------------------------
-    async def create_category(self, data: "CategoryRequest") -> CategoryModel:
-        category = CategoryModel(user_id=data.user_id, name=data.name, icon=data.icon)
-        return await self._category_domain.create(category)
+    async def create_category(self, data: List["CategoryRequest"]) -> List[CategoryModel]:
+        categories = [CategoryModel(user_id=cat.user_id, name=cat.name, icon=cat.icon) for cat in data]
+        return await self._category_domain.create(categories)
 
     async def update_category(self, category_id: UUID, data: "CategoryRequest") -> CategoryModel:
         category = CategoryModel(id=category_id, user_id=data.user_id, name=data.name, icon=data.icon)

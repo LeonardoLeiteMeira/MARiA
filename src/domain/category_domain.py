@@ -1,4 +1,5 @@
 from uuid import UUID
+from typing import List
 
 from repository import CategoryRepository, CategoryModel
 
@@ -9,9 +10,8 @@ class CategoryDomain:
     def __init__(self, repo: CategoryRepository):
         self._repo = repo
 
-    async def create(self, category: CategoryModel) -> CategoryModel:
-        await self._repo.create(category)
-        return category
+    async def create(self, categories: List[CategoryModel]) -> List[CategoryModel]:
+        return await self._repo.create(categories)
 
     async def update(self, category: CategoryModel) -> CategoryModel:
         await self._repo.update(category)

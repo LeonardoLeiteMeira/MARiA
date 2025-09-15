@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, List
 import uuid
 
 from sqlalchemy import select, update, delete, inspect
@@ -8,10 +8,11 @@ from .db_models.category_model import CategoryModel
 
 
 class CategoryRepository(BaseRepository):
-    async def create(self, category: CategoryModel):
+    async def create(self, categories: List[CategoryModel]) -> List[CategoryModel]:
         async with self.session() as session:
-            session.add(category)
+            session.add_all(categories)
             await session.commit()
+            return categories
 
     async def update(self, category: CategoryModel):
         if category.id is None:
