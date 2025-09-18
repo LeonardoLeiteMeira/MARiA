@@ -54,3 +54,7 @@ class AccountModel(BaseModel):
         String(5),
         nullable=False
     )
+    name: Mapped[str] = mapped_column(
+        String(5),
+        nullable=False
+    )
