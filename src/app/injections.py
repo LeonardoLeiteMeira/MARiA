@@ -12,6 +12,7 @@ from application import (
     ManagementPlanningApplication,
     AccountApplication,
     TransactionApplication,
+    UserApplication
 )
 from domain import (
     UserDomain,
@@ -321,8 +322,17 @@ def create_auth_application(appState: CustomState) -> Callable[[], AuthApplicati
 
     return dependency
 
-def  create_pluggy_auth_loader() ->  Callable[[], PluggyAuthLoader]:
+def create_pluggy_auth_loader() ->  Callable[[], PluggyAuthLoader]:
     def dependency() -> PluggyAuthLoader:
         return PluggyAuthLoader(settings)
+    
+    return dependency
+
+def create_user_application(appState: CustomState) -> Callable[[], UserApplication]:
+    def dependency(
+            user_domain=Depends(create_user_domain(appState)),
+            category_domain=Depends(create_category_domain(appState))
+        ) -> UserApplication:
+        return UserApplication(user_domain, category_domain)
     
     return dependency

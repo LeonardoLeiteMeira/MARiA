@@ -1,6 +1,8 @@
 from sqlalchemy import select
 from uuid import UUID
 
+from dto.models.user_dto import UserDto
+
 from .base_repository import BaseRepository
 from .db_models.user_model import UserModel
 from .db_models.revoked_token_model import RevokedToken
@@ -9,11 +11,19 @@ from .db_models.revoked_token_model import RevokedToken
 class AuthRepository(BaseRepository):
     """Data access for authentication-related tables."""
 
-    async def get_user_by_email(self, email: str) -> UserModel | None:
+    async def get_full_user_by_email(self, email: str) -> UserModel | None:
         stmt = select(UserModel).where(UserModel.email == email)
         async with self.session() as session:
             res = await session.execute(stmt)
             return res.scalars().first()
+        
+    async def get_base_user_by_email(self, email: str) -> UserDto | None:
+        stmt = select(UserModel).where(UserModel.email == email)
+        async with self.session() as session:
+            res = await session.execute(stmt)
+            full_user = res.scalars().first()
+            return UserDto.model_validate(full_user) 
+
 
     async def get_user_by_id(self, user_id: UUID) -> UserModel | None:
         stmt = select(UserModel).where(UserModel.id == user_id)

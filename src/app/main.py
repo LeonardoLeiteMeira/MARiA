@@ -9,7 +9,7 @@ from controllers import (
     NotionAuthorizationController,
     HealthCheckController,
     AuthController,
-    TestAuthController,
+    UserController,
     OpenFinanceConnectionController,
     ManagementPeriodController,
     CategoryController,
@@ -33,6 +33,7 @@ from .injections import (
     create_management_planning_application,
     create_account_application,
     create_transaction_application,
+    create_user_application
 )
 from .lifespan import lifespan
 
@@ -71,7 +72,7 @@ app.include_router(NotionAuthorizationController(notion_app_dependency))
 
 app.include_router(HealthCheckController(inject_application))
 app.include_router(AuthController(auth_app_dependency))
-app.include_router(TestAuthController(jwt_dependency))
+app.include_router(UserController(jwt_dependency, create_user_application(app.state)))
 app.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader(), create_open_finance_application(app.state)))
 
 # Dependencies for newly created application layers

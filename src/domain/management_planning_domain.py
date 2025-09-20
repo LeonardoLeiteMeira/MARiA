@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from repository import ManagementPlanningRepository, ManagementPlanningModel
 from dto.models import ManagementPlanningDto
@@ -15,9 +15,8 @@ class ManagementPlanningDomain:
     def __init__(self, repo: ManagementPlanningRepository):
         self._repo = repo
 
-    async def create(self, planning: ManagementPlanningModel) -> ManagementPlanningModel:
-        await self._repo.create(planning)
-        return planning
+    async def create(self, planning: List[ManagementPlanningModel]) -> ManagementPlanningModel:
+        return await self._repo.create(planning)
 
     async def update(self, planning: ManagementPlanningModel) -> ManagementPlanningModel:
         await self._repo.update(planning)

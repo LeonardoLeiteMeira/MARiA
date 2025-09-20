@@ -1,6 +1,6 @@
 from collections.abc import Callable
 from uuid import UUID
-from typing import TypeAlias, Annotated
+from typing import TypeAlias, Annotated, List
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query
 
@@ -15,13 +15,15 @@ class ManagementPlanningController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], ManagementPlanningApplication]):
         super().__init__(prefix="/management-plannings", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=ManagementPlanningDto)
+        @self.post("/", response_model=List[ManagementPlanningDto])
         async def create_planning(
             request: Request,
-            data: ManagementPlanningRequest,
+            data: List[ManagementPlanningRequest],
             app: ManagementPlanningApplication = Depends(app_dependency),
         ):
-            data.user_id = request.state.user.id
+            user_id = request.state.user.id
+            for plan in data:
+                plan.user_id = user_id
             return await app.create(data)
 
         @self.put("/{planning_id}")

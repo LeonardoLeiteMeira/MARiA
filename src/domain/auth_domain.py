@@ -1,6 +1,8 @@
 from datetime import datetime
 from uuid import UUID
 
+from dto.models.user_dto import UserDto
+
 from repository.auth_repository import AuthRepository
 from repository.db_models.user_model import UserModel
 
@@ -11,8 +13,11 @@ class AuthDomain:
     def __init__(self, repo: AuthRepository):
         self._repo = repo
 
-    async def get_user_by_email(self, email: str) -> UserModel | None:
-        return await self._repo.get_user_by_email(email)
+    async def get_full_user_by_email(self, email: str) -> UserModel | None:
+        return await self._repo.get_full_user_by_email(email)
+    
+    async def get_base_user_by_email(self, email: str) -> UserDto | None:
+        return await self._repo.get_base_user_by_email(email)
 
     async def get_user_by_id(self, user_id: UUID) -> UserModel | None:
         return await self._repo.get_user_by_id(user_id)

@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from application.auth_application import AuthApplication
-
+from dto.models.auth_user_dto import AuthUserDto
 
 class AuthController(APIRouter):
     def __init__(self, app_dependency: Callable[[], AuthApplication]):
@@ -21,20 +21,19 @@ class AuthController(APIRouter):
                 raise HTTPException(status_code=400, detail=str(exc))
             return {"detail": "created"}
 
-        @self.post("/login")
+        @self.post("/login", response_model=AuthUserDto)
         async def login(
             form: OAuth2PasswordRequestForm = Depends(),
             app: AuthApplication = Depends(app_dependency),
         ):
             try:
-                access_token = await app.login(form.username, form.password)
+                return await app.login(form.username, form.password)
             except ValueError:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail="Invalid credentials",
                     headers={"WWW-Authenticate": "Bearer"},
                 )
-            return {"access_token": access_token, "token_type": "bearer"}
 
         @self.post("/logout")
         async def logout(

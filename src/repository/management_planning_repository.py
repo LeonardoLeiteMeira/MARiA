@@ -1,4 +1,4 @@
-from typing import Sequence, TYPE_CHECKING
+from typing import Sequence, TYPE_CHECKING, List
 import uuid
 
 from sqlalchemy import select, update, delete, inspect, func
@@ -14,10 +14,11 @@ if TYPE_CHECKING:
     from controllers.request_models.management_planning import ManagementPlanningFilter
 
 class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSqlAlchemyMixin):
-    async def create(self, planning: ManagementPlanningModel):
+    async def create(self, planning: List[ManagementPlanningModel]) -> List[ManagementPlanningModel]:
         async with self.session() as session:
-            session.add(planning)
+            session.add_all(planning)
             await session.commit()
+            return planning
 
     async def update(self, planning: ManagementPlanningModel):
         if planning.id is None:

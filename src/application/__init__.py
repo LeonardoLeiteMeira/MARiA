@@ -8,6 +8,7 @@ from .category_application import CategoryApplication
 from .management_planning_application import ManagementPlanningApplication
 from .account_application import AccountApplication
 from .transaction_application import TransactionApplication
+from .user_application import UserApplication
 
 __all__ = [
     "MessageApplication",
@@ -19,4 +20,5 @@ __all__ = [
     "ManagementPlanningApplication",
     "AccountApplication",
     "TransactionApplication",
+    "UserApplication"
 ]

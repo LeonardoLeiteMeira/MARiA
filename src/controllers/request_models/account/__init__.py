@@ -11,3 +11,4 @@ class AccountRequest(BaseModel):
     opening_balance_cents: float
     icon: str | None = None
     currency: str
+    name: str

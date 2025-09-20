@@ -1,9 +1,10 @@
 from datetime import datetime, timedelta, timezone
 import uuid
 from uuid import UUID
-
 from jose import jwt
 
+from dto.models.user_dto import UserDto
+from dto.models.auth_user_dto import AuthUserDto
 from domain.auth_domain import AuthDomain
 from app.core.security import (
     decode_token,
@@ -22,7 +23,7 @@ class AuthApplication:
         self._domain = domain
 
     async def signup(self, username: str, password: str) -> None:
-        user = await self._domain.get_user_by_email(username)
+        user = await self._domain.get_full_user_by_email(username)
         if not user:
             raise ValueError("User not registered")
         if user.password:
@@ -30,11 +31,16 @@ class AuthApplication:
         user.password = hash_password(password)
         await self._domain.save_user(user)
 
-    async def login(self, username: str, password: str) -> str:
-        user = await self._domain.get_user_by_email(username)
+    async def login(self, username: str, password: str) -> AuthUserDto:
+        user = await self._domain.get_full_user_by_email(username)
         if not user or not verify_password(password, user.password):
             raise ValueError("Invalid credentials")
-        return self._create_access_token(user)
+        token = self._create_access_token(user)
+        return AuthUserDto(
+            user=UserDto.model_validate(user),
+            token_type='bearer',
+            access_token=token
+        )
 
     async def logout(self, token: str) -> None:
         payload = decode_token(token)

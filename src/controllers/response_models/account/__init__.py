@@ -14,6 +14,7 @@ class AccountResponse(BaseModel):
     opening_balance_cents: float
     icon: str | None
     currency: str
+    name: str
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -15,25 +15,15 @@ class AccountApplication:
         self._domain = domain
 
     async def create(self, data: "AccountRequest") -> AccountModel:
-        # Convert API payload into domain model before persisting
-        account = AccountModel(
-            user_id=data.user_id,
-            type=data.type,
-            opening_balance_cents=data.opening_balance_cents,
-            icon=data.icon,
-            currency=data.currency,
-        )
+        data_dict = data.model_dump()
+        account = AccountModel(**data_dict)
         return await self._domain.create(account)
 
     async def update(self, account_id: UUID, data: "AccountRequest") -> AccountModel:
-        account = AccountModel(
-            id=account_id,
-            user_id=data.user_id,
-            type=data.type,
-            opening_balance_cents=data.opening_balance_cents,
-            icon=data.icon,
-            currency=data.currency,
-        )
+        data_dict = data.model_dump()
+        account = AccountModel(**data_dict)
+        account.id = account_id
+
         return await self._domain.update(account)
 
     async def delete(self, account_id: UUID, user_id: UUID) -> None:

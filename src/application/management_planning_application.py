@@ -1,5 +1,5 @@
 from uuid import UUID
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from domain import ManagementPlanningDomain
 from repository import ManagementPlanningModel
@@ -16,15 +16,15 @@ class ManagementPlanningApplication:
     def __init__(self, domain: ManagementPlanningDomain):
         self._domain = domain
 
-    async def create(self, data: "ManagementPlanningRequest") -> ManagementPlanningModel:
-        planning = ManagementPlanningModel(
+    async def create(self, plan: List["ManagementPlanningRequest"]) -> ManagementPlanningModel:
+        planning = [ManagementPlanningModel(
             user_id=data.user_id,
             management_period_id=data.management_period_id,
             planned_value_cents=data.planned_value_cents,
             category_id=data.category_id,
             name=data.name,
             tags=data.tags,
-        )
+        ) for data in plan]
         return await self._domain.create(planning)
 
     async def update(self, planning_id: UUID, data: "ManagementPlanningRequest") -> ManagementPlanningModel:
