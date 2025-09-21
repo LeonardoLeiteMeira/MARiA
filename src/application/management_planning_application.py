@@ -17,26 +17,12 @@ class ManagementPlanningApplication:
         self._domain = domain
 
     async def create(self, plan: List["ManagementPlanningRequest"]) -> ManagementPlanningModel:
-        planning = [ManagementPlanningModel(
-            user_id=data.user_id,
-            management_period_id=data.management_period_id,
-            planned_value_cents=data.planned_value_cents,
-            category_id=data.category_id,
-            name=data.name,
-            tags=data.tags,
-        ) for data in plan]
+        planning = [ManagementPlanningModel(**(data.model_dump())) for data in plan]
         return await self._domain.create(planning)
 
     async def update(self, planning_id: UUID, data: "ManagementPlanningRequest") -> ManagementPlanningModel:
-        planning = ManagementPlanningModel(
-            id=planning_id,
-            user_id=data.user_id,
-            management_period_id=data.management_period_id,
-            planned_value_cents=data.planned_value_cents,
-            category_id=data.category_id,
-            name=data.name,
-            tags=data.tags,
-        )
+        planning = ManagementPlanningModel(**(data.model_dump()))
+        planning.id = planning_id
         return await self._domain.update(planning)
 
     async def delete(self, planning_id: UUID, user_id: UUID) -> None:
