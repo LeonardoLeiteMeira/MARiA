@@ -84,13 +84,15 @@ class CategoryController(APIRouter):
             return CategoryListResponse(data=categories)
 
         # --- Macro category endpoints -----------------------------------
-        @self.post("/macro-categories", response_model=MacroCategoryResponse)
+        @self.post("/macro-categories", response_model=List[MacroCategoryResponse])
         async def create_macro_category(
             request: Request,
-            data: CategoryRequest,
+            data: List[CategoryRequest],
             app: CategoryApplication = Depends(app_dependency),
         ):
-            data.user_id = request.state.user.id
+            user_id = request.state.user.id
+            for cat in data:
+                cat.user_id = user_id
             return await app.create_macro_category(data)
 
         @self.put("/macro-categories/{macro_id}")

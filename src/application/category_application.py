@@ -35,9 +35,12 @@ class CategoryApplication:
         return await self._category_domain.get_by_user_id(user_id)
 
     # Macro category operations ------------------------------------------
-    async def create_macro_category(self, data: "CategoryRequest") -> MacroCategoryModel:
-        macro = MacroCategoryModel(user_id=data.user_id, name=data.name, icon=data.icon)
-        return await self._macro_category_domain.create(macro)
+    async def create_macro_category(self, list_data: List["CategoryRequest"]) -> MacroCategoryModel:
+        macro_list = [
+            MacroCategoryModel(**(data.model_dump())) 
+                for data in list_data
+        ]
+        return await self._macro_category_domain.create(macro_list)
 
     async def update_macro_category(self, macro_id: UUID, data: "CategoryRequest") -> MacroCategoryModel:
         macro = MacroCategoryModel(id=macro_id, user_id=data.user_id, name=data.name, icon=data.icon)

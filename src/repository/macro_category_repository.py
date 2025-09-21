@@ -1,4 +1,4 @@
-from typing import Sequence
+from typing import Sequence, List
 import uuid
 
 from sqlalchemy import select, update, delete, inspect
@@ -8,10 +8,11 @@ from .db_models.macro_category_model import MacroCategoryModel
 
 
 class MacroCategoryRepository(BaseRepository):
-    async def create(self, macro_category: MacroCategoryModel):
+    async def create(self, macro_categories: List[MacroCategoryModel]):
         async with self.session() as session:
-            session.add(macro_category)
+            session.add_all(macro_categories)
             await session.commit()
+            return macro_categories
 
     async def update(self, macro_category: MacroCategoryModel):
         if macro_category.id is None:

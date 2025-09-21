@@ -5,13 +5,14 @@ from domain import (
     ManagementPeriodDomain,
     ManagementPlanningDomain,
     CategoryDomain,
+    MacroCategoryDomain,
     TransactionDomain
 )
 from dto.models.transaction_dto import TransactionType
-from repository import ManagementPeriodModel, CategoryModel
+from repository import ManagementPeriodModel, CategoryModel, MacroCategoryModel
 from dto import PaginatedDataListDto
 from dto.models import ManagementPeriodDto, ManagementPlanningDto, TransactionDto
-from dto.aggregates import DashboardAggregate, PlanningAggregate, CategoryTransactionAggregate
+from dto.aggregates import DashboardAggregate, PlanningAggregate, CategoryTransactionAggregate, MacroCategoryTransactionAggregate
 
 from controllers.request_models.management_period import ManagementPeriodFilter
 from controllers.request_models.management_planning import ManagementPlanningFilter
@@ -32,12 +33,14 @@ class ManagementPeriodApplication:
             domain: ManagementPeriodDomain,
             plannig_domain: ManagementPlanningDomain,
             category_domain: CategoryDomain,
-            transaction_domain: TransactionDomain, 
+            macro_category_domain: MacroCategoryDomain,
+            transaction_domain: TransactionDomain,
         ):
             self._domain = domain
             self.plannig_domain = plannig_domain
             self.category_domain = category_domain
             self.transaction_domain = transaction_domain
+            self.macro_category_domain = macro_category_domain
 
     async def create(self, data: "ManagementPeriodRequest") -> ManagementPeriodModel:
         period = ManagementPeriodModel(**(data.model_dump()))
@@ -57,10 +60,11 @@ class ManagementPeriodApplication:
     async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._domain.get_by_filter(filter)
 
-    async def get_current_period_resume(self, user_id: UUID):
+    async def get_current_period_resume(self, user_id: UUID) -> DashboardAggregate:
         current_period = await self.get_current_management_period(user_id)
         plans = await self.__get_management_plan(user_id, current_period.id)
         categories = await self.category_domain.get_by_user_id(user_id)
+        macro_categories = await self.macro_category_domain.get_by_user_id(user_id)
         transactions = await self.__get_period_transactions(user_id, current_period.id)
 
         categories_by_id: Dict[str, CategoryModel] = {}
@@ -70,6 +74,10 @@ class ManagementPeriodApplication:
         plans_by_category: Dict[str, ManagementPlanningDto] = {}
         for plan in plans:
             plans_by_category[str(plan.category_id)] = plan
+
+        macro_categories_by_id: Dict[str, MacroCategoryModel] = {}
+        for macro in macro_categories:
+            macro_categories_by_id[str(macro.id)] = macro
 
         # Total de entradas
         all_incomes = [transaction for transaction in transactions if transaction.type == TransactionType.INCOME]
@@ -106,13 +114,28 @@ class ManagementPeriodApplication:
             expenses_by_category[key].transactions.append(expense)
             expenses_by_category[key].total += expense.amount_cents
 
+        # Total gasto em cada macro categoria
+        expenses_by_macro_category: Dict[str, MacroCategoryTransactionAggregate] = {}
+        for expense in all_expenses:
+            key = str(expense.macro_category_id)
+            if not (key in expenses_by_macro_category):
+                macro_cat = macro_categories_by_id[key]
+                macro_aggregate = MacroCategoryTransactionAggregate(
+                    macro_category_id=expense.macro_category_id,
+                    transactions=[],
+                    total=0,
+                    macro_category_name=macro_cat.name,
+                    icon=macro_cat.icon
+                )
+                expenses_by_macro_category[key] = macro_aggregate
+            expenses_by_macro_category[key].transactions.append(expense)
+            expenses_by_macro_category[key].total += expense.amount_cents
+
         # Total gasto de cada planejamento
         plan_aggregate: List[PlanningAggregate] = []
         for plan in plans:
-
             expense_data = expenses_by_category.get(str(plan.category_id), None)
-            total_expenses_plan = expense_data['total'] if expense_data != None else 0
-
+            total_expenses_plan = expense_data.total if expense_data != None else 0
             new_plan = PlanningAggregate(
                 plan_id = plan.id,
                 category_id = plan.category_id,
@@ -120,9 +143,9 @@ class ManagementPeriodApplication:
                 total_expenses = total_expenses_plan,
                 total_available = plan.planned_value_cents - total_expenses_plan,
                 name = plan.name,
-                category_name = expense_data['category_name'] if expense_data != None else None,
-                category_icon =  expense_data['category_icon'] if expense_data != None else None,
-                transactions = expense_data['transactions'] if expense_data != None else [],
+                category_name = expense_data.category_name if expense_data != None else None,
+                category_icon =  expense_data.icon if expense_data != None else None,
+                transactions = expense_data.transactions if expense_data != None else [],
             )
 
             plan_aggregate.append(new_plan)
@@ -136,6 +159,7 @@ class ManagementPeriodApplication:
         total_expenses_out_plan = sum(expense.amount_cents for expense in transactions_without_plan)
 
         final_dashboard = DashboardAggregate(
+            management_period_id=current_period.id,
             start_period = current_period.start_date,
             end_period = current_period.end_date,
             total_incomes = total_incomes,
@@ -144,10 +168,11 @@ class ManagementPeriodApplication:
             available_to_plan = available_to_plan,
             total_expenses_out_plan = total_expenses_out_plan,
             planning_aggregate = plan_aggregate,
+            expense_by_category=expenses_by_category,
+            expense_by_macro_category=expenses_by_macro_category
         )
 
-        print(final_dashboard)
-
+        return final_dashboard
 
 
     async def get_current_management_period(self, user_id: UUID) -> ManagementPeriodDto:

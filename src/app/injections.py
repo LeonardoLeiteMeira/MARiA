@@ -209,9 +209,10 @@ def create_management_period_application(appState: CustomState) -> Callable[[], 
             domain=Depends(create_management_period_domain(appState)),
             plan_domain=Depends(create_management_planning_domain(appState)),
             category_domain=Depends(create_category_domain(appState)),
+            macro_category_domain=Depends(create_macro_category_domain(appState)),
             transaction_domain=Depends(create_transaction_domain(appState)),
         ) -> ManagementPeriodApplication:
-        return ManagementPeriodApplication(domain, plan_domain, category_domain, transaction_domain)
+        return ManagementPeriodApplication(domain, plan_domain, category_domain, macro_category_domain,transaction_domain)
     return dependency
 
 

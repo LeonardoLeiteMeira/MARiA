@@ -1,4 +1,5 @@
 from uuid import UUID
+from typing import List
 
 from repository import MacroCategoryRepository, MacroCategoryModel
 
@@ -9,9 +10,8 @@ class MacroCategoryDomain:
     def __init__(self, repo: MacroCategoryRepository):
         self._repo = repo
 
-    async def create(self, macro: MacroCategoryModel) -> MacroCategoryModel:
-        await self._repo.create(macro)
-        return macro
+    async def create(self, macros: List[MacroCategoryModel]) -> MacroCategoryModel:
+        return await self._repo.create(macros)
 
     async def update(self, macro: MacroCategoryModel) -> MacroCategoryModel:
         await self._repo.update(macro)
