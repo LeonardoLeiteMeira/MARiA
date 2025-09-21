@@ -13,8 +13,8 @@ class ManagementPlanningRequest(BaseModel):
 
 class ManagementPlanningFilter(BaseModel):
     user_id: UUID | None = None
-    management_period_id: list[str]| None = None
-    category_id: list[str]| None = None
+    management_period_id: list[UUID]| None = None
+    category_id: list[UUID]| None = None
     name: str| None = None
     tags: list[str]| None = None
     page: int = 1

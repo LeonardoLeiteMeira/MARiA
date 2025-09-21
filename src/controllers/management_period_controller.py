@@ -23,6 +23,14 @@ class ManagementPeriodController(APIRouter):
         ):
             data.user_id = request.state.user.id
             return await app.create(data)
+        
+        @self.get('/current-resume')
+        async def get_resume_current_period(
+            request: Request,
+            app: ManagementPeriodApplication = Depends(app_dependency),
+        ):
+            user_id = request.state.user.id
+            await app.get_current_period_resume(user_id)
 
         @self.put("/{period_id}")
         async def update_period(

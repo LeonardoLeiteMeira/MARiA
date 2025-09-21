@@ -25,12 +25,12 @@ class TransactionRequest(BaseModel):
 class TransactionFilter(BaseModel):
     user_id: UUID = None
     tags: list[str] = None
-    destination_account_id: list[str] = None
-    source_account_id: list[str] = None
-    management_period_id: list[str] = None
+    destination_account_id: list[UUID] = None
+    source_account_id: list[UUID] = None
+    management_period_id: list[UUID] = None
     type: list[TransactionType] = None
-    macro_category_id: list[str] = None
-    category_id: list[str] = None
+    macro_category_id: list[UUID] = None
+    category_id: list[UUID] = None
     occurred_at_min: datetime = None
     occurred_at_max: datetime = None
     min_amount: float = None
