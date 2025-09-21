@@ -10,7 +10,7 @@ class PlanningAggregate(BaseModel):
     plan_value_cents: float
     total_expenses: float
     total_available: float
-    name: str
-    category_name: str | None
+    name: str | None
+    category_name: str
     category_icon: str | None
     transactions: List[TransactionDto]

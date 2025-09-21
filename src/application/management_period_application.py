@@ -136,6 +136,7 @@ class ManagementPeriodApplication:
         for plan in plans:
             expense_data = expenses_by_category.get(str(plan.category_id), None)
             total_expenses_plan = expense_data.total if expense_data != None else 0
+            category = categories_by_id[str(plan.category_id)]
             new_plan = PlanningAggregate(
                 plan_id = plan.id,
                 category_id = plan.category_id,
@@ -143,8 +144,8 @@ class ManagementPeriodApplication:
                 total_expenses = total_expenses_plan,
                 total_available = plan.planned_value_cents - total_expenses_plan,
                 name = plan.name,
-                category_name = expense_data.category_name if expense_data != None else None,
-                category_icon =  expense_data.icon if expense_data != None else None,
+                category_name = category.name,
+                category_icon =  category.icon,
                 transactions = expense_data.transactions if expense_data != None else [],
             )
 

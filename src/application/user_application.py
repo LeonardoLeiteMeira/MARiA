@@ -8,5 +8,5 @@ class UserApplication:
 
     async def is_user_empty(self, user: UserModel) -> bool:
         categories = await self.__category_domain.get_by_user_id(user.id)
-        # return True
+
         return len(categories) == 0
