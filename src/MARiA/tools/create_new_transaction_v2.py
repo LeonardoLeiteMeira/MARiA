@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
@@ -13,7 +12,7 @@ from external.notion.enum import UserDataTypes
 
 class CreateNewOutTransactionV2(ToolInterface):
     name: str = "criar_nova_transacao_de_saida"
-    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
+    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar!"
     args_schema: Type[BaseModel] = None
     __notion_user_data: NotionUserData = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
@@ -56,8 +55,8 @@ class CreateNewOutTransactionV2(ToolInterface):
             "CreateNewOutTransactionInputDynamic",
             name=(str, Field(..., description="Nome escolhido para a transação")),
             amount=(float, Field(..., description="Valor da transação")),
-            date=(str, Field(..., description="Data ISO da transação")),
-            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. O default é True")),
+            date=(str, Field(..., description="Data ISO da transação. Use a data correta. Se o usuario nao fornecer use a de hoje!")),
+            hasPaid=(bool, Field(..., description="Se a transação foi paga ou não. Se o usuário não informar, deve ser True!")),
             card_or_account=(
                 CardEnum,
                 Field(..., description="Cartão ou conta utilizada na saída"),
