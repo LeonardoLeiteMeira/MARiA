@@ -44,13 +44,13 @@ class AccountController(APIRouter):
             await app.delete(account_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/", response_model=AccountListResponse)
+        @self.get("/", response_model=list[AccountResponse])
         async def get_accounts_by_user(
             request: Request,
             app: AccountApplication = Depends(app_dependency),
         ):
             accounts = await app.get_by_user_id(request.state.user.id)
-            return AccountListResponse(data=accounts)
+            return accounts
 
         @self.get("/{account_id}", response_model=AccountResponse)
         async def get_account(

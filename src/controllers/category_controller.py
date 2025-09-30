@@ -55,14 +55,14 @@ class CategoryController(APIRouter):
             await app.delete_category(category_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/categories/user", response_model=CategoryListResponse)
+        @self.get("/categories/user", response_model=list[CategoryResponse])
         async def get_categories_by_user(
             request: Request,
             app: CategoryApplication = Depends(app_dependency),
         ):
             # list only categories owned by the authenticated user
             categories = await app.get_categories_by_user(request.state.user.id)
-            return CategoryListResponse(data=categories)
+            return categories
 
         @self.get("/categories/{category_id}", response_model=CategoryResponse)
         async def get_category(
@@ -74,14 +74,14 @@ class CategoryController(APIRouter):
                 raise HTTPException(status_code=404, detail="category not found")
             return categories[0]
 
-        @self.get("/categories", response_model=CategoryListResponse)
+        @self.get("/categories", response_model=list[CategoryResponse])
         async def get_categories(
             ids: list[UUID] | None = Query(default=None),
             app: CategoryApplication = Depends(app_dependency),
         ):
             ids = ids or []
             categories = await app.get_categories_by_ids(ids)
-            return CategoryListResponse(data=categories)
+            return categories
 
         # --- Macro category endpoints -----------------------------------
         @self.post("/macro-categories", response_model=List[MacroCategoryResponse])
@@ -116,14 +116,14 @@ class CategoryController(APIRouter):
             await app.delete_macro_category(macro_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/macro-categories/user", response_model=MacroCategoryListResponse)
+        @self.get("/macro-categories/user", response_model=list[MacroCategoryResponse])
         async def get_macro_by_user(
             request: Request,
             app: CategoryApplication = Depends(app_dependency),
         ):
             # fetch macro categories for the authenticated user only
             macros = await app.get_macro_categories_by_user(request.state.user.id)
-            return MacroCategoryListResponse(data=macros)
+            return macros
 
         @self.get("/macro-categories/{macro_id}", response_model=MacroCategoryResponse)
         async def get_macro_category(

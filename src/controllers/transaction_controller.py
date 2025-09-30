@@ -16,7 +16,7 @@ class TransactionController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], TransactionApplication]):
         super().__init__(prefix="/transactions", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=TransactionDto)
+        @self.post("", response_model=TransactionDto)
         async def create_transaction(
             request: Request,
             data: TransactionRequest,
@@ -56,7 +56,7 @@ class TransactionController(APIRouter):
             return trxs[0]
 
         PaginatedTransactionsDto: TypeAlias = PaginatedDataListDto[TransactionDto]
-        @self.get("/", response_model=PaginatedTransactionsDto)
+        @self.get("", response_model=PaginatedTransactionsDto)
         async def get_transactions(
             request: Request,
             app: TransactionApplication = Depends(app_dependency),
