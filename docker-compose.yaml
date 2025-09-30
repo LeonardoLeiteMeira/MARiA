@@ -20,7 +20,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.maria_prisma_web.rule=Host(`app.alemdatech.com`)"
       - "traefik.http.routers.maria_prisma_web.entrypoints=websecure"
-      - "traefik.http.routers.maria_prisma_web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.maria_prisma_web.tls.certresolver=le"
       - "traefik.http.services.maria_prisma_web.loadbalancer.server.port=80"
 
   api:
