@@ -16,7 +16,7 @@ class ManagementPeriodController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], ManagementPeriodApplication]):
         super().__init__(prefix="/management-periods", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=ManagementPeriodDto)
+        @self.post("", response_model=ManagementPeriodDto)
         async def create_period(
             request: Request,
             data: ManagementPeriodRequest,

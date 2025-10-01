@@ -39,4 +39,4 @@ ENV PYTHONUNBUFFERED=1 \
     PYTHONPATH=/app/src
 
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",  "--log-config", "log_config.yaml"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",  "--log-config", "log_config.yaml", "--proxy-headers", "--forwarded-allow-ips", "*"]
