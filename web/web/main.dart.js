@@ -27542,7 +27542,7 @@ QJ:function QJ(a){this.a=a},
 aGT:function aGT(){},
 aGU:function aGU(){},
 aGV:function aGV(){},
-b8A(){var s=null,r=A.oP(new A.aG2(),"LoginPage","/",B.cC),q=t.yo,p=A.oP(new A.aG3(),"FirstPlan","/first-plan",A.b([A.oP(new A.aG4(),"FirstIncome","/income",B.cC),A.oP(new A.aG5(),"CategoryValues","values",B.cC)],q)),o=A.b([A.aqh(A.b([A.oP(new A.aG6(),"Resume","/resume",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG7(),"Dashboard","/dashboard",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG8(),"Settings","/settings",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG9(),"MARiA","/maria",B.cC)],q))],t.uP)
+b8A(){var s=null,r=A.oP(new A.aG2(),"LoginPage","/",B.cC),q=t.yo,p=A.oP(new A.aG3(),"FirstPlan","/first-plan",A.b([A.oP(new A.aG4(),"FirstIncome","income",B.cC),A.oP(new A.aG5(),"CategoryValues","values",B.cC)],q)),o=A.b([A.aqh(A.b([A.oP(new A.aG6(),"Resume","/resume",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG7(),"Dashboard","/dashboard",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG8(),"Settings","/settings",B.cC)],q)),A.aqh(A.b([A.oP(new A.aG9(),"MARiA","/maria",B.cC)],q))],t.uP)
 r=A.b([r,p,new A.pH(s,new A.aGa(),s,A.b9L(),o,new A.b5(s,t.al),s,A.b2c(o),s)],q)
 return A.aZY(!1,s,s,s,s,s,s,s,s,!1,s,!0,s,!1,new A.Wx(new A.ans(r,A.b9M(),5)))},
 aG2:function aG2(){},
