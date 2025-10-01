@@ -64,7 +64,7 @@ class ManagementPeriodController(APIRouter):
             return periods[0]
 
         PaginatedManagementPeriodDto: TypeAlias = PaginatedDataListDto[ManagementPeriodDto]
-        @self.get("/", response_model=PaginatedManagementPeriodDto)
+        @self.get("", response_model=PaginatedManagementPeriodDto)
         async def get_periods(
             request: Request,
             app: ManagementPeriodApplication = Depends(app_dependency),
