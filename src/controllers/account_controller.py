@@ -15,7 +15,7 @@ class AccountController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], AccountApplication]):
         super().__init__(prefix="/accounts", dependencies=[Depends(jwt_dependency)])
 
-        @self.post("/", response_model=AccountResponse)
+        @self.post("", response_model=AccountResponse)
         async def create_account(
             request: Request,
             data: AccountRequest,
@@ -44,7 +44,7 @@ class AccountController(APIRouter):
             await app.delete(account_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("/", response_model=list[AccountResponse])
+        @self.get("", response_model=list[AccountResponse])
         async def get_accounts_by_user(
             request: Request,
             app: AccountApplication = Depends(app_dependency),
