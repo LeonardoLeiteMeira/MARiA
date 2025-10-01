@@ -42,4 +42,8 @@ Pesquisar sobre e implementar uma cache no redis para as chamadas de tools. Dess
 - poetry run alembic upgrade head
 - poetry run alembic downgrade -1
 
+# Access database in productioin
+
+docker compose exec -e PGPASSWORD='passwordHere' containerName psql -U user
+
 
