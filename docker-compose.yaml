@@ -1,6 +1,9 @@
 services:
   traefik:
     image: traefik:v3.0
+    cpus: "0.25"
+    mem_limit: "256m"
+    pids_limit: 256
     container_name: traefik
     restart: always
     ports:
@@ -15,6 +18,9 @@ services:
   maria_prisma_web:
     build: ./web
     init: true
+    pids_limit: 256
+    cpus: "0.25"
+    mem_limit: "256m"
     container_name: maria_web
     restart: unless-stopped
     labels:
@@ -26,12 +32,10 @@ services:
 
   api:
     build: .
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-        reservations:
-          memory: 128m
+    mem_limit: "512m"
+    cpus: "1.0"
+    pids_limit: 512
+    mem_reservation: "384m"
     container_name: fastapi_app
     init: true
     env_file:
@@ -56,12 +60,10 @@ services:
     container_name: evolution_api
     init: true
     image: atendai/evolution-api
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-        reservations:
-          memory: 128m
+    mem_limit: "768m"
+    cpus: "1.0"
+    pids_limit: 1024
+    mem_reservation: "512m"
     restart: always
     ports:
       - "8080:8080"
@@ -82,12 +84,10 @@ services:
   database:
     container_name: postgres_db
     image: postgres:latest
-    deploy:
-      resources:
-          limits:
-            memory: 512m
-          reservations:
-            memory: 256m
+    mem_limit: "1g"
+    cpus: "1.0"
+    pids_limit: 2048
+    mem_reservation: "768m"
     restart: always
     # ports:
     #   - "5432:5432"
