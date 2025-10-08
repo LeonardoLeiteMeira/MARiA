@@ -286,8 +286,11 @@ def create_account_domain(appState: CustomState) -> Callable[[], AccountDomain]:
 
 
 def create_account_application(appState: CustomState) -> Callable[[], AccountApplication]:
-    def dependency(domain=Depends(create_account_domain(appState))) -> AccountApplication:
-        return AccountApplication(domain)
+    def dependency(
+            domain=Depends(create_account_domain(appState)),
+            transaction_domain=Depends(create_transaction_domain(appState))
+        ) -> AccountApplication:
+        return AccountApplication(domain, transaction_domain)
     return dependency
 
 
