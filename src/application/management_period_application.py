@@ -185,7 +185,7 @@ class ManagementPeriodApplication:
         )
         management_result = await self._domain.get_by_filter(management_filter)
         if len(management_result.list_data) == 0:
-            raise "There is no management period to read"
+            raise ValueError("There is no management period to read")
         
         return management_result.list_data[0]
     

@@ -53,7 +53,7 @@ class AgentBase:
 
     async def set_structured_output(self, structured_model):
         if self.agent == None:
-            raise "AgentBase - Agent not Initialized"
+            raise ValueError("AgentBase - Agent not Initialized")
         
         if self.agent_with_tools != None:
             self.agent_with_structured_output = self.agent_with_tools.with_str

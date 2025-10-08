@@ -14,7 +14,7 @@ class UserRepository(BaseRepository):
 
     async def update_user(self, user: UserModel):
         if user.id is None:
-            raise "user id is not defined"
+            raise ValueError("user id is not defined")
         stmt = (
             update(UserModel)
             .where(UserModel.id == user.id)
