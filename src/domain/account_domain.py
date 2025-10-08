@@ -4,8 +4,6 @@ from repository import AccountRepository, AccountModel, AccountType
 
 
 class AccountDomain:
-    """Domain layer for account operations."""
-
     def __init__(self, repo: AccountRepository):
         self._repo = repo
 

@@ -9,6 +9,7 @@ from .macro_category_domain import MacroCategoryDomain
 from .management_planning_domain import ManagementPlanningDomain
 from .account_domain import AccountDomain
 from .transaction_domain import TransactionDomain
+from .recover_password_domain import RecoverPasswordDomain
 
 __all__ = [
     "UserDomain",
@@ -21,4 +22,5 @@ __all__ = [
     "ManagementPlanningDomain",
     "AccountDomain",
     "TransactionDomain",
+    "RecoverPasswordDomain",
 ]

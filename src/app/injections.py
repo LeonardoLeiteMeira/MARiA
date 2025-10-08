@@ -25,6 +25,7 @@ from domain import (
     ManagementPlanningDomain,
     AccountDomain,
     TransactionDomain,
+    RecoverPasswordDomain,
 )
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
@@ -45,6 +46,7 @@ from repository import (
     ManagementPlanningRepository,
     AccountRepository,
     TransactionRepository,
+    RecoverPasswordRepository,
 )
 from external.notion import NotionFactory
 from external.pluggy import PluggyAuthLoader
@@ -308,6 +310,18 @@ def create_transaction_application(appState: CustomState) -> Callable[[], Transa
     return dependency
 
 
+def create_recover_password_repository(appState: CustomState) -> Callable[[], RecoverPasswordRepository]:
+    def dependency():
+        return RecoverPasswordRepository(appState.database)
+    return dependency
+
+
+def create_recover_password_domain(appState: CustomState) -> Callable[[], RecoverPasswordDomain]:
+    def dependency(repo=Depends(create_recover_password_repository(appState))):
+        return RecoverPasswordDomain(repo)
+    return dependency
+
+
 def create_auth_repository(appState: CustomState) -> Callable[[], AuthRepository]:
     def dependency():
         return AuthRepository(appState.database)
@@ -323,8 +337,12 @@ def create_auth_domain(appState: CustomState) -> Callable[[], AuthDomain]:
 
 
 def create_auth_application(appState: CustomState) -> Callable[[], AuthApplication]:
-    def dependency(domain=Depends(create_auth_domain(appState))) -> AuthApplication:
-        return AuthApplication(domain)
+    def dependency(
+        domain=Depends(create_auth_domain(appState)),
+        message_service=Depends(create_message_service()),
+        recover_password_domain=Depends(create_recover_password_domain(appState)),
+    ) -> AuthApplication:
+        return AuthApplication(domain, message_service, recover_password_domain)
 
     return dependency
 

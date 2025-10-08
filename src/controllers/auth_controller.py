@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 
 from application.auth_application import AuthApplication
+from controllers.request_models.recover_password import RecoverPasswordRequest
 from dto.models.auth_user_dto import AuthUserDto
 
 class AuthController(APIRouter):
@@ -42,3 +43,19 @@ class AuthController(APIRouter):
         ):
             await app.logout(token)
             return {"detail": "revoked"}
+        
+        @self.post("/recover-code")
+        async def get_recover_code(email: str, app: AuthApplication = Depends(app_dependency)):
+            await app.get_recover_code(email)
+            return 202
+
+        @self.post("/recover")
+        async def recover(
+            recoverData: RecoverPasswordRequest,
+            app: AuthApplication = Depends(app_dependency)
+        ):
+            await app.update_password_by_code(
+                recoverData.user_email,
+                recoverData.code,
+                recoverData.new_password,
+            )

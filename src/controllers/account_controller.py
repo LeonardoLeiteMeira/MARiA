@@ -2,9 +2,10 @@ from collections.abc import Callable
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from typing import Annotated
+from typing import Annotated, List
 
 from application import AccountApplication
+from dto.aggregates.accout_with_balance_aggregate import AccountWithBalanceAggregate
 from .request_models.account import AccountRequest
 from .response_models.account import AccountResponse, AccountListResponse
 
@@ -61,3 +62,11 @@ class AccountController(APIRouter):
             if not accounts:
                 raise HTTPException(status_code=404, detail="account not found")
             return accounts[0]
+        
+        self.get("/with-balance", response_model=List[AccountWithBalanceAggregate])
+        async def get_accounts_with_balance(
+                request: Request,
+                app: AccountApplication = Depends(app_dependency),
+            ):
+            user_id = request.state.user.id
+            await app.get_accounts_with_balance(user_id)

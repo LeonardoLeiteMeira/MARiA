@@ -17,6 +17,7 @@ from .db_models.macro_category_model import MacroCategoryModel
 from .db_models.management_planning_model import ManagementPlanningModel
 from .db_models.account_model import AccountModel, AccountType
 from .db_models.transaction_model import TransactionModel
+from .db_models.recover_password_model import RecoverPasswordModel
 from .notion_authorization_repository import NotionAuthorizationRepository
 from .user_repository import UserRepository
 from .notion_database_repository import NotionDatabaseRepository
@@ -28,6 +29,7 @@ from .macro_category_repository import MacroCategoryRepository
 from .management_planning_repository import ManagementPlanningRepository
 from .account_repository import AccountRepository
 from .transaction_repository import TransactionRepository
+from .recover_password_repository import RecoverPasswordRepository
 
 __all__ = [
     "UserRepository",
@@ -55,6 +57,8 @@ __all__ = [
     "AccountModel",
     "AccountType",
     "TransactionModel",
+    "RecoverPasswordModel",
+    "RecoverPasswordRepository",
     "ManagementPeriodRepository",
     "CategoryRepository",
     "MacroCategoryRepository",
