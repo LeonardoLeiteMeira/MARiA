@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from uuid import UUID
 from datetime import datetime
 
@@ -12,5 +12,7 @@ class AccountWithBalanceAggregate(BaseModel):
     icon: str | None
     currency: str
     name: str | None
-    balance: float
-    balance_date: datetime
+    balance_cents: float|None = 0
+    balance_date: datetime = Field(default_factory=datetime.now)
+
+    model_config = ConfigDict(from_attributes=True)

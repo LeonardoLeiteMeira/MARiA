@@ -58,3 +58,7 @@ class AccountModel(BaseModel):
         String(5),
         nullable=False
     )
+    deleted_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP, 
+        default=None
+    )

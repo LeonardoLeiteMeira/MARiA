@@ -1,4 +1,5 @@
 from uuid import UUID
+from datetime import datetime
 
 from repository import AccountRepository, AccountModel, AccountType
 
@@ -16,9 +17,12 @@ class AccountDomain:
         return account
 
     async def delete(self, account_id: UUID, user_id: UUID) -> None:
-        # propagate user filter to repository to avoid cross-user operations
-        account = AccountModel(id=account_id, user_id=user_id)
-        await self._repo.delete(account)
+        account = AccountModel(
+            id=account_id,
+            user_id=user_id,
+            deleted_at=datetime.now()
+        )
+        await self._repo.update(account)
 
     async def get_by_ids(self, account_ids: list[UUID]) -> list[AccountModel]:
         return await self._repo.get_by_ids(account_ids)
