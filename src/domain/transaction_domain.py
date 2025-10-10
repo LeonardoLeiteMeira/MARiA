@@ -30,17 +30,16 @@ class TransactionDomain:
     async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> PaginatedDataListDto[TransactionDto]:
         return await self._repo.get_user_transactions_with_filter(filter)
     
-    async def sum_transactions_from_source_account(self, source_account_id: UUID, user_id: UUID) -> PaginatedDataListDto[TransactionDto]:
+    async def sum_transactions_from_source_account(self, source_account_id: UUID, user_id: UUID) -> float:
         transaction_filter = TransactionFilter(
-            source_account_id=source_account_id,
+            source_account_id=[source_account_id],
             user_id=user_id
         )
-        return await self._repo.sum_transactions_amount_by_filter(transaction_filter)
-        
+        return await self._repo.sum_transactions_amount_by_filter(transaction_filter)        
 
-    async def sum_transactions_from_destination_account(self, destination_account_id: UUID, user_id: UUID) -> PaginatedDataListDto[TransactionDto]:
+    async def sum_transactions_from_destination_account(self, destination_account_id: UUID, user_id: UUID) -> float:
         transaction_filter = TransactionFilter(
-            destination_account_id=destination_account_id,
+            destination_account_id=[destination_account_id],
             user_id=user_id
         )
         return await self._repo.sum_transactions_amount_by_filter(transaction_filter)

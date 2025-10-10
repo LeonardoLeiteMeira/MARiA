@@ -16,6 +16,14 @@ class AccountController(APIRouter):
     def __init__(self, jwt_dependency: Callable, app_dependency: Callable[[], AccountApplication]):
         super().__init__(prefix="/accounts", dependencies=[Depends(jwt_dependency)])
 
+        @self.get("", response_model=list[AccountResponse])
+        async def get_accounts_by_user(
+            request: Request,
+            app: AccountApplication = Depends(app_dependency),
+        ):
+            accounts = await app.get_by_user_id(request.state.user.id)
+            return accounts
+
         @self.post("", response_model=AccountResponse)
         async def create_account(
             request: Request,
@@ -24,6 +32,15 @@ class AccountController(APIRouter):
         ):
             data.user_id = request.state.user.id
             return await app.create(data)
+
+        @self.get("/with-balance", response_model=List[AccountWithBalanceAggregate])
+        async def get_accounts_with_balance(
+                request: Request,
+                app: AccountApplication = Depends(app_dependency),
+            ):
+            user_id = request.state.user.id
+            account_list = await app.get_accounts_with_balance(user_id)
+            return account_list
 
         @self.put("/{account_id}")
         async def update_account(
@@ -45,14 +62,6 @@ class AccountController(APIRouter):
             await app.delete(account_id, request.state.user.id)
             return {"detail": "deleted"}
 
-        @self.get("", response_model=list[AccountResponse])
-        async def get_accounts_by_user(
-            request: Request,
-            app: AccountApplication = Depends(app_dependency),
-        ):
-            accounts = await app.get_by_user_id(request.state.user.id)
-            return accounts
-
         @self.get("/{account_id}", response_model=AccountResponse)
         async def get_account(
             account_id: UUID,
@@ -62,11 +71,3 @@ class AccountController(APIRouter):
             if not accounts:
                 raise HTTPException(status_code=404, detail="account not found")
             return accounts[0]
-        
-        self.get("/with-balance", response_model=List[AccountWithBalanceAggregate])
-        async def get_accounts_with_balance(
-                request: Request,
-                app: AccountApplication = Depends(app_dependency),
-            ):
-            user_id = request.state.user.id
-            await app.get_accounts_with_balance(user_id)

@@ -101,6 +101,7 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
     async def sum_transactions_amount_by_filter(self, filter: "TransactionFilter") -> float:
         stmt = select(func.coalesce(func.sum(TransactionModel.amount_cents), 0))
         stmt = self.apply_transaction_filters(stmt, filter, TransactionModel)
+        stmt = stmt.order_by(None)
         async with self.session() as session:
             result = await session.execute(stmt)
             total = result.scalar()
