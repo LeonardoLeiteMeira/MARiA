@@ -25,13 +25,14 @@ class ManagementPeriodController(APIRouter):
             data.user_id = request.state.user.id
             return await app.create(data)
         
-        @self.get('/current-resume', response_model=DashboardAggregate)
+        @self.get('/resume', response_model=DashboardAggregate)
         async def get_resume_current_period(
             request: Request,
+            period_id: Annotated[UUID | None, Query()] = None,
             app: ManagementPeriodApplication = Depends(app_dependency),
         ):
             user_id = request.state.user.id
-            return await app.get_current_period_resume(user_id)
+            return await app.get_current_period_resume(user_id, period_id)
 
         @self.put("/{period_id}")
         async def update_period(
@@ -56,9 +57,11 @@ class ManagementPeriodController(APIRouter):
         @self.get("/{period_id}", response_model=ManagementPeriodDto)
         async def get_period(
             period_id: UUID,
+            request: Request,
             app: ManagementPeriodApplication = Depends(app_dependency),
         ):
-            periods = await app.get_by_ids([period_id])
+            user_id = request.state.user.id
+            periods = await app.get_by_ids([period_id], user_id)
             if not periods:
                 raise HTTPException(status_code=404, detail="management period not found")
             return periods[0]

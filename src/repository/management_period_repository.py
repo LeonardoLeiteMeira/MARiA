@@ -68,10 +68,15 @@ class ManagementPeriodRepository(BaseRepository, ManagementPeriodFilterToSqlAlch
             cursor = await session.execute(stmt)
             return cursor.scalars().first()
 
-    async def get_by_ids(self, management_period_ids: Sequence[uuid.UUID]) -> list[ManagementPeriodModel]:
+    async def get_by_ids(self, management_period_ids: Sequence[uuid.UUID], user_id: uuid.UUID) -> list[ManagementPeriodModel]:
         if not management_period_ids:
             return []
-        stmt = select(ManagementPeriodModel).where(ManagementPeriodModel.id.in_(management_period_ids))
+        stmt = (select(ManagementPeriodModel)
+                .where(
+                    ManagementPeriodModel.id.in_(management_period_ids),
+                    ManagementPeriodModel.user_id == user_id,
+                )
+            )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())

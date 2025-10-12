@@ -54,14 +54,22 @@ class ManagementPeriodApplication:
     async def delete(self, period_id: UUID, user_id: UUID) -> None:
         await self._domain.delete(period_id, user_id)
 
-    async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
+    async def get_by_ids(self, period_ids: list[UUID], user_id: UUID) -> list[ManagementPeriodModel]:
         return await self._domain.get_by_ids(period_ids)
 
     async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._domain.get_by_filter(filter)
 
-    async def get_current_period_resume(self, user_id: UUID) -> DashboardAggregate:
-        current_period = await self.get_current_management_period(user_id)
+    async def get_current_period_resume(self, user_id: UUID, period_id: UUID | None) -> DashboardAggregate:
+        if(period_id == None):
+            current_period = await self.get_current_management_period(user_id)
+        else:
+            periods = await self._domain.get_by_ids([period_id], user_id)
+            current_period = periods[0] if len(periods)>0 else None
+
+        if (current_period == None):
+            raise Exception('No period found')
+
         plans = await self.__get_management_plan(user_id, current_period.id)
         categories = await self.category_domain.get_by_user_id(user_id)
         macro_categories = await self.macro_category_domain.get_by_user_id(user_id)

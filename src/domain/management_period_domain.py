@@ -32,8 +32,8 @@ class ManagementPeriodDomain:
         period = ManagementPeriodModel(id=period_id, user_id=user_id)
         await self._repo.delete(period)
 
-    async def get_by_ids(self, period_ids: list[UUID]) -> list[ManagementPeriodModel]:
-        return await self._repo.get_by_ids(period_ids)
+    async def get_by_ids(self, period_ids: list[UUID], user_id: UUID) -> list[ManagementPeriodModel]:
+        return await self._repo.get_by_ids(period_ids, user_id)
 
     async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._repo.get_by_filter(filter)
