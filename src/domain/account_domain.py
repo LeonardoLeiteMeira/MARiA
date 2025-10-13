@@ -27,5 +27,5 @@ class AccountDomain:
     async def get_by_ids(self, account_ids: list[UUID]) -> list[AccountModel]:
         return await self._repo.get_by_ids(account_ids)
 
-    async def get_by_user_id(self, user_id: UUID) -> list[AccountModel]:
-        return await self._repo.get_by_user_id(user_id)
+    async def get_by_user_id(self, user_id: UUID, withDeleted: bool = False) -> list[AccountModel]:
+        return await self._repo.get_by_user_id(user_id, withDeleted)

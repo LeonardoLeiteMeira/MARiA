@@ -34,7 +34,7 @@ class AccountApplication:
         return await self.__domain.get_by_ids(account_ids)
 
     async def get_by_user_id(self, user_id: UUID) -> list[AccountModel]:
-        return await self.__domain.get_by_user_id(user_id)
+        return await self.__domain.get_by_user_id(user_id, withDeleted=True)
     
     async def get_accounts_with_balance(self, user_id: UUID) -> List[AccountWithBalanceAggregate]:
         accounts = await self.__domain.get_by_user_id(user_id)

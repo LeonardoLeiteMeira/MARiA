@@ -69,8 +69,15 @@ class AccountRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_user_id(self, user_id: uuid.UUID) -> list[AccountModel]:
-        stmt = select(AccountModel).where(AccountModel.user_id == user_id)
+    async def get_by_user_id(self, user_id: uuid.UUID, withDeleted: bool = False) -> list[AccountModel]:
+        stmt = select(AccountModel)
+        if withDeleted:
+            stmt.where(AccountModel.user_id == user_id)
+        else:
+            stmt.where(
+                AccountModel.user_id == user_id,
+                AccountModel.deleted_at != None,
+            )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
