@@ -1,3 +1,5 @@
+import os
+import time
 from typing import cast
 
 import sentry_sdk
@@ -38,6 +40,11 @@ from .injections import (
 from .lifespan import lifespan
 
 settings = get_settings()
+
+if settings.timezone:
+    os.environ["TZ"] = settings.timezone
+    if hasattr(time, "tzset"):
+        time.tzset()
 
 if settings.is_production:
     sentry_sdk.init(
