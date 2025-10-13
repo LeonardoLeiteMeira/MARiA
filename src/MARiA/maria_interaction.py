@@ -3,6 +3,7 @@ from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.types import Command
+from datetime import datetime
 
 from .graph import MariaGraph
 from dto import UserAnswerDataDTO
@@ -20,7 +21,9 @@ class MariaInteraction:
         current_thread = await self.__get_current_thread(user.id)
         thread_id_str = str(current_thread.id)
         config = {"configurable": {"thread_id": thread_id_str}}
-        user_input_with_name = f"{user.name}: {user_input}"
+        now = datetime.now()
+        current_time = now.strftime("%I:%M %p, %B %d, %Y")
+        user_input_with_name = f"{current_time} - {user.name}: {user_input}"
 
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
