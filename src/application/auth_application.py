@@ -16,7 +16,7 @@ from app.core.security import (
     ALGORITHM,
     ACCESS_TOKEN_MINUTES,
 )
-from messaging import MessageService
+from external.whatsapp import MessageService
 
 
 class AuthApplication:

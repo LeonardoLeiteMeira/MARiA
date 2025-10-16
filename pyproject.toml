@@ -38,7 +38,6 @@ packages = [
     {include = "controllers", from = "src"},
     {include = "database", from = "src"},
     {include = "MARiA", from = "src"},
-    {include = "messaging", from = "src"},
     {include = "application", from = "src"},
     {include = "repository", from = "src"},
     {include = "domain", from = "src"},

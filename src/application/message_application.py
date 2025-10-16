@@ -1,6 +1,6 @@
 from domain import UserDomain
 from MARiA import MariaInteraction
-from messaging import MessageService
+from external.whatsapp import MessageService
 from repository import UserModel
 from config import get_settings
 

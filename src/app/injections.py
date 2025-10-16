@@ -33,7 +33,7 @@ from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
                          ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
-from messaging import MessageService, MessageServiceDev
+from external.whatsapp import MessageService, MessageServiceDev
 from repository import (
     UserRepository,
     NotionAuthorizationRepository,

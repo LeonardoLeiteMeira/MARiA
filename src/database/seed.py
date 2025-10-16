@@ -13,6 +13,10 @@ DEFAULT_USER = {
 }
 
 async def seed_database(base_db: BaseDatabase) -> None:
+    settings = get_settings()
+    if not settings.is_production:
+        return
+
     async with base_db.session() as session:
         query = text(
             "SELECT id FROM users WHERE phone_number = :phone_number LIMIT 1"
@@ -42,7 +46,6 @@ async def seed_database(base_db: BaseDatabase) -> None:
 
 
 async def ensure_migrations(base_db: BaseDatabase) -> None:
-    """Run Alembic migrations if the `alembic_version` table is absent."""
     settings = get_settings()
     if not settings.is_production:
         return

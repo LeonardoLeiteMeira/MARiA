@@ -23,11 +23,6 @@ if TYPE_CHECKING:
 
 
 class ManagementPeriodApplication:
-    """Application layer for management period.
-
-    All business validations should be placed here before delegating to the
-    domain layer. For now it simply forwards the calls."""
-
     def __init__(
             self,
             domain: ManagementPeriodDomain,
