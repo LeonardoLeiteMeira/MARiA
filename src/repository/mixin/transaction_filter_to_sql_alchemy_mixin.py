@@ -1,6 +1,8 @@
 from datetime import timezone, datetime
 
 from typing import TYPE_CHECKING, Any
+
+from sqlalchemy import or_
 if TYPE_CHECKING:
     from ..db_models.transaction_model import TransactionModel
     from controllers.request_models.transaction import TransactionFilter
@@ -20,6 +22,12 @@ class TransactionFilterToSqlAlchemyMixin:
 
         if filters.source_account_id:
             query = query.where(Transaction.source_account_id.in_(filters.source_account_id))
+
+        if filters.any_accounts_id:
+            query = query.where(or_(
+                Transaction.source_account_id.in_(filters.any_accounts_id),
+                Transaction.destination_account_id.in_(filters.any_accounts_id)
+            ))
 
         if filters.management_period_id:
             query = query.where(Transaction.management_period_id.in_(filters.management_period_id))

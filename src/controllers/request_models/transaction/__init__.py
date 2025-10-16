@@ -27,6 +27,7 @@ class TransactionFilter(BaseModel):
     tags: list[str] = None
     destination_account_id: list[UUID] = None
     source_account_id: list[UUID] = None
+    any_accounts_id: list[UUID] = None
     management_period_id: list[UUID] = None
     type: list[TransactionType] = None
     macro_category_id: list[UUID] = None
