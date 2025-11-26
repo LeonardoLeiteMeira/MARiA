@@ -1,7 +1,0 @@
-FROM nginx:stable-alpine
-
-# Copy Flutter Web build (contents) to Nginx html root
-COPY ./web/ /usr/share/nginx/html
-
-# Replace default server config with SPA-friendly fallback
-COPY default.conf /etc/nginx/conf.d/default.conf
