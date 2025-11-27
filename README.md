@@ -12,28 +12,8 @@ She can create new transactions and read diferents notion databases.
 - ... 
 
 
-## To do List
-- [x] Fazer query de planejamento
-- [x] Modificar busca dos dados: Ao busca categorias não esta listando todas pois esta limitado em 10. Devo mexer para que a AI saiba disso e possa buscar mais (mas deixar mais de 10 o default pode ser uma boa)
-- [x] Fazer queries em transações
-    - [x] Query de dados com filter, properties, cursor e page_size
-    - [x] Sort
-    - [x] Melhorar nomeclatura das colunas
-- [x] Conectar no whatsapp
-    - [x] Simples
-    - [x] Diferenciar numeros controlando acessos
-    - [x] Mover docker compose para esse repositorio 
-- [x] Lista todas as funcoes e testes que quero levar para o web summit
-- [x] Update de informação
-- [x] Fazer um planejamento
-
-- [ ] Escrever aqui proximos passos
-
-
-
-
-## To Do Future 
-Pesquisar sobre e implementar uma cache no redis para as chamadas de tools. Dessa forma evitando chamadas desnecessárias e demoradas nas APIs utilizadas
+## Project management
+The project management can be accessed in this [notion](https://leonardoleite.notion.site/MARiA-2b614f691c8380298eecfec9c2cbb3d7?source=copy_link)
 
 
 # Alembic
