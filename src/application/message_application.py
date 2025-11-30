@@ -13,27 +13,35 @@ class MessageApplication:
         self.__message_service = message_service
 
     async def new_message(self, message_data:dict):
-        is_new_message = self.__message_service.is_event_a_new_message(message_data)
-        if not is_new_message:
-            return
+        try:
+            is_new_message = self.__message_service.is_event_a_new_message(message_data)
+            if not is_new_message:
+                return
 
-        phone_number = self.__message_service.get_phone_number(message_data)
-        message = self.__message_service.get_message(message_data)
-        user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
-        chat_id = self.__message_service.get_chat_id(message_data)
+            phone_number = self.__message_service.get_phone_number(message_data)
+            message = self.__message_service.get_message(message_data)
+            user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
+            chat_id = self.__message_service.get_chat_id(message_data)
 
-        user = await self.__user_domain.get_user_by_phone_number(phone_number)
-        if not user:
-            print(f"{phone_number}: {user_name}")
-            await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')
-            return
-        
-        if not user.notion_authorization:
-            await self.send_auth_link(user, chat_id)
-            return
+            user = await self.__user_domain.get_user_by_phone_number(phone_number)
+            if not user:
+                print(f"{phone_number}: {user_name}")
+                await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')
+                return
+            
+            if not user.notion_authorization:
+                await self.send_auth_link(user, chat_id)
+                return
 
-        answer = await self.__maria.get_maria_answer(user, message)
-        await self.__message_service.send_message(chat_id, answer)
+            answer = await self.__maria.get_maria_answer(user, message)
+            await self.__message_service.send_message(chat_id, answer)
+        except Exception as ex:
+            print({
+                "message":"Error while deal with new user message",
+                "error": ex,
+                "message_data": message_data
+            })
+            raise ex
 
     async def send_auth_link(self, user: UserModel, chat_id: str):
         link = self.__get_auth_link(user.id)

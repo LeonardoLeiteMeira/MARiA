@@ -1,6 +1,6 @@
 from collections.abc import Awaitable, Callable
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import BackgroundTasks, APIRouter, Body, Depends
 from fastapi.responses import JSONResponse
 
 from application import MessageApplication
@@ -14,19 +14,12 @@ class NewMessageController(APIRouter):
 
         @self.post("/whatsapp")
         async def new_message_controller_whatsapp(
+            background_tasks: BackgroundTasks,
             data: dict = Body(...),
             message_application: MessageApplication = Depends(
                 service_dependency_injected
             ),
         ):
-            try:
-                await message_application.new_message(data)
-                return JSONResponse(status_code=200, content={"status": "received"})
-            except Exception as ex:
-                print("\nERROR HAS OCCURRED")
-                print(ex)
-                print("=====================\n")
-                return JSONResponse(
-                    status_code=500, content={"status": "Internal error"}
-                )
+            background_tasks.add_task(message_application.new_message, data)
+            return JSONResponse(status_code=200, content={"status": "received"})
 
