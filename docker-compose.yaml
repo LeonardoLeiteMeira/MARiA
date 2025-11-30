@@ -15,20 +15,20 @@ services:
       - traefik_letsencrypt:/letsencrypt
       - /var/run/docker.sock:/var/run/docker.sock:ro
 
-  maria_prisma_web:
-    build: ./web
-    init: true
-    pids_limit: 256
-    cpus: "0.25"
-    mem_limit: "256m"
-    container_name: maria_web
-    restart: unless-stopped
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.maria_prisma_web.rule=Host(`app.alemdatech.com`)"
-      - "traefik.http.routers.maria_prisma_web.entrypoints=websecure"
-      - "traefik.http.routers.maria_prisma_web.tls.certresolver=le"
-      - "traefik.http.services.maria_prisma_web.loadbalancer.server.port=80"
+  # maria_prisma_web:
+  #   build: ./web
+  #   init: true
+  #   pids_limit: 256
+  #   cpus: "0.25"
+  #   mem_limit: "256m"
+  #   container_name: maria_web
+  #   restart: unless-stopped
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.http.routers.maria_prisma_web.rule=Host(`app.alemdatech.com`)"
+  #     - "traefik.http.routers.maria_prisma_web.entrypoints=websecure"
+  #     - "traefik.http.routers.maria_prisma_web.tls.certresolver=le"
+  #     - "traefik.http.services.maria_prisma_web.loadbalancer.server.port=80"
 
   api:
     build: .
