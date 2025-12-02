@@ -5,7 +5,7 @@ from config import get_settings
 settings = get_settings()
 class MessageService:
     def __init__(self, instance: str):
-        self.evolution_api_key = settings.authentication_api_key
+        self.evolution_api_key = settings.evo_authentication_api_key
         self.instance = instance
         self.message_base_url = settings.evo_send_message_endpoint
 

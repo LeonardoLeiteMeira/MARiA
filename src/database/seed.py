@@ -5,6 +5,8 @@ from sqlalchemy import text
 import uuid
 import subprocess
 from config import get_settings
+from alembic.config import Config
+from alembic import command
 
 DEFAULT_USER = {
     "name": "Leonardo Leite",
@@ -45,12 +47,10 @@ async def seed_database(base_db: BaseDatabase) -> None:
         await session.commit()
 
 
-async def ensure_migrations(base_db: BaseDatabase) -> None:
+async def ensure_migrations() -> None:
     settings = get_settings()
     if not settings.is_production:
         return
 
-    subprocess.run(
-        ["alembic", "upgrade", "head"],
-        check=True,
-    )
+    alembic_cfg = Config("alembic.ini")
+    command.upgrade(alembic_cfg, "head")

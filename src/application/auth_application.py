@@ -12,7 +12,7 @@ from app.core.security import (
     decode_token,
     hash_password,
     verify_password,
-    SECRET_KEY,
+    JWT_SECRET_KEY,
     ALGORITHM,
     ACCESS_TOKEN_MINUTES,
 )
@@ -72,7 +72,7 @@ class AuthApplication:
             "exp": datetime.now(timezone.utc)
             + timedelta(minutes=ACCESS_TOKEN_MINUTES),
         }
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
     
     async def get_recover_code(self, user_email: str) -> None:
         user = await self._domain.get_full_user_by_email(user_email)

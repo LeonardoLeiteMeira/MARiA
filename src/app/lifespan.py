@@ -9,7 +9,7 @@ from database import BaseDatabase, seed_database, ensure_migrations
 async def lifespan(app: FastAPI):
     app.state = cast(CustomState, app.state)
     app.state.database = BaseDatabase()
-    await ensure_migrations(app.state.database)
+    await ensure_migrations()
     await seed_database(app.state.database)
     yield
 

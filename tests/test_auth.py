@@ -11,7 +11,7 @@ import app.lifespan as lifespan_module
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test_auth.db"
 os.environ["DATABASE_CONNECTION_URI_MARIA_ASYNC"] = SQLALCHEMY_DATABASE_URL
-os.environ["APP_SECRET_KEY"] = 'uVchA0mszYV7ve0g3U6r5UgpNIXfW53U++rmowQEe1I='
+os.environ["NOTION_ENCRYPT_SECRET"] = 'uVchA0mszYV7ve0g3U6r5UgpNIXfW53U++rmowQEe1I='
 
 if os.path.exists("test_auth.db"):
     os.remove("test_auth.db")

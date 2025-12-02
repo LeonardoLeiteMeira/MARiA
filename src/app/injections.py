@@ -351,7 +351,7 @@ def create_auth_application(appState: CustomState) -> Callable[[], AuthApplicati
 
 def create_pluggy_auth_loader() ->  Callable[[], PluggyAuthLoader]:
     def dependency() -> PluggyAuthLoader:
-        return PluggyAuthLoader(settings)
+        return PluggyAuthLoader(settings.pluggy_client_id, settings.pluggy_client_secret)
     
     return dependency
 

@@ -3,7 +3,7 @@ import os
 from jose import jwt
 from passlib.context import CryptContext
 
-SECRET_KEY = os.getenv("SECRET_KEY", "CHANGE_ME")
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGE_ME")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_MINUTES = 30
 
@@ -22,6 +22,6 @@ def decode_token(token: str) -> dict:
     from jose.exceptions import JWTError
 
     try:
-        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        return jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError as exc:
         raise ValueError("Invalid token") from exc

@@ -1,11 +1,9 @@
 import httpx
-from config import Settings
-
 
 class PluggyAuthLoader:
-    def __init__(self, settings: Settings):
-        self.__client_id = settings.pluggy_client_id
-        self.__client_secret = settings.pluggy_client_secret
+    def __init__(self, client_id: str, client_secret: str):
+        self.__client_id = client_id
+        self.__client_secret = client_secret
 
     async def get_api_key(self) -> str:
         try:
