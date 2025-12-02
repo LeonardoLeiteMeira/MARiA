@@ -1,0 +1,75 @@
+services:
+  # Para receber os webhooks de dentro do container basta configurar com http://host.docker.internal:8000
+  evolution-api:
+    image: atendai/evolution-api:latest
+    container_name: evolution-api
+    restart: always
+    mem_limit: "768m"
+    cpus: "1.0"
+    pids_limit: 1024
+    mem_reservation: "512m"
+    environment:
+      CONFIG_SESSION_PHONE_VERSION: ${CONFIG_SESSION_PHONE_VERSION}
+
+      DATABASE_PROVIDER: ${DATABASE_PROVIDER}
+      DATABASE_CONNECTION_URI: ${DATABASE_CONNECTION_URI}
+      DATABASE_CONNECTION_DB_PREFIX_NAME: ${DATABASE_CONNECTION_DB_PREFIX_NAME}
+      DATABASE_SAVE_DATA_INSTANCE: ${DATABASE_SAVE_DATA_INSTANCE}
+      DATABASE_SAVE_DATA_NEW_MESSAGE: ${DATABASE_SAVE_DATA_NEW_MESSAGE}
+      DATABASE_SAVE_MESSAGE_UPDATE: ${DATABASE_SAVE_MESSAGE_UPDATE}
+      DATABASE_SAVE_DATA_CONTACTS: ${DATABASE_SAVE_DATA_CONTACTS}
+      DATABASE_SAVE_DATA_CHATS: ${DATABASE_SAVE_DATA_CHATS}
+
+      WEBSOCKET_ENABLED: ${WEBSOCKET_ENABLED}
+      WEBSOCKET_GLOBAL_EVENTS: ${WEBSOCKET_GLOBAL_EVENTS}
+
+      CACHE_REDIS_ENABLED: ${CACHE_REDIS_ENABLED}
+
+      AUTHENTICATION_API_KEY: ${EVO_AUTHENTICATION_API_KEY}
+    ports:
+      - "8080:8080"
+    volumes:
+      - evolution_store:/evolution/store
+      - evolution_instances:/evolution/instances
+    depends_on:
+      - database
+    # healthcheck:
+    #   test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+    #   interval: 30s
+    #   timeout: 5s
+    #   retries: 3
+    #   start_period: 10s
+
+  database:
+    container_name: postgres_db
+    image: postgres:latest
+    mem_limit: "1g"
+    cpus: "1.0"
+    pids_limit: 2048
+    mem_reservation: "768m"
+    # restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_local:/var/lib/postgresql/data
+    command: >
+      postgres -c tcp_keepalives_idle=60
+              -c tcp_keepalives_interval=30
+              -c tcp_keepalives_count=5
+              -c idle_in_transaction_session_timeout=60000
+    # healthcheck:
+    #   test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+    #   interval: 10s
+    #   timeout: 3s
+    #   retries: 5
+    #   start_period: 5s
+
+volumes:
+  evolution_store:
+  evolution_instances:
+  postgres_local:
+    driver: local
