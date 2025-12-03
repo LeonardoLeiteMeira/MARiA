@@ -45,13 +45,13 @@ services:
     #   evolution-api:
     #     condition: service_healthy 
     restart: always
-    ports:
-      - "8000:8000"
+    # ports:
+    #   - "8000:8000"
     expose:
       - "8000"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.api.rule=Host(`api.maria.alemdatech.com`)
+      - traefik.http.routers.api.rule=Host(`api.maria.alemdatech.com`) && PathPrefix(`/api`)
       - traefik.http.routers.api.entrypoints=websecure
       - traefik.http.routers.api.tls.certresolver=le
       - traefik.http.services.api.loadbalancer.server.port=8000

@@ -3,7 +3,7 @@ import time
 from typing import cast
 
 import sentry_sdk
-from fastapi import FastAPI
+from fastapi import FastAPI, APIRouter
 
 from config import get_settings
 from controllers import (
@@ -74,13 +74,15 @@ jwt_dependency = create_jwt_dependency(auth_app_dependency)
 inject_application = create_message_application(app.state)
 app.include_router(NewMessageController(inject_application))
 
-notion_app_dependency = create_notion_authorization_application(app.state)
-app.include_router(NotionAuthorizationController(notion_app_dependency))
+api = APIRouter(prefix="/api")
 
-app.include_router(HealthCheckController(inject_application))
-app.include_router(AuthController(auth_app_dependency))
-app.include_router(UserController(jwt_dependency, create_user_application(app.state)))
-app.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader(), create_open_finance_application(app.state)))
+notion_app_dependency = create_notion_authorization_application(app.state)
+api.include_router(NotionAuthorizationController(notion_app_dependency))
+
+api.include_router(HealthCheckController(inject_application))
+api.include_router(AuthController(auth_app_dependency))
+api.include_router(UserController(jwt_dependency, create_user_application(app.state)))
+api.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader(), create_open_finance_application(app.state)))
 
 # Dependencies for newly created application layers
 management_period_app = create_management_period_application(app.state)
@@ -90,8 +92,10 @@ account_app = create_account_application(app.state)
 transaction_app = create_transaction_application(app.state)
 
 # Register routers that expose the business features
-app.include_router(ManagementPeriodController(jwt_dependency, management_period_app))
-app.include_router(CategoryController(jwt_dependency, category_app))
-app.include_router(ManagementPlanningController(jwt_dependency, management_planning_app))
-app.include_router(AccountController(jwt_dependency, account_app))
-app.include_router(TransactionController(jwt_dependency, transaction_app))
+api.include_router(ManagementPeriodController(jwt_dependency, management_period_app))
+api.include_router(CategoryController(jwt_dependency, category_app))
+api.include_router(ManagementPlanningController(jwt_dependency, management_planning_app))
+api.include_router(AccountController(jwt_dependency, account_app))
+api.include_router(TransactionController(jwt_dependency, transaction_app))
+
+app.include_router(api)
