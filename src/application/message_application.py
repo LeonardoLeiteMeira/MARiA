@@ -19,7 +19,6 @@ class MessageApplication:
                 return
 
             phone_number = self.__message_service.get_phone_number(message_data)
-            message = self.__message_service.get_message(message_data)
             user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
             chat_id = self.__message_service.get_chat_id(message_data)
 
@@ -28,7 +27,9 @@ class MessageApplication:
                 print(f"{phone_number}: {user_name}")
                 await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')
                 return
-            
+
+            message = await self.__message_service.get_message(message_data)
+
             if not user.notion_authorization:
                 await self.send_auth_link(user, chat_id)
                 return
