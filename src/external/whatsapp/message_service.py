@@ -42,37 +42,61 @@ class MessageService:
     def get_name(self, data: dict) -> str:
         return data['data']["pushName"]
     
-    async def get_message(self, data: dict) -> str:
+    async def get_message(self, data: dict) -> dict:
         if 'audioMessage' in data['data']['message']:
-            message = data['data']['message']
+            try:
+                message = data['data']['message']
+
+                audio_bytes = await self.download_and_decrypt_audio(
+                    message['audioMessage']['url'], 
+                    message['audioMessage']['mediaKey'],
+                    "audio/ogg"
+                )
+
+                from io import BytesIO
+                file = BytesIO(audio_bytes)
+
+                from openai import OpenAI
+
+                client = OpenAI(api_key=settings.openai_api_key)
+
+                file.name = "audio.ogg"
+
+                resp = client.audio.transcriptions.create(
+                    model="gpt-4o-transcribe",  # ou gpt-4o-mini-transcribe
+                    file=file,
+                )
+                message = f"Audio transcript: {resp.text}"
+                return {
+                    'status': True,
+                    'message': message,
+                    'error_message': None
+                }
+            except Exception as ex:
+                print("Ocorreu um erro ao ler o audio")
+                return {
+                    'status': False,
+                    'message': None,
+                    'error_message': "Error ao ouvir o audio!"
+                }
+        
+        if 'conversation' in data['data']['message']:
+            message =  data['data']['message']['conversation']
+            return {
+                'status': True,
+                'message': message,
+                'error_message': None
+            }
+        
+        return {
+            'status': False,
+            'message': None,
+            'error_message': "Desculpe! Não consigo ver essa mensagem!"
+        }
+        
+        
 
 
-            # TODO: Adicionar metodo com try catch e fallback pra erro
-            audio_bytes = await self.download_and_decrypt_audio(
-                message['audioMessage']['url'], 
-                message['audioMessage']['mediaKey'],
-                "audio/ogg"
-            )
-
-
-            from io import BytesIO
-            file = BytesIO(audio_bytes)
-
-            # ======== TODO usar o OpenAiUtils
-            from openai import OpenAI
-
-            client = OpenAI(api_key=settings.openai_api_key)
-
-            file.name = "audio.ogg"
-
-            resp = client.audio.transcriptions.create(
-                model="gpt-4o-transcribe",  # ou gpt-4o-mini-transcribe
-                file=file,
-            )
-            return f"Audio transcript: {resp.text}"
-            # ========
-
-        return data['data']['message']['conversation']
     
     def get_chat_id(self, data: dict) -> str:
         return data['data']['key']['remoteJid']

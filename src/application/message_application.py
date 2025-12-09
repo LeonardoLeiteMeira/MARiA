@@ -30,6 +30,10 @@ class MessageApplication:
 
             message = await self.__message_service.get_message(message_data)
 
+            if not message['status']:
+                await self.__message_service.send_message(chat_id, message['error_message'])
+                return
+
             if not user.notion_authorization:
                 await self.send_auth_link(user, chat_id)
                 return
