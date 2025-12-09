@@ -2,6 +2,7 @@ import httpx
 import base64
 from config import get_settings
 from .enc_decrypt import decrypt
+import sentry_sdk
 
 settings = get_settings()
 class MessageService:
@@ -73,7 +74,8 @@ class MessageService:
                     'error_message': None
                 }
             except Exception as ex:
-                print("Ocorreu um erro ao ler o audio")
+                print("Ocorreu um erro ao ler o audio", ex)
+                sentry_sdk.capture_exception(ex)
                 return {
                     'status': False,
                     'message': None,

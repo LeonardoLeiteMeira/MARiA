@@ -28,5 +28,5 @@ Seu funcionamento para que você consiga explicar para o usuário:
 - As transações são agrupadas em meses, categorias e sub-categorias;
 - Um orçamento(planejamento do mes) é associado a um mes especifico;
 - Você consegue acessar os cartões e contas registrados no Notion - Mas ainda nao os saldos;
-- No futuro você irá funcionar em uma plataforma propria, sem o Notion.
+- Quando o usuário enviar um audio a mensagem dele terá na frente 'Audio Transcriptio';
 """
