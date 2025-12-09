@@ -12,7 +12,7 @@ from external.notion.enum import UserDataTypes
 
 class CreateNewOutTransactionV2(ToolInterface):
     name: str = "criar_nova_transacao_de_saida"
-    description: str = "Cria uma nova transação de saída com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar!"
+    description: str = "Cria uma nova transação de saída com os dados fornecidos. Apenas categoria e macro-categoria sao opcionais!"
     args_schema: Type[BaseModel] = None
     __notion_user_data: NotionUserData = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
@@ -62,12 +62,12 @@ class CreateNewOutTransactionV2(ToolInterface):
                 Field(..., description="Cartão ou conta utilizada na saída"),
             ),
             category=(
-                CategoriesEnum,
-                Field(..., description="Categoria que classifica essa saída"),
+                Optional[CategoriesEnum],
+                Field(None, description="Categoria que classifica essa saída. Opcional."),
             ),
             macro_category=(
-                MacroCategoriesEnum,
-                Field(..., description="Categoria macro da saída"),
+                Optional[MacroCategoriesEnum],
+                Field(None, description="Categoria macro da saída. Opcional."),
             ),
             month=(
                 MonthsEnum,
@@ -81,19 +81,20 @@ class CreateNewOutTransactionV2(ToolInterface):
 
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            name = parms['args']['name']
-            amount = parms['args']['amount']
-            date = parms['args']['date']
-            card_or_account = parms['args']['card_or_account']
-            category = parms['args']['category']
-            macro_category = parms['args']['macro_category']
-            month = parms['args']['month']
-            hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
+            args_data = parms['args']
+            name = args_data['name']
+            amount = args_data['amount']
+            date = args_data['date']
+            card_or_account = args_data['card_or_account']
+            category = args_data.get('category')
+            macro_category = args_data.get('macro_category')
+            month = args_data['month']
+            hasPaid = args_data['hasPaid'] if 'hasPaid' in args_data else True
 
             month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
             card_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
-            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
-            marco_category_id = await self.__notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
+            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category) if category else None
+            macro_category_id = await self.__notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category) if macro_category else None
 
             await self.__notion_tool.create_expense(
                 name,
@@ -102,7 +103,7 @@ class CreateNewOutTransactionV2(ToolInterface):
                 date,
                 card_id,
                 category_id,
-                marco_category_id,
+                macro_category_id,
                 hasPaid
             )
             return ToolMessage(

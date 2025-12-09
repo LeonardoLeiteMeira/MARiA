@@ -28,8 +28,8 @@ class NotionTool:
         amount: float,
         date: str,
         card_id: str,
-        category_id: str,
-        marco_category_id: str,
+        category_id: str | None,
+        marco_category_id: str | None,
         hasPaid: bool
     ):
         await self.__template_access.create_out_transaction(

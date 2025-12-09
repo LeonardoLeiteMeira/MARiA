@@ -130,7 +130,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_database_registers(data)
     
     
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
+    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, type_id:str | None, status: bool = True):
         await self.__create_new_transaction(
             name=name,
             month_id=month_id,
