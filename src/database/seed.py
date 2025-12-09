@@ -51,6 +51,8 @@ async def ensure_migrations() -> None:
     settings = get_settings()
     if not settings.is_production:
         return
-
-    alembic_cfg = Config("alembic.ini")
-    command.upgrade(alembic_cfg, "head")
+    
+    subprocess.run(
+        ["alembic", "upgrade", "head"],
+        check=True,
+    )
