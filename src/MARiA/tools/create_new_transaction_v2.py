@@ -107,7 +107,7 @@ class CreateNewOutTransactionV2(ToolInterface):
                 hasPaid
             )
             return ToolMessage(
-                content="Criado com sucesso",
+                content="Criado com sucesso! Retorne para o usuário para ele saber exatamente o que foi criado!",
                 tool_call_id=parms['id'],
             )
         except Exception as e:
