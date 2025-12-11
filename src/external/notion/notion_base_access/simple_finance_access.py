@@ -3,10 +3,7 @@ from datetime import datetime
 import urllib.parse
 
 from ..enum import NotionDatabaseEnum
-from .notion_external import NotionExternal
 from .base_template_access import BaseTemplateAccessInterface
-
-from repository.db_models.notion_database_model import NotionDatabaseModel
 
 class TransactionType(Enum):
     INCOME = 'Entrada'

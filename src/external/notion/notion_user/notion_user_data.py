@@ -1,5 +1,7 @@
-from ..enum import NotionDatabaseEnum, UserDataTypes
-from .. import BaseTemplateAccessInterface
+from typing import Optional
+
+from ..enum import NotionDatabaseEnum, UserDataTypes, TemplateTypes
+from .. import BaseTemplateAccessInterface, EjFinanceAccess, SimpleFinanceAccess
 
 
 class UserData:
@@ -14,6 +16,7 @@ class NotionUserData:
         self.template_access = template_access
         self.user_data = UserData()
         self.user_data.is_loaded = False
+        self._template_type: Optional[TemplateTypes] = None
         self.__class__._initialized = True
 
     #TODO remover para ter um metodo para cada dado
@@ -24,7 +27,7 @@ class NotionUserData:
         self.user_data.cards = await self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
         self.user_data.categories = await self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
         self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
-        self.user_data.months = await self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
+        self.user_data.months = await self.template_access.get_simple_data(database=NotionDatabaseEnum.MONTHS,template_type=self.__get_template_type())
 
         self.user_data.is_loaded = True
 
@@ -66,5 +69,19 @@ class NotionUserData:
     async def get_user_months(self):
         if getattr(self.user_data, 'months', None):
             return self.user_data.months
-        self.user_data.months = await self.template_access.get_simple_data(NotionDatabaseEnum.MONTHS)
+        template_type = self.__get_template_type()
+        self.user_data.months = await self.template_access.get_simple_data(database=NotionDatabaseEnum.MONTHS, template_type=template_type)
         return self.user_data.months
+
+    def __get_template_type(self) -> TemplateTypes:
+        if self._template_type is not None:
+            return self._template_type
+
+        if isinstance(self.template_access, EjFinanceAccess):
+            self._template_type = TemplateTypes.EJ_FINANCE_TEMPLATE
+        elif isinstance(self.template_access, SimpleFinanceAccess):
+            self._template_type = TemplateTypes.SIMPLE_TEMPLATE
+        else:
+            raise ValueError('Unsupported template access type')
+
+        return self._template_type

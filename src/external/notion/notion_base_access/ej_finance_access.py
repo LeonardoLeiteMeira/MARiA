@@ -10,6 +10,7 @@ class TransactionType(Enum):
     OUTCOME = 'Saída'
     TRANSFER = 'Movimentação'
 
+
 class EjFinanceAccess(BaseTemplateAccessInterface):
     def get_transaction_enum(self):
         return TransactionType

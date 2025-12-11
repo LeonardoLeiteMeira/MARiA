@@ -3,7 +3,7 @@ import urllib.parse
 
 from repository.db_models.notion_database_model import NotionDatabaseModel
 from .notion_external import NotionExternal
-from ..enum import NotionDatabaseEnum
+from ..enum import NotionDatabaseEnum, TemplateTypes
 
 
 class BaseTemplateAccessInterface(ABC):
@@ -98,14 +98,18 @@ class BaseTemplateAccessInterface(ABC):
         data = await self.notion_external.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
         return await self.notion_external.process_database_registers(data)
 
-    async def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = []):
+    async def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = [], template_type: TemplateTypes = None):
         full_properties = await self.__get_properties(database)
         title_property_id = self.__get_title_property_from_schema(full_properties)
         property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
+        
+        sort = self.__get_sort(database, template_type)
+
         data = await self.notion_external.get_database(
             self.databases[database.value]['id'],
             filter_properties=[title_property_id, *property_ids_parsed],
-            start_cursor=cursor
+            start_cursor=cursor,
+            sorts=sort
         )
         return await self.notion_external.process_database_registers(data)
 
@@ -136,3 +140,22 @@ class BaseTemplateAccessInterface(ABC):
             if value['type'] == 'title':
                 return value['id']
         return None
+    
+    def __get_sort(self, database: NotionDatabaseEnum, template_type: TemplateTypes | None) -> list:
+        if template_type is None:
+            return []
+
+        if database == NotionDatabaseEnum.MONTHS:
+            if template_type is TemplateTypes.EJ_FINANCE_TEMPLATE:
+                return [{
+                    "property": "Data Fim",
+                    "direction": "descending"
+                }]
+
+            if template_type is TemplateTypes.SIMPLE_TEMPLATE:
+                return [{
+                    "property": "MesData",
+                    "direction": "descending"
+                }]
+
+        return []

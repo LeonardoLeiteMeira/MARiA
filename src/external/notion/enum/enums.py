@@ -18,3 +18,7 @@ class UserDataTypes(Enum):
 #     NotionDatabaseEnum.TRANSACTIONS = ['Nome', 'Valor', 'Data Planejada', 'Status', 'Categoria', 'Tipo de Transação', 'Entrada em', 'Saida de', 'Verificação', 'Macro Categorias']
 #     NotionDatabaseEnum.CATEGORIES = ['Name']
 #     NotionDatabaseEnum.MONTHS = ['Name', 'Data Inicio', 'Data Fim', 'Total Planejado', 'Gasto Concluido', 'Gasto Pendente', 'Gasto Total', 'Receitas recebida', ]
+
+class TemplateTypes(str, Enum):
+    SIMPLE_TEMPLATE = 'SIMPLE_TEMPLATE'
+    EJ_FINANCE_TEMPLATE = 'EJ_FINANCE_TEMPLATE'
