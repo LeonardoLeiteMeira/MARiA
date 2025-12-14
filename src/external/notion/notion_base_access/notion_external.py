@@ -8,7 +8,7 @@ class NotionExternal:
 
     async def get_database(
         self,
-        database_id: str,
+        data_source_id: str,
         filter_properties: list = None,
         filter: dict = None,
         sorts: list = [],
@@ -16,7 +16,7 @@ class NotionExternal:
         page_size: int = 30,
     ) -> dict:
         query = {
-            "database_id": database_id,
+            "data_source_id": data_source_id,
             "sorts": sorts,
             "start_cursor": start_cursor,
             "page_size": page_size
@@ -27,7 +27,7 @@ class NotionExternal:
         if filter:
             query["filter"] = filter
 
-        data = await self.notion_client.databases.query(**query)
+        data = await self.notion_client.data_sources.query(**query)
         return data
 
     async def get_page(self, page_id: str) -> dict:
@@ -38,8 +38,8 @@ class NotionExternal:
         )
         return data
     
-    async def retrieve_databse(self, databse_id: str) -> dict:
-        return await self.notion_client.databases.retrieve(databse_id)
+    async def retrieve_databse(self, data_source_id: str) -> dict:
+        return await self.notion_client.data_sources.retrieve(data_source_id)
     
     async def create_page(self, page: dict):
         page["children"] = [{
@@ -94,7 +94,7 @@ class NotionExternal:
 
     async def get_all_databases(self) -> list[NotionBaseDatabase]:
         payload = {
-            "filter": {"property": "object", "value": "database"},
+            "filter": {"property": "object", "value": "data_source"},
             "page_size": 20
         }
         search_result = await self.notion_client.search(**payload)
@@ -107,11 +107,3 @@ class NotionExternal:
                 )
             )
         return databases
-
-    # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
-    #     response = self.notion_client.create_page(database_id, properties)
-    #     return NotionPage(response)
-
-    # def update_page(self, page_id: str, properties: Dict[str, Any]) -> NotionPage:
-    #     response = self.notion_client.update_page(page_id, properties)
-    #     return NotionPage(response)

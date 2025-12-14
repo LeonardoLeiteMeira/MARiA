@@ -10,7 +10,7 @@ class NotionAuthorizationController(APIRouter):
     def __init__(self, app_dependency: Callable[[], NotionAuthorizationApplication]):
         super().__init__()
 
-        @self.get("/notion_authorization")
+        @self.get("/notion-authorization")
         async def notion_authorization_endpoint(
             code: str | None = Query(None),
             state: str | None = Query(None),

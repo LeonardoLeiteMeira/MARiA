@@ -13,6 +13,7 @@ class NotionDatabaseRepository(BaseRepository):
 
     async def upsert_databases(self, databases: list[NotionDatabaseModel]):
         async with self.session() as session:
+            # TODO: Verificar otimizacao
             for db in databases:
                 stmt = (
                     select(NotionDatabaseModel)

@@ -58,7 +58,10 @@ class NotionFactory:
 
     def __create_access_classes(self):
         if self.__notion_client == None:
-            self.__notion_client = AsyncClient(auth=self.__access_token)
+            self.__notion_client = AsyncClient(
+                auth=self.__access_token,
+                notion_version = "2025-09-03"
+            )
 
         if self.__notion_external == None:
             self.__notion_external = NotionExternal(self.__notion_client)

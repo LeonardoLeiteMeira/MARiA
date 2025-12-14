@@ -46,7 +46,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             cursor: str| None,
             page_size: int
         ) -> dict:
-        database_id = self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
+        data_source_id = self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']
         filter = {"and": []}
 
         if name is not None:
@@ -78,7 +78,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             filter["and"].append(transaction_type_filter)
 
         data = await self.notion_external.get_database(
-            database_id=database_id,
+            data_source_id=data_source_id,
             start_cursor=cursor,
             page_size=page_size,
             filter=filter,
@@ -174,8 +174,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         ):
         page = {
             "parent": {
-                "type": "database_id",
-                "database_id": self.databases[NotionDatabaseEnum.PLANNING.value]['id']
+                "type": "data_source_id",
+                "data_source_id": self.databases[NotionDatabaseEnum.PLANNING.value]['id']
             },
             "properties": {
                 "Name": {"title": [{"text": {"content": name}}]},
@@ -189,8 +189,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
     async def create_card(self, name: str, initial_balance: float):
         page = {
             "parent": {
-                "type": "database_id",
-                "database_id": self.databases[NotionDatabaseEnum.CARDS.value]['id']
+                "type": "data_source_id",
+                "data_source_id": self.databases[NotionDatabaseEnum.CARDS.value]['id']
             },
             "properties": {
                 "Name": {
@@ -208,8 +208,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
     async def create_month(self, name: str, start_date:str, finish_date:str):
         page = {
             "parent": {
-                "type": "database_id",
-                "database_id": self.databases[NotionDatabaseEnum.MONTHS.value]['id']
+                "type": "data_source_id",
+                "data_source_id": self.databases[NotionDatabaseEnum.MONTHS.value]['id']
             },
             "properties": {
                 "Name": {
@@ -223,9 +223,9 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         await self.notion_external.create_page(page)
 
     async def get_planning_by_month(self, month_id) -> dict:
-        database_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
+        data_source_id = self.databases[NotionDatabaseEnum.PLANNING.value]['id']
         data = await self.notion_external.get_database(
-            database_id,
+            data_source_id,
             filter={
                 'and': [{
                 'property': 'Mes', # TODO Remover
@@ -259,7 +259,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             **({"Tipo Transação": {"select": {"name": transaction_type.value}}} if transaction_type is not None else {})
         }
         page = {
-            "parent": {"type": "database_id","database_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
+            "parent": {"type": "data_source_id","data_source_id": self.databases[NotionDatabaseEnum.TRANSACTIONS.value]['id']},
             "properties": properties,
         }
         await self.notion_external.create_page(page)

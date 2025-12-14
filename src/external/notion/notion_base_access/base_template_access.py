@@ -88,8 +88,8 @@ class BaseTemplateAccessInterface(ABC):
         if 'properties' in self.databases[database.value]:
             return self.databases[database.value]['properties']
         
-        database_id = self.databases[database.value]['id']
-        data = await self.notion_external.retrieve_databse(database_id)
+        data_source_id = self.databases[database.value]['id']
+        data = await self.notion_external.retrieve_databse(data_source_id)
         self.databases[database.value]['properties'] = data['properties']
         return self.databases[database.value]['properties']
 
