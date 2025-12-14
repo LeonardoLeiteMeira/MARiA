@@ -1,14 +1,14 @@
 from notion_client import AsyncClient
-from ..models import NotionProperties, NotionBaseDatabase
+from ..models import NotionProperties, NotionBaseDatasource
 
 class NotionExternal:
     def __init__(self, notion_client: AsyncClient):
         self.notion_client = notion_client
         self.cache = {}
 
-    async def get_database(
+    async def get_datasource(
         self,
-        database_id: str,
+        datasource_id: str,
         filter_properties: list = None,
         filter: dict = None,
         sorts: list = [],
@@ -16,7 +16,7 @@ class NotionExternal:
         page_size: int = 30,
     ) -> dict:
         query = {
-            "database_id": database_id,
+            "data_source_id": datasource_id,
             "sorts": sorts,
             "start_cursor": start_cursor,
             "page_size": page_size
@@ -27,7 +27,7 @@ class NotionExternal:
         if filter:
             query["filter"] = filter
 
-        data = await self.notion_client.databases.query(**query)
+        data = await self.notion_client.data_sources.query(**query)
         return data
 
     async def get_page(self, page_id: str) -> dict:
@@ -38,8 +38,8 @@ class NotionExternal:
         )
         return data
     
-    async def retrieve_databse(self, databse_id: str) -> dict:
-        return await self.notion_client.databases.retrieve(databse_id)
+    async def retrieve_datasource(self, datasource_id: str) -> dict:
+        return await self.notion_client.data_sources.retrieve(datasource_id)
     
     async def create_page(self, page: dict):
         page["children"] = [{
@@ -54,7 +54,7 @@ class NotionExternal:
         response = await self.notion_client.pages.create(**page)
         print(response)
 
-    async def process_database_registers(self, data) -> dict:
+    async def process_datasource_registers(self, data) -> dict:
         full_data = {
             'has_more': data['has_more'],
             'next_cursor': data['next_cursor']
@@ -92,26 +92,18 @@ class NotionExternal:
     async def delete_page(self, page_id: str) -> None:
         await self.notion_client.pages.update(page_id=page_id, archived=True)
 
-    async def get_all_databases(self) -> list[NotionBaseDatabase]:
+    async def get_all_data_sources(self) -> list[NotionBaseDatasource]:
         payload = {
-            "filter": {"property": "object", "value": "database"},
+            "filter": {"property": "object", "value": "data_source"},
             "page_size": 20
         }
         search_result = await self.notion_client.search(**payload)
-        databases = []
+        datasources = []
         for result in search_result['results']:
-            databases.append(
-                NotionBaseDatabase(
+            datasources.append(
+                NotionBaseDatasource(
                     name=result['title'][0]['text']['content'],
                     id=result['id']
                 )
             )
-        return databases
-
-    # def create_page(self, database_id: str, properties: Dict[str, Any]) -> NotionPage:
-    #     response = self.notion_client.create_page(database_id, properties)
-    #     return NotionPage(response)
-
-    # def update_page(self, page_id: str, properties: Dict[str, Any]) -> NotionPage:
-    #     response = self.notion_client.update_page(page_id, properties)
-    #     return NotionPage(response)
+        return datasources

@@ -1,13 +1,14 @@
-from repository import UserRepository, ThreadModel, UserModel, NotionDatabaseRepository, NotionDatabaseModel
-from external.notion.models import NotionBaseDatabase
+from repository import UserRepository, ThreadModel, UserModel, NotionDatasourceRepository, NotionDatasourceModel
+from external.notion.models import NotionBaseDatasource
 from datetime import datetime, timedelta
 import uuid
-from .domain_mixin.choose_notion_database_tag_mixin import ChooseNotionDatabaseTagMixin
+from .domain_mixin.choose_notion_datasource_tag_mixin import ChooseNotionDatasourceTagMixin
 
-class UserDomain(ChooseNotionDatabaseTagMixin):
-    def __init__(self, user_repository: UserRepository, notion_database_repo: NotionDatabaseRepository):
+
+class UserDomain(ChooseNotionDatasourceTagMixin):
+    def __init__(self, user_repository: UserRepository, notion_datasource_repo: NotionDatasourceRepository):
         self.__user_repository = user_repository
-        self.__notion_database_repo = notion_database_repo
+        self.__notion_datasource_repo = notion_datasource_repo
 
         self.__valid_thread_period = (datetime.now()) - timedelta(hours=1)
 
@@ -43,22 +44,22 @@ class UserDomain(ChooseNotionDatabaseTagMixin):
         await self.__user_repository.create_user(new_user)
         return new_user
     
-    async def save_user_notion_databases(self, user_id: str, user_databases: list[NotionBaseDatabase]):
-        new_databases = []
-        for database in user_databases:
-            new_databases.append(
-                NotionDatabaseModel(
+    async def save_user_notion_datasources(self, user_id: str, user_datasources: list[NotionBaseDatasource]):
+        new_datasources = []
+        for datasource in user_datasources:
+            new_datasources.append(
+                NotionDatasourceModel(
                     user_id=user_id,
-                    table_name=database.name,
-                    table_id=database.id,
-                    tag=self.select_database_tag(database),
+                    table_name=datasource.name,
+                    table_id=datasource.id,
+                    tag=self.select_datasource_tag(datasource),
                 )
             )
-        await self.__notion_database_repo.upsert_databases(new_databases)
+        await self.__notion_datasource_repo.upsert_datasources(new_datasources)
 
-    async def get_user_notion_databases_taged(self, user_id:str):
-        databases = await self.__notion_database_repo.get_user_databases(user_id)
-        return databases
+    async def get_user_notion_datasources_taged(self, user_id: str):
+        datasources = await self.__notion_datasource_repo.get_user_datasources(user_id)
+        return datasources
     
     async def select_all_users(self):
         return await self.__user_repository.get_all_users()

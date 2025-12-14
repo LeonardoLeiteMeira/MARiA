@@ -1,6 +1,6 @@
 from notion_client import AsyncClient
 
-from repository.db_models.notion_database_model import NotionDatabaseModel
+from repository.db_models.notion_datasource_model import NotionDatasourceModel
 from .notion_base_access.notion_external import NotionExternal
 from .notion_base_access import EjFinanceAccess, SimpleFinanceAccess, BaseTemplateAccessInterface
 from .notion_user.notion_tool import NotionTool
@@ -9,7 +9,7 @@ from .notion_user.notion_authorization_data import NotionAuthorizationData
 
 class NotionFactory:
     def __init__(self):
-        self.__user_databases: list[NotionDatabaseModel] = []
+        self.__user_datasources: list[NotionDatasourceModel] = []
         self.__access_token = None
         self.__notion_client = None
         self.__notion_external = None
@@ -23,8 +23,8 @@ class NotionFactory:
     def set_user_access_token(self, access_token:str):
         self.__access_token = access_token
 
-    def set_user_databases(self, notion_user_databases: list[NotionDatabaseModel], use_default_template: bool = True):
-        self.__user_databases = notion_user_databases
+    def set_user_datasources(self, notion_user_datasources: list[NotionDatasourceModel], use_default_template: bool = True):
+        self.__user_datasources = notion_user_datasources
         self.__default_template = use_default_template
 
     def create_notion_tool(self) -> NotionTool:
@@ -54,11 +54,18 @@ class NotionFactory:
         self.__create_access_classes()
         
         if self.__template_access == None:
-            self.__template_access = SimpleFinanceAccess(self.__notion_external, self.__user_databases) if self.__default_template else EjFinanceAccess(self.__notion_external, self.__user_databases)
+            self.__template_access = (
+                SimpleFinanceAccess(self.__notion_external, self.__user_datasources)
+                if self.__default_template
+                else EjFinanceAccess(self.__notion_external, self.__user_datasources)
+            )
 
     def __create_access_classes(self):
         if self.__notion_client == None:
-            self.__notion_client = AsyncClient(auth=self.__access_token)
+            self.__notion_client = AsyncClient(
+                auth=self.__access_token,
+                notion_version = "2025-09-03"
+            )
 
         if self.__notion_external == None:
             self.__notion_external = NotionExternal(self.__notion_client)

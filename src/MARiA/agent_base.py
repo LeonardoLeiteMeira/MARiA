@@ -4,7 +4,6 @@ from external.notion import NotionFactory
 from MARiA.tools import ToolInterface
 from langchain_openai import ChatOpenAI
 from external.notion import NotionUserData, NotionTool
-from repository import NotionDatabaseModel
 
 from langchain.chat_models import init_chat_model
 
@@ -26,7 +25,7 @@ class AgentBase:
         instanciated_tools = []
 
         notion_factory.set_user_access_token(user_answer_data.access_token)
-        notion_factory.set_user_databases(user_answer_data.user_databases, user_answer_data.use_default_template)
+        notion_factory.set_user_datasources(user_answer_data.user_datasources, user_answer_data.use_default_template)
 
         notion_user_data = notion_factory.create_notion_user_data()
         notion_tool = notion_factory.create_notion_tool()

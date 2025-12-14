@@ -1969,14 +1969,14 @@ files = [
 
 [[package]]
 name = "notion-client"
-version = "2.3.0"
+version = "2.7.0"
 description = "Python client for the official Notion API"
 optional = false
-python-versions = "<4,>=3.7"
+python-versions = "<4,>=3.8"
 groups = ["main"]
 files = [
-    {file = "notion-client-2.3.0.tar.gz", hash = "sha256:c4b4ae04ce182eb89611d41544dac710049683a4d7309c4b22fde52f81cbcb39"},
-    {file = "notion_client-2.3.0-py2.py3-none-any.whl", hash = "sha256:6696bb057b7872477077d6a3bb4299c4a7924450e7d168174e79cbf8e01d9576"},
+    {file = "notion_client-2.7.0-py2.py3-none-any.whl", hash = "sha256:9057a8ac2103ff245556c2a5102bde1d2ccdd3505f66bcc130fc31857731d91e"},
+    {file = "notion_client-2.7.0.tar.gz", hash = "sha256:31bde3ae03ede77650cadce136152916efdd86579ff65f49fc6705fbe462e2fb"},
 ]
 
 [package.dependencies]
