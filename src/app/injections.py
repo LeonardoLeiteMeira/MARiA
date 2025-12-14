@@ -37,7 +37,7 @@ from external.whatsapp import MessageService, MessageServiceDev
 from repository import (
     UserRepository,
     NotionAuthorizationRepository,
-    NotionDatabaseRepository,
+    NotionDatasourceRepository,
     AuthRepository,
     PluggyItemRepository,
     ManagementPeriodRepository,
@@ -112,17 +112,17 @@ def create_pluggy_item_repository(appState: CustomState) -> Callable[[], PluggyI
         return PluggyItemRepository(appState.database)
     return dependency
 
-def create_notion_database_repository(appState: CustomState) -> Callable[[], UserDomain]:
+def create_notion_datasource_repository(appState: CustomState) -> Callable[[], NotionDatasourceRepository]:
     def dependency():
-        return NotionDatabaseRepository(appState.database)
+        return NotionDatasourceRepository(appState.database)
     return dependency
 
 def create_user_domain(appState: CustomState) -> Callable[[], UserDomain]:
     def dependency(
         repo=Depends(create_user_repository(appState)),
-        notion_db_repo=Depends(create_notion_database_repository(appState))
+        notion_datasource_repo=Depends(create_notion_datasource_repository(appState))
     ):
-        return UserDomain(repo, notion_db_repo)
+        return UserDomain(repo, notion_datasource_repo)
 
     return dependency
 

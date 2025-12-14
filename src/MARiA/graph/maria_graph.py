@@ -21,7 +21,7 @@ class MariaGraph:
     
     async def get_state_graph(self, user_answer_data: UserAnswerDataDTO) -> StateGraph:
         self.__notion_factory.set_user_access_token(user_answer_data.access_token)
-        self.__notion_factory.set_user_databases(user_answer_data.user_databases, user_answer_data.use_default_template)
+        self.__notion_factory.set_user_datasources(user_answer_data.user_datasources, user_answer_data.use_default_template)
 
         await self.main_agent.create_agent(user_answer_data, self.__notion_factory) 
 
@@ -105,4 +105,3 @@ class MariaGraph:
             goto='main_maria_node',
             update={"messages": outputs}
         )
-

@@ -3,7 +3,7 @@ from .db_models.notion_authorization_model import (NotionAuthorizationModel,
 from .db_models.thread_model import ThreadModel
 from .db_models.user_model import UserModel
 from .db_models.pluggy_item_model import PluggyItemModel
-from .db_models.notion_database_model import NotionDatabaseModel
+from .db_models.notion_datasource_model import NotionDatasourceModel
 from .db_models.pluggy_transactions_model import PluggyTransactionModel
 from .db_models.revoked_token_model import RevokedToken
 from .db_models.pluggy_account_model import PluggyAccountModel
@@ -20,7 +20,7 @@ from .db_models.transaction_model import TransactionModel
 from .db_models.recover_password_model import RecoverPasswordModel
 from .notion_authorization_repository import NotionAuthorizationRepository
 from .user_repository import UserRepository
-from .notion_database_repository import NotionDatabaseRepository
+from .notion_datasource_repository import NotionDatasourceRepository
 from .auth_repository import AuthRepository
 from .pluggy_item_repository import PluggyItemRepository
 from .management_period_repository import ManagementPeriodRepository
@@ -34,12 +34,12 @@ from .recover_password_repository import RecoverPasswordRepository
 __all__ = [
     "UserRepository",
     "ThreadModel",
-    "NotionDatabaseModel",
+    "NotionDatasourceModel",
     "UserModel",
     "NotionAuthorizationModel",
     "OwnerType",
     "NotionAuthorizationRepository",
-    "NotionDatabaseRepository",
+    "NotionDatasourceRepository",
     "RevokedToken",
     "AuthRepository",
     "PluggyItemModel",

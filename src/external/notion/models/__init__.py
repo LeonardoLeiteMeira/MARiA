@@ -1,2 +1,2 @@
 from .notion_properties import NotionProperties
-from .notion_base_database import NotionBaseDatabase
+from .notion_base_datasource import NotionBaseDatasource

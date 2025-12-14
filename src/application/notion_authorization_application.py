@@ -21,9 +21,9 @@ class NotionAuthorizationApplication:
         self.__notion_factory.set_user_access_token(user_auth.access_token)
         notion_auth_data = self.__notion_factory.create_notion_authorization_data()
 
-        user_databases = await notion_auth_data.get_all_databases()
+        user_data_sources = await notion_auth_data.get_all_data_sources()
 
-        await self.__user_domain.save_user_notion_databases(user_id, user_databases)
+        await self.__user_domain.save_user_notion_datasources(user_id, user_data_sources)
     
     async def __store_notion_authorization(self, user_id: str, payload) -> NotionAuthorizationModel:
         owner = payload.get("owner", {})
@@ -70,4 +70,3 @@ class NotionAuthorizationApplication:
             resp = await client.post(token_url, data=data, auth=auth)
             resp.raise_for_status()
             return resp.json()
-

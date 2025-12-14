@@ -9,7 +9,7 @@ from .graph import MariaGraph
 from dto import UserAnswerDataDTO
 from domain import UserDomain
 from repository import UserModel, ThreadModel
-from repository.db_models.notion_database_model import NotionDatabaseModel
+from repository.db_models.notion_datasource_model import NotionDatasourceModel
 
 class MariaInteraction:
     def __init__(self, user_domain: UserDomain, maria_graph: MariaGraph, checkpointer_manager: _AsyncGeneratorContextManager[AsyncPostgresSaver]):
@@ -27,9 +27,9 @@ class MariaInteraction:
 
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
-            user_notion_databases = await self.__user_domain.get_user_notion_databases_taged(user.id)
+            user_notion_datasources = await self.__user_domain.get_user_notion_datasources_taged(user.id)
 
-            user_answer_data = self.__get_user_answer_data(user, user_notion_databases)
+            user_answer_data = self.__get_user_answer_data(user, user_notion_datasources)
             state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
 
             compiled = state_graph.compile(checkpointer=checkpointer)
@@ -60,9 +60,9 @@ class MariaInteraction:
             current_thread = user_threads[0]
         return current_thread
     
-    def __get_user_answer_data(self, user: UserModel, user_notion_databases: list[NotionDatabaseModel]) -> UserAnswerDataDTO:
+    def __get_user_answer_data(self, user: UserModel, user_notion_datasources: list[NotionDatasourceModel]) -> UserAnswerDataDTO:
         return UserAnswerDataDTO(
             access_token=user.notion_authorization.access_token,
-            user_databases=user_notion_databases,
+            user_datasources=user_notion_datasources,
             use_default_template=user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
         )

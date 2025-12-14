@@ -1,6 +1,6 @@
 from typing import Optional
 
-from ..enum import NotionDatabaseEnum, UserDataTypes, TemplateTypes
+from ..enum import NotionDatasourceEnum, UserDataTypes, TemplateTypes
 from .. import BaseTemplateAccessInterface, EjFinanceAccess, SimpleFinanceAccess
 
 
@@ -24,10 +24,10 @@ class NotionUserData:
         if self.user_data.is_loaded:
             return self.user_data
 
-        self.user_data.cards = await self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
-        self.user_data.categories = await self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
-        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
-        self.user_data.months = await self.template_access.get_simple_data(database=NotionDatabaseEnum.MONTHS,template_type=self.__get_template_type())
+        self.user_data.cards = await self.template_access.get_simple_data(NotionDatasourceEnum.CARDS)
+        self.user_data.categories = await self.template_access.get_simple_data(NotionDatasourceEnum.CATEGORIES)
+        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatasourceEnum.MACRO_CATEGORIES)
+        self.user_data.months = await self.template_access.get_simple_data(datasource=NotionDatasourceEnum.MONTHS, template_type=self.__get_template_type())
 
         self.user_data.is_loaded = True
 
@@ -51,26 +51,26 @@ class NotionUserData:
     async def get_user_cards(self):
         if getattr(self.user_data, 'cards', None):
             return self.user_data.cards
-        self.user_data.cards = await self.template_access.get_simple_data(NotionDatabaseEnum.CARDS)
+        self.user_data.cards = await self.template_access.get_simple_data(NotionDatasourceEnum.CARDS)
         return self.user_data.cards
 
     async def get_user_categories(self):
         if getattr(self.user_data, 'categories', None):
             return self.user_data.categories
-        self.user_data.categories = await self.template_access.get_simple_data(NotionDatabaseEnum.CATEGORIES)
+        self.user_data.categories = await self.template_access.get_simple_data(NotionDatasourceEnum.CATEGORIES)
         return self.user_data.categories
 
     async def get_user_macro_categories(self):
         if getattr(self.user_data, 'macroCategories', None):
             return self.user_data.macroCategories
-        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatabaseEnum.MACRO_CATEGORIES)
+        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatasourceEnum.MACRO_CATEGORIES)
         return self.user_data.macroCategories
 
     async def get_user_months(self):
         if getattr(self.user_data, 'months', None):
             return self.user_data.months
         template_type = self.__get_template_type()
-        self.user_data.months = await self.template_access.get_simple_data(database=NotionDatabaseEnum.MONTHS, template_type=template_type)
+        self.user_data.months = await self.template_access.get_simple_data(datasource=NotionDatasourceEnum.MONTHS, template_type=template_type)
         return self.user_data.months
 
     def __get_template_type(self) -> TemplateTypes:

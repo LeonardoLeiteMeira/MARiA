@@ -1,19 +1,19 @@
 from abc import ABC, abstractmethod
 import urllib.parse
 
-from repository.db_models.notion_database_model import NotionDatabaseModel
+from repository.db_models.notion_datasource_model import NotionDatasourceModel
 from .notion_external import NotionExternal
-from ..enum import NotionDatabaseEnum, TemplateTypes
+from ..enum import NotionDatasourceEnum, TemplateTypes
 
 
 class BaseTemplateAccessInterface(ABC):
-    def __init__(self, notion_external: NotionExternal, user_databases: list[NotionDatabaseModel]):
+    def __init__(self, notion_external: NotionExternal, user_datasources: list[NotionDatasourceModel]):
         self.notion_external = notion_external
-        self.databases = {
-            user_db.tag: {
-                'id': user_db.table_id
+        self.datasources = {
+            user_datasource.tag: {
+                'id': user_datasource.table_id
             }
-            for user_db in user_databases
+            for user_datasource in user_datasources
         }
         self.cache = {}
 
@@ -84,37 +84,37 @@ class BaseTemplateAccessInterface(ABC):
     async def get_planning_by_month(self, month_id) -> dict:
         pass
     
-    async def __get_properties(self, database: NotionDatabaseEnum) -> dict:
-        if 'properties' in self.databases[database.value]:
-            return self.databases[database.value]['properties']
-        
-        data_source_id = self.databases[database.value]['id']
-        data = await self.notion_external.retrieve_databse(data_source_id)
-        self.databases[database.value]['properties'] = data['properties']
-        return self.databases[database.value]['properties']
+    async def __get_properties(self, datasource: NotionDatasourceEnum) -> dict:
+        if 'properties' in self.datasources[datasource.value]:
+            return self.datasources[datasource.value]['properties']
+
+        datasource_id = self.datasources[datasource.value]['id']
+        data = await self.notion_external.retrieve_datasource(datasource_id)
+        self.datasources[datasource.value]['properties'] = data['properties']
+        return self.datasources[datasource.value]['properties']
 
     async def get_full_categories(self) -> dict:
         '''It's lazy because load a lot of data'''
-        data = await self.notion_external.get_database(self.databases[NotionDatabaseEnum.CATEGORIES.value]['id'])
-        return await self.notion_external.process_database_registers(data)
+        data = await self.notion_external.get_datasource(self.datasources[NotionDatasourceEnum.CATEGORIES.value]['id'])
+        return await self.notion_external.process_datasource_registers(data)
 
-    async def get_simple_data(self, database: NotionDatabaseEnum, cursor: str = None, property_ids: list[str] = [], template_type: TemplateTypes = None):
-        full_properties = await self.__get_properties(database)
+    async def get_simple_data(self, datasource: NotionDatasourceEnum, cursor: str = None, property_ids: list[str] = [], template_type: TemplateTypes = None):
+        full_properties = await self.__get_properties(datasource)
         title_property_id = self.__get_title_property_from_schema(full_properties)
         property_ids_parsed = [urllib.parse.unquote(id) for id in property_ids]
-        
-        sort = self.__get_sort(database, template_type)
 
-        data = await self.notion_external.get_database(
-            self.databases[database.value]['id'],
+        sort = self.__get_sort(datasource, template_type)
+
+        data = await self.notion_external.get_datasource(
+            self.datasources[datasource.value]['id'],
             filter_properties=[title_property_id, *property_ids_parsed],
             start_cursor=cursor,
             sorts=sort
         )
-        return await self.notion_external.process_database_registers(data)
+        return await self.notion_external.process_datasource_registers(data)
 
-    async def get_properties(self, database: str) -> dict:
-        full_properties = await self.__get_properties(database)
+    async def get_properties(self, datasource: NotionDatasourceEnum) -> dict:
+        full_properties = await self.__get_properties(datasource)
         properties = {}
         for key, value in full_properties.items():
             properties[key] = {
@@ -141,11 +141,11 @@ class BaseTemplateAccessInterface(ABC):
                 return value['id']
         return None
     
-    def __get_sort(self, database: NotionDatabaseEnum, template_type: TemplateTypes | None) -> list:
+    def __get_sort(self, datasource: NotionDatasourceEnum, template_type: TemplateTypes | None) -> list:
         if template_type is None:
             return []
 
-        if database == NotionDatabaseEnum.MONTHS:
+        if datasource == NotionDatasourceEnum.MONTHS:
             if template_type is TemplateTypes.EJ_FINANCE_TEMPLATE:
                 return [{
                     "property": "Data Fim",

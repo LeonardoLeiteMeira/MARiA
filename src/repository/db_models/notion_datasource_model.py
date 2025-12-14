@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
 
-class NotionDatabaseModel(Base):
+class NotionDatasourceModel(Base):
     __tablename__ = 'notion_databases'
 
     id: Mapped[uuid.UUID] = mapped_column(

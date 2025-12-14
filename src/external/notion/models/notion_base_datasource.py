@@ -1,4 +1,4 @@
-class NotionBaseDatabase:
+class NotionBaseDatasource:
     name: str = None
     id: str = None
 
