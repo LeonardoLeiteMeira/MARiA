@@ -7,20 +7,22 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.tool_interface import ToolInterface
-from external.notion import NotionUserData, NotionTool
+from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
+from MARiA.graph.state import State
+from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 
 class CreateNewTransfer(ToolInterface):
     name: str = "criar_nova_transferencia"
     description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserData = PrivateAttr()
+    __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self.__notion_user_data = notion_user_data
+        self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
@@ -28,22 +30,22 @@ class CreateNewTransfer(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewTransfer':
-        cards = await notion_user_data.get_user_cards()
-        months = await notion_user_data.get_user_months()
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'CreateNewTransfer':
+        cards = get_state_records_by_type(state, UserDataTypes.CARDS_AND_ACCOUNTS)
+        months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
         EnterInEnum = Enum(
             "CardInEnum",
-            {card["Name"].upper(): card["Name"] for card in cards['data']},
+            {card["Name"].upper(): card["Name"] for card in cards},
         )
         OutOfEnum = Enum(
             "CardInEnum",
-            {card["Name"].upper(): card["Name"] for card in cards['data']},
+            {card["Name"].upper(): card["Name"] for card in cards},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in months['data']},
+            {month["Name"].upper(): month["Name"] for month in months},
         )
 
         InputModel = create_model(
@@ -66,7 +68,7 @@ class CreateNewTransfer(ToolInterface):
             ),
         )
 
-        tool = CreateNewTransfer(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = CreateNewTransfer(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -80,9 +82,9 @@ class CreateNewTransfer(ToolInterface):
             out_of = parms['args']['out_of']
             month = parms['args']['month']
 
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            enter_in = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
-            out_of = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
+            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+            enter_in = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
+            out_of = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
 
             await self.__notion_tool.create_transfer(
                 name,

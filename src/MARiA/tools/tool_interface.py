@@ -5,7 +5,9 @@ from .tool_type_enum import ToolType
 from langchain_core.messages.tool import ToolMessage
 import sentry_sdk
 
-from external.notion import NotionTool, NotionUserData
+from external.notion import NotionTool
+
+from MARiA.graph.state import State
 
 
 class ToolInterface(BaseTool, ABC):
@@ -14,7 +16,7 @@ class ToolInterface(BaseTool, ABC):
     
     @classmethod
     @abstractmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData | None, notion_tool: NotionTool | None) -> 'ToolInterface':
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'ToolInterface':
         pass
 
     def handle_tool_exception(self, error: Exception, tool_call_id: str) -> ToolMessage:
@@ -27,4 +29,3 @@ class ToolInterface(BaseTool, ABC):
             ),
             tool_call_id=tool_call_id,
         )
-

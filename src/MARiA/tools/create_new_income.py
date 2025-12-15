@@ -3,22 +3,24 @@ from langchain_core.tools import BaseTool
 from typing import Optional, Type
 from langchain_core.messages.tool import ToolMessage
 from langchain_core.runnables import RunnableConfig
-from external.notion import NotionTool, NotionUserData
+from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
 from pydantic import create_model, Field
 from MARiA.tools.tool_interface import ToolInterface
 from pydantic import PrivateAttr
+from MARiA.graph.state import State
+from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 class CreateNewIncome(ToolInterface):
     name: str = "criar_nova_transacao_de_entrada"
     description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserData = PrivateAttr()
+    __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self.__notion_user_data = notion_user_data
+        self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
@@ -26,18 +28,18 @@ class CreateNewIncome(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewIncome':
-        cards = await notion_user_data.get_user_cards()
-        months = await notion_user_data.get_user_months()
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'CreateNewIncome':
+        cards = get_state_records_by_type(state, UserDataTypes.CARDS_AND_ACCOUNTS)
+        months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
         CardEnum = Enum(
             "CardEnum",
-            {card["Name"].upper(): card["Name"] for card in cards['data']},
+            {card["Name"].upper(): card["Name"] for card in cards},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in months['data']},
+            {month["Name"].upper(): month["Name"] for month in months},
         )
 
         InputModel = create_model(
@@ -56,7 +58,7 @@ class CreateNewIncome(ToolInterface):
             ),
         )
 
-        tool = CreateNewIncome(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = CreateNewIncome(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -69,8 +71,8 @@ class CreateNewIncome(ToolInterface):
             month = parms['args']['month']
             hasPaid = parms['args']['hasPaid'] if 'hasPaid' in parms['args'] else True
 
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
+            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+            card_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
 
             await self.__notion_tool.create_income(
                 name = name,

@@ -2,6 +2,7 @@ from typing import Annotated
 from langgraph.graph.message import add_messages
 from typing_extensions import TypedDict
 from langchain_core.messages import HumanMessage
+from enum import Enum
 
 class State(TypedDict):
     messages: Annotated[list, add_messages]
@@ -13,3 +14,4 @@ class State(TypedDict):
     categories: dict = None
     macroCategories: dict = None
     months: dict = None
+    transaction_types: list[str] | None

@@ -6,8 +6,10 @@ from pydantic import create_model, Field
 
 from .tool_interface import ToolInterface
 from .tool_type_enum import ToolType
+from MARiA.graph.state import State
+from external.notion import NotionTool
 
-class TransactionOperationEnum(Enum):
+class TransactionOperationEnum(str, Enum):
     CREATE_INCOME = 'CREATE_INCOME'
     CREATE_OUTCOME = 'CREATE_OUTCOME'
     CREATE_TRANSFER = 'CREATE_TRANSFER'
@@ -29,5 +31,5 @@ class RedirectTransactionsAgent(ToolInterface):
         pass
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: None, notion_tool: None) -> 'RedirectTransactionsAgent':
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'RedirectTransactionsAgent':
         return RedirectTransactionsAgent()

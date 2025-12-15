@@ -5,7 +5,7 @@ import urllib.parse
 from ..enum import NotionDatasourceEnum
 from .base_template_access import BaseTemplateAccessInterface
 
-class TransactionType(Enum):
+class TransactionType(str, Enum):
     INCOME = 'Entrada'
     OUTCOME = 'Saida'
     TRANSFER = 'Movimentação Interna'

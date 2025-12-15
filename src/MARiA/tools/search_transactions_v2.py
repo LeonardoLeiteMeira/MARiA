@@ -5,19 +5,21 @@ from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field, PrivateAttr
 
 from MARiA.tools.tool_interface import ToolInterface
-from external.notion import NotionUserData, NotionTool
+from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
+from MARiA.graph.state import State
+from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 class SearchTransactionV2(ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
     description: str = "Fazer busca de transacoes com base nas informacoes que o usuario passar. Use apenas as informações que o usuário passar, o que ele não passar deixe como None"
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserData = PrivateAttr()
+    __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self.__notion_user_data = notion_user_data
+        self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
@@ -25,29 +27,36 @@ class SearchTransactionV2(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'SearchTransactionV2':
-        cards = await notion_user_data.get_user_cards()
-        categories = await notion_user_data.get_user_categories()
-        macroCategories = await notion_user_data.get_user_macro_categories()
-        months = await notion_user_data.get_user_months()
-        transaction_types = notion_tool.ger_transaction_types()
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'SearchTransactionV2':
+        cards = get_state_records_by_type(state, UserDataTypes.CARDS_AND_ACCOUNTS)
+        categories = get_state_records_by_type(state, UserDataTypes.CATEGORIES)
+        macroCategories = get_state_records_by_type(state, UserDataTypes.MACRO_CATEGORIES)
+        months = get_state_records_by_type(state, UserDataTypes.MONTHS)
+        transaction_types = state.get("transaction_types")
+        if not transaction_types:
+            transaction_enum = notion_tool.ger_transaction_types()
+            transaction_types = [member.value for member in transaction_enum]
 
         from enum import Enum
         CardEnum = Enum(
             "CardEnum",
-            {card["Name"].upper(): card["Name"] for card in cards['data']},
+            {card["Name"].upper(): card["Name"] for card in cards},
         )
         CategoriesEnum = Enum(
             "CategoryEnum",
-            {category["Name"].upper(): category["Name"] for category in categories['data']},
+            {category["Name"].upper(): category["Name"] for category in categories},
         )
         MacroCategoriesEnum = Enum(
             "macroCategoryEnum",
-            {macro["Name"].upper(): macro["Name"] for macro in macroCategories['data']},
+            {macro["Name"].upper(): macro["Name"] for macro in macroCategories},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in months['data']},
+            {month["Name"].upper(): month["Name"] for month in months},
+        )
+        TransactionTypeEnum = Enum(
+            "TransactionTypeEnum",
+            {value.upper().replace(" ", "_"): value for value in transaction_types},
         )
 
         InputModel = create_model(
@@ -75,14 +84,14 @@ class SearchTransactionV2(ToolInterface):
                 Field(..., description="Filtrar o Mês"),
             ),
             transaction_type=(
-                transaction_types | None,
+                TransactionTypeEnum | None,
                 Field(..., description="Filtrar o tipo de transação"),
             ),
             cursor=(str | None, Field(..., description="Ao fazer uma busca, se tiver mais registros esse atributo podera ser retornado, e seja solicitado mais dados para a mesma consulta, envie esse cursor junto para pegar a proxima pagina.")),
             page_size=(int, Field(..., description="O padrão e 25 para a quantidade de registros retornados.")),
         )
 
-        tool = SearchTransactionV2(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = SearchTransactionV2(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -99,11 +108,11 @@ class SearchTransactionV2(ToolInterface):
             cursor = parms['args'].get('cursor', None)
             page_size = parms['args'].get('page_size', None)
 
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            card_account_enter_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
-            card_account_out_id = await self.__notion_user_data.get_data_id(UserDataTypes.CARDS_AND_ACCOUNTS, card_account_out)
-            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
-            macro_category_id = await self.__notion_user_data.get_data_id(UserDataTypes.MACRO_CATEGORIES, macro_category)
+            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+            card_account_enter_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
+            card_account_out_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, card_account_out)
+            category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
+            macro_category_id = get_data_id_from_state(self.__state, UserDataTypes.MACRO_CATEGORIES, macro_category)
 
             transactions = await self.__notion_tool.get_transactions(
                 name,

@@ -79,23 +79,27 @@ class MariaGraph:
     
 
     async def __create_agent(self, state: State):
-        if not state["months"]:
+        if not state.get("months"):
             state["months"] = await self.__notion_user_data.get_user_months()
 
-        if not state["cards"]:
+        if not state.get("cards"):
             state["cards"] = await self.__notion_user_data.get_user_cards()
 
-        if not state["categories"]:
+        if not state.get("categories"):
             state["categories"] = await self.__notion_user_data.get_user_categories()
 
-        if not state["macroCategories"]:
+        if not state.get("macroCategories"):
             state["macroCategories"] = await self.__notion_user_data.get_user_macro_categories()
+
+        if not state.get("transaction_types"):
+            transaction_enum = self.__notion_tool.ger_transaction_types()
+            state["transaction_types"] = [member.value for member in transaction_enum]
         
         instanciated_tools = []
         for Tool in self.__tools:
             #TODO mudar contrato das tools - Elas devem ser criadas a partir do state graph
             # Verificar sobre adcionar callback de execucao de sucesso, para limpar o state e atualizar os dados quando necessario
-            tool_created = await Tool.instantiate_tool(notion_user_data, notion_tool)
+            tool_created = await Tool.instantiate_tool(state, self.__notion_tool)
             self.__tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
 
@@ -113,9 +117,9 @@ class MariaGraph:
     async def main_maria_node(self, state: State):
         """ Node with chatbot logic """
         messages = state["messages"]
-        await self.__create_agent() 
+        await self.__create_agent(state)
         chain_output = await self.__agent_with_tools.ainvoke(messages)
-        return {"messages": [chain_output]}
+        return {**state, "messages": [chain_output]}
     
     def __router(self, state: State):
         if isinstance(state, list):

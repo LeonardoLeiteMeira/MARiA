@@ -1,4 +1,3 @@
-from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Type
 from langchain_core.messages.tool import ToolMessage
@@ -6,6 +5,8 @@ from pydantic import create_model, Field
 
 from .tool_interface import ToolInterface
 from .tool_type_enum import ToolType
+from MARiA.graph.state import State
+from external.notion import NotionTool
 
 
 class GoToSupervisor(ToolInterface):
@@ -21,5 +22,5 @@ class GoToSupervisor(ToolInterface):
         pass
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: None, notion_tool: None) -> 'GoToSupervisor':
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'GoToSupervisor':
         return GoToSupervisor()

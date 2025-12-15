@@ -7,19 +7,21 @@ from pydantic import create_model, Field
 from pydantic import PrivateAttr
 
 from MARiA.tools.tool_interface import ToolInterface
-from external.notion import NotionTool, NotionUserData
+from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
+from MARiA.graph.state import State
+from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 class CreateNewPlanning(ToolInterface):
     name: str = "criar_novo_planejamento"
     description: str = "Criar um novo planejamento associado um mes"
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserData = PrivateAttr()
-    __notion_user_data: NotionTool = PrivateAttr()
+    __state: State = PrivateAttr()
+    __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self.__notion_user_data = notion_user_data
+        self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
@@ -27,18 +29,18 @@ class CreateNewPlanning(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewPlanning':
-        months = await notion_user_data.get_user_months()
-        categories = await notion_user_data.get_user_categories()
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'CreateNewPlanning':
+        months = get_state_records_by_type(state, UserDataTypes.MONTHS)
+        categories = get_state_records_by_type(state, UserDataTypes.CATEGORIES)
 
         from enum import Enum
         CategoriesEnum = Enum(
             "CategoryEnum",
-            {category["Name"].upper(): category["Name"] for category in categories['data']},
+            {category["Name"].upper(): category["Name"] for category in categories},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in months['data']},
+            {month["Name"].upper(): month["Name"] for month in months},
         )
 
         InputModel = create_model(
@@ -56,7 +58,7 @@ class CreateNewPlanning(ToolInterface):
             text=(str, Field(..., description="Texto de observação sobre esse planejamento. Pode ser algo do usuário ou percepção sua.")),
         )
 
-        tool = CreateNewPlanning(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = CreateNewPlanning(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -68,8 +70,8 @@ class CreateNewPlanning(ToolInterface):
             amount = parms['args']['amount']
             text = parms['args']['text']
      
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
-            category_id = await self.__notion_user_data.get_data_id(UserDataTypes.CATEGORIES, category)
+            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+            category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
 
             await self.__notion_tool.create_plan(
                 name,

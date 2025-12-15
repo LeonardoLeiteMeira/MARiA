@@ -4,6 +4,7 @@ import urllib.parse
 from repository.db_models.notion_datasource_model import NotionDatasourceModel
 from .notion_external import NotionExternal
 from ..enum import NotionDatasourceEnum, TemplateTypes
+from enum import Enum
 
 
 class BaseTemplateAccessInterface(ABC):
@@ -38,7 +39,7 @@ class BaseTemplateAccessInterface(ABC):
         pass
 
     @abstractmethod
-    def get_transaction_enum(self):
+    def get_transaction_enum(self) -> Enum:
         pass
 
     @abstractmethod
