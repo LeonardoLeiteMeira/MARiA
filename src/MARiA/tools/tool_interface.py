@@ -14,7 +14,7 @@ class ToolInterface(BaseTool, ABC):
     
     @classmethod
     @abstractmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData | None, notion_tool: NotionTool | None):
+    async def instantiate_tool(cls, notion_user_data: NotionUserData | None, notion_tool: NotionTool | None) -> 'ToolInterface':
         pass
 
     def handle_tool_exception(self, error: Exception, tool_call_id: str) -> ToolMessage:

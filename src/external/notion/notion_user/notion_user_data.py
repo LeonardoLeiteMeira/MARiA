@@ -35,11 +35,13 @@ class NotionUserData:
     
     async def get_data_id(self, data_type: UserDataTypes, register_name: str):
         if not self.user_data.is_loaded:
+            # Remover essa parte
             await self.get_user_base_data()
 
         data = None
         user_data = getattr(self.user_data, data_type.value)
         for register in user_data['data']:
+            # Fazer a verificacao mais especifica
             if register['Name'] == register_name:
                 data = register
 

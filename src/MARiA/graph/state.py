@@ -8,3 +8,8 @@ class State(TypedDict):
     transactions_agent_messages: Annotated[list, add_messages]
     user_input: str
     args: dict
+
+    cards: dict = None
+    categories: dict = None
+    macroCategories: dict = None
+    months: dict = None

@@ -28,16 +28,17 @@ class CreateNewPlanning(ToolInterface):
 
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'CreateNewPlanning':
-        user_data = await notion_user_data.get_user_base_data()
+        months = await notion_user_data.get_user_months()
+        categories = await notion_user_data.get_user_categories()
 
         from enum import Enum
         CategoriesEnum = Enum(
             "CategoryEnum",
-            {category["Name"].upper(): category["Name"] for category in user_data.categories['data']},
+            {category["Name"].upper(): category["Name"] for category in categories['data']},
         )
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
+            {month["Name"].upper(): month["Name"] for month in months['data']},
         )
 
         InputModel = create_model(

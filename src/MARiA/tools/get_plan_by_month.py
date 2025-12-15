@@ -28,12 +28,12 @@ class GetPlanByMonth(ToolInterface):
 
     @classmethod
     async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'GetPlanByMonth':
-        user_data = await notion_user_data.get_user_base_data()
+        months = await notion_user_data.get_user_months()
 
         from enum import Enum
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
+            {month["Name"].upper(): month["Name"] for month in months['data']},
         )
 
         InputModel = create_model(
