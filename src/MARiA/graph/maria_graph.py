@@ -29,6 +29,7 @@ class MariaGraph:
         self.__model_name = "openai:gpt-4.1" 
 
         self.__tools_by_name: dict[str, ToolInterface] = {}
+        self.__state_keys_cache_by_tool = {}
 
         self.__tools: list[ToolInterface] = [
             #Tools do transaction agent
@@ -101,6 +102,7 @@ class MariaGraph:
             self.__tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
 
+        self.__create_state_keys_cache_by_tool()
         agent = init_chat_model(self.__model_name, temperature=0.2)
         self.__agent_with_tools = agent.bind_tools(instanciated_tools)
     
@@ -136,6 +138,7 @@ class MariaGraph:
         else:
             raise ValueError("No message found in input")
         outputs = []
+        state_updates: dict[str, None] = {}
         for tool_call in message.tool_calls:
             tool_to_call = self.__tools_by_name[tool_call["name"]]
 
@@ -155,8 +158,35 @@ class MariaGraph:
             outputs.append(
                 tool_result
             )
+            state_updates.update(self.__invalidate_state_cache(state, tool_to_call.name))
 
         return Command(
             goto='main_maria_node',
-            update={"messages": outputs}
+            update={"messages": outputs, **state_updates}
         )
+
+    def __invalidate_state_cache(self, state: State, tool_name: str) -> dict[str, None]:
+        keys_to_reset = self.__state_keys_cache_by_tool.get(tool_name)
+        if not keys_to_reset:
+            return {}
+        updates = {}
+        for key in keys_to_reset:
+            if key in state:
+                state[key] = None
+                updates[key] = None
+        return updates
+    
+
+    def __create_state_keys_cache_by_tool(self):
+        for tool in self.__tools_by_name.values():
+            if isinstance(tool, CreateCard):
+                self.__state_keys_cache_by_tool[tool.name] = ("cards",)
+            if isinstance(tool, CreateNewMonth):
+                self.__state_keys_cache_by_tool[tool.name] = ("months",)
+            if isinstance(tool, DeleteData):
+                self.__state_keys_cache_by_tool[tool.name] = (
+                    "cards",
+                    "categories",
+                    "macroCategories",
+                    "months"
+                )
