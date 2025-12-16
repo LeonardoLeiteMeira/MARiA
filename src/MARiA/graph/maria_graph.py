@@ -108,16 +108,16 @@ class MariaGraph:
     
     async def __start_message(self, state: State):
         messages = state["messages"]
+        await self.__create_agent(state)
         if len(messages) != 0:
             return {"messages": [state["user_input"]]}
         
         system = SystemMessage(self.prompt)
-        return {"messages": [system, state["user_input"]]}
+        return {**state, "messages": [system, state["user_input"]]}
 
     async def main_maria_node(self, state: State):
         """ Node with chatbot logic """
         messages = state["messages"]
-        await self.__create_agent(state)
         chain_output = await self.__agent_with_tools.ainvoke(messages)
         return {**state, "messages": [chain_output]}
     
