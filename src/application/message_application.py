@@ -22,7 +22,7 @@ class MessageApplication:
             user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
             chat_id = self.__message_service.get_chat_id(message_data)
 
-            user = await self.__user_domain.get_user_by_phone_number(phone_number)
+            user = await self.__user_domain.get_user_by_phone_number_with_notion_data(phone_number)
             if not user or not user.enable:
                 print(f"{phone_number}: {user_name}")
                 await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')

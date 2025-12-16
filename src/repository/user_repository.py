@@ -1,6 +1,7 @@
 from .base_repository import BaseRepository
 from .db_models.user_model import UserModel
 from .db_models.thread_model import ThreadModel
+from .db_models.notion_datasource_model import NotionDatasourceModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
 from sqlalchemy.orm import joinedload
 from datetime import datetime
@@ -35,11 +36,13 @@ class UserRepository(BaseRepository):
             return user_tuple[0] if user_tuple else None
         
 
-    async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
+    async def get_user_by_phone_number_with_notion_data(self, phone_number:str) -> UserModel | None:
         stmt = (
             select(UserModel)
             .options(joinedload(UserModel.notion_authorization))
+            .options(joinedload(UserModel.notion_datasources))
             .where(UserModel.phone_number == phone_number)
+            .where(NotionDatasourceModel.tag != None)
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)

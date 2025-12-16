@@ -28,8 +28,7 @@ class MariaInteraction:
 
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
-            user_notion_datasources = await self.__user_domain.get_user_notion_datasources_taged(user.id)
-            notion_user_data, notion_tool = self.__get_notion_instances(user, user_notion_datasources)
+            notion_user_data, notion_tool = self.__get_notion_instances(user)
             state_graph = await self.__maria_graph.get_state_graph(notion_user_data, notion_tool)
 
             compiled = state_graph.compile(checkpointer=checkpointer)
@@ -60,11 +59,11 @@ class MariaInteraction:
             current_thread = user_threads[0]
         return current_thread
     
-    def __get_notion_instances(self, user: UserModel, user_notion_datasources: list[NotionDatasourceModel]) -> tuple[NotionUserData, NotionTool]:
+    def __get_notion_instances(self, user: UserModel) -> tuple[NotionUserData, NotionTool]:
         is_default_template = user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
         notion_factory = NotionFactory()
         notion_factory.set_user_access_token(user.notion_authorization.access_token)
-        notion_factory.set_user_datasources(user_notion_datasources, is_default_template)
+        notion_factory.set_user_datasources(user.notion_datasources, is_default_template)
 
         notion_user_data = notion_factory.create_notion_user_data()
         notion_tool = notion_factory.create_notion_tool()

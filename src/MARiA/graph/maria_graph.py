@@ -97,8 +97,6 @@ class MariaGraph:
         
         instanciated_tools = []
         for Tool in self.__tools:
-            #TODO mudar contrato das tools - Elas devem ser criadas a partir do state graph
-            # Verificar sobre adcionar callback de execucao de sucesso, para limpar o state e atualizar os dados quando necessario
             tool_created = await Tool.instantiate_tool(state, self.__notion_tool)
             self.__tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
