@@ -7,19 +7,21 @@ from pydantic import PrivateAttr
 from pydantic import create_model, Field
 
 from MARiA.tools.tool_interface import ToolInterface
-from external.notion import NotionUserData, NotionTool
+from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
+from MARiA.graph.state import State
+from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 class GetPlanByMonth(ToolInterface):
     name: str = "buscar_planejamento_por_mes"
     description: str = "Busca um planejamento de um mes em especifico."
     args_schema: Type[BaseModel] = None
-    __notion_user_data: NotionUserData = PrivateAttr()
+    __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, notion_user_data: NotionUserData, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data):
         super().__init__(**data)
-        self.__notion_user_data = notion_user_data
+        self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args, **kwargs) -> ToolMessage:
@@ -27,13 +29,13 @@ class GetPlanByMonth(ToolInterface):
 
 
     @classmethod
-    async def instantiate_tool(cls, notion_user_data: NotionUserData, notion_tool: NotionTool) -> 'GetPlanByMonth':
-        user_data = await notion_user_data.get_user_base_data()
+    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'GetPlanByMonth':
+        months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
         MonthsEnum = Enum(
             "MonthEnum",
-            {month["Name"].upper(): month["Name"] for month in user_data.months['data']},
+            {month["Name"].upper(): month["Name"] for month in months},
         )
 
         InputModel = create_model(
@@ -44,7 +46,7 @@ class GetPlanByMonth(ToolInterface):
             )
         )
 
-        tool = GetPlanByMonth(notion_user_data=notion_user_data, notion_tool=notion_tool)
+        tool = GetPlanByMonth(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
@@ -52,7 +54,7 @@ class GetPlanByMonth(ToolInterface):
         try:
             month = parms['args']['month']
 
-            month_id = await self.__notion_user_data.get_data_id(UserDataTypes.MONTHS, month)
+            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
 
             month_plan = await self.__notion_tool.get_plan_by_month(month_id)
 

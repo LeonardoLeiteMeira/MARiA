@@ -88,7 +88,18 @@ class TransactionsAgentGraph:
     async def __build_agent(self, state: State):
         notion_user_data = self.__notion_factory.create_notion_user_data()
         notion_tool = self.__notion_factory.create_notion_tool()
-        await self.agent.create_new_agent(notion_user_data, notion_tool, True)
+        if not state.get("months"):
+            state["months"] = await notion_user_data.get_user_months()
+        if not state.get("cards"):
+            state["cards"] = await notion_user_data.get_user_cards()
+        if not state.get("categories"):
+            state["categories"] = await notion_user_data.get_user_categories()
+        if not state.get("macroCategories"):
+            state["macroCategories"] = await notion_user_data.get_user_macro_categories()
+        if not state.get("transaction_types"):
+            transaction_enum = notion_tool.ger_transaction_types()
+            state["transaction_types"] = [member.value for member in transaction_enum]
+        await self.agent.create_new_agent(state, notion_tool, True)
         return Command(
             goto='call_agent'
         )
@@ -187,4 +198,3 @@ class TransactionsAgentGraph:
     #     )
 
     # if interrupts:
-

@@ -12,8 +12,8 @@ class UserDomain(ChooseNotionDatasourceTagMixin):
 
         self.__valid_thread_period = (datetime.now()) - timedelta(hours=1)
 
-    async def get_user_by_phone_number(self, phone_number:str) -> UserModel | None:
-        return await self.__user_repository.get_user_by_phone_number(phone_number)
+    async def get_user_by_phone_number_with_notion_data(self, phone_number:str) -> UserModel | None:
+        return await self.__user_repository.get_user_by_phone_number_with_notion_data(phone_number)
     
     async def get_user_valid_thread(self, user_id: str) -> list[ThreadModel]:
         return await self.__user_repository.get_user_valid_threads_by_user_id(user_id, self.__valid_thread_period)

@@ -10,6 +10,7 @@ from dto import UserAnswerDataDTO
 from domain import UserDomain
 from repository import UserModel, ThreadModel
 from repository.db_models.notion_datasource_model import NotionDatasourceModel
+from external.notion import NotionFactory, NotionUserData, NotionTool
 
 class MariaInteraction:
     def __init__(self, user_domain: UserDomain, maria_graph: MariaGraph, checkpointer_manager: _AsyncGeneratorContextManager[AsyncPostgresSaver]):
@@ -27,10 +28,8 @@ class MariaInteraction:
 
         async with self.__checkpointer as checkpointer:
             await checkpointer.setup()
-            user_notion_datasources = await self.__user_domain.get_user_notion_datasources_taged(user.id)
-
-            user_answer_data = self.__get_user_answer_data(user, user_notion_datasources)
-            state_graph = await self.__maria_graph.get_state_graph(user_answer_data)
+            notion_user_data, notion_tool = self.__get_notion_instances(user)
+            state_graph = await self.__maria_graph.get_state_graph(notion_user_data, notion_tool)
 
             compiled = state_graph.compile(checkpointer=checkpointer)
             snapshot = await compiled.aget_state(config, subgraphs=True)
@@ -60,9 +59,14 @@ class MariaInteraction:
             current_thread = user_threads[0]
         return current_thread
     
-    def __get_user_answer_data(self, user: UserModel, user_notion_datasources: list[NotionDatasourceModel]) -> UserAnswerDataDTO:
-        return UserAnswerDataDTO(
-            access_token=user.notion_authorization.access_token,
-            user_datasources=user_notion_datasources,
-            use_default_template=user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
-        )
+    def __get_notion_instances(self, user: UserModel) -> tuple[NotionUserData, NotionTool]:
+        is_default_template = user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
+        notion_factory = NotionFactory()
+        notion_factory.set_user_access_token(user.notion_authorization.access_token)
+        notion_factory.set_user_datasources(user.notion_datasources, is_default_template)
+
+        notion_user_data = notion_factory.create_notion_user_data()
+        notion_tool = notion_factory.create_notion_tool()
+
+        return (notion_user_data, notion_tool)
+    

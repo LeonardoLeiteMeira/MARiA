@@ -1,6 +1,6 @@
 from enum import Enum
 
-class NotionDatasourceEnum(Enum):
+class NotionDatasourceEnum(str, Enum):
     TRANSACTIONS = "transactions"
     CATEGORIES = "categories"
     MONTHS = "months"
@@ -8,7 +8,7 @@ class NotionDatasourceEnum(Enum):
     MACRO_CATEGORIES = "types"
     PLANNING = "planning"
 
-class UserDataTypes(Enum):
+class UserDataTypes(str, Enum):
     CATEGORIES = "categories"
     MACRO_CATEGORIES= "macroCategories"
     MONTHS = "months"

@@ -4,6 +4,10 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from repository import ThreadModel, NotionAuthorizationModel, NotionDatasourceModel
+
 
 class UserModel(Base):
     __tablename__ = 'users'

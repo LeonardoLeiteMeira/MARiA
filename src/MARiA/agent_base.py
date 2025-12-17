@@ -3,7 +3,8 @@ from dto import UserAnswerDataDTO
 from external.notion import NotionFactory
 from MARiA.tools import ToolInterface
 from langchain_openai import ChatOpenAI
-from external.notion import NotionUserData, NotionTool
+from external.notion import NotionTool
+from MARiA.graph.state import State
 
 from langchain.chat_models import init_chat_model
 
@@ -20,35 +21,19 @@ class AgentBase:
         self.agent_with_tools = None
         self.agent_with_structured_output = None
 
-    #TODO remover
-    async def create_agent(self, user_answer_data: UserAnswerDataDTO, notion_factory: NotionFactory):
-        instanciated_tools = []
-
-        notion_factory.set_user_access_token(user_answer_data.access_token)
-        notion_factory.set_user_datasources(user_answer_data.user_datasources, user_answer_data.use_default_template)
-
-        notion_user_data = notion_factory.create_notion_user_data()
-        notion_tool = notion_factory.create_notion_tool()
-
-        for Tool in self.tools:
-            tool_created = await Tool.instantiate_tool(notion_user_data, notion_tool)
-            self.tools_by_name[tool_created.name] = tool_created
-            instanciated_tools.append(tool_created)
-
-        self.agent = init_chat_model(self.model_name, temperature=0.2)
-        self.agent_with_tools = self.agent.bind_tools(instanciated_tools)
-
-    async def create_new_agent(self, notion_user_data: NotionUserData, notion_tool: NotionTool, force_tool_call: bool = False):
+    async def create_new_agent(self, state: State, notion_tool: NotionTool, force_tool_call: bool = False):
         instanciated_tools = []
 
         for Tool in self.tools:
-            tool_created = await Tool.instantiate_tool(notion_user_data, notion_tool)
+            tool_created = await Tool.instantiate_tool(state, notion_tool)
             self.tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
 
         self.agent = init_chat_model(self.model_name, temperature=0.2)
 
-        self.agent_with_tools = self.agent.bind_tools(instanciated_tools, tool_choice='any') if force_tool_call else self.agent.bind_tools(instanciated_tools)
+        tool_choice = 'any' if force_tool_call else None
+
+        self.agent_with_tools = self.agent.bind_tools(instanciated_tools, tool_choice=tool_choice)
 
     async def set_structured_output(self, structured_model):
         if self.agent == None:
