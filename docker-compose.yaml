@@ -87,8 +87,6 @@ services:
       - evolution_instances:/evolution/instances
     depends_on:
       - database
-    expose:
-      - "8080"
     labels:
       - traefik.enable=true
       - traefik.http.routers.evo.rule=Host(`api.maria.alemdatech.com`) && PathPrefix(`/evo`)
