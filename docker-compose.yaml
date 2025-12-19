@@ -87,15 +87,15 @@ services:
       - evolution_instances:/evolution/instances
     depends_on:
       - database
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.evo.rule=Host(`api.maria.alemdatech.com`) && PathPrefix(`/evo`)
-      - traefik.http.routers.evo.entrypoints=websecure
-      - traefik.http.routers.evo.tls.certresolver=le
-      - traefik.http.services.evo.loadbalancer.server.port=8080
-      - traefik.http.middlewares.evo-rewrite.replacePathRegex.regex=^/evo/?(.*)
-      - traefik.http.middlewares.evo-rewrite.replacePathRegex.replacement=/manager/$$1
-      - traefik.http.routers.evo.middlewares=evo-rewrite
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.evo.rule=Host(`api.maria.alemdatech.com`) && PathPrefix(`/evo`)
+    #   - traefik.http.routers.evo.entrypoints=websecure
+    #   - traefik.http.routers.evo.tls.certresolver=le
+    #   - traefik.http.services.evo.loadbalancer.server.port=8080
+    #   - traefik.http.middlewares.evo-rewrite.replacePathRegex.regex=^/evo/?(.*)
+    #   - traefik.http.middlewares.evo-rewrite.replacePathRegex.replacement=/manager/$$1
+    #   - traefik.http.routers.evo.middlewares=evo-rewrite
     # healthcheck:
     #   test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
     #   interval: 30s
