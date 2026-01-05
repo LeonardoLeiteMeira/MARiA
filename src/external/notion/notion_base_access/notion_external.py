@@ -71,9 +71,9 @@ class NotionExternal:
         row['id'] = page['id']
         for key, value in page['properties'].items():
             property = NotionProperties(key, value)
-            row[property.name] = property.value
-            if property.property_type == 'relation' :
-                row[property.name] = [await self.__get_page_name(page_id['id']) for page_id in property.value]
+            row[property.key] = property.value
+            if property.property_type == 'relation':
+                row[property.key] = [await self.__get_page_name(page_id['id']) for page_id in property.value]
         return row
     
     async def __get_page_name(self, page_id: str) -> str:
