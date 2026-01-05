@@ -67,7 +67,6 @@ class MariaGraph:
 
         state_graph.add_edge(START, "start_node")
         state_graph.add_edge("start_node", "main_maria_node")
-        state_graph.add_edge('main_maria_node', END)
         state_graph.add_conditional_edges(
             'main_maria_node',
             self.__router,
@@ -122,9 +121,7 @@ class MariaGraph:
         return {**state, "messages": [chain_output]}
     
     def __router(self, state: State):
-        if isinstance(state, list):
-            ai_message = state[-1]
-        elif messages := state.get("messages", []):
+        if messages := state.get("messages", []):
             ai_message = messages[-1]
         else:
             raise ValueError(f"No messages found in input state to tool_edge: {state}")
@@ -140,25 +137,43 @@ class MariaGraph:
         outputs = []
         state_updates: dict[str, None] = {}
         for tool_call in message.tool_calls:
-            tool_to_call = self.__tools_by_name[tool_call["name"]]
+            try:
+                tool_to_call = self.__tools_by_name.get(tool_call["name"])
 
-            tool_type = tool_to_call.tool_type
-            if tool_type == ToolType.AGENT_REDIRECT:
-                return Command(
-                    goto=tool_call['name'],
-                    update={
-                        'messages':[ToolMessage(content=f"Transferido para {tool_call['name']}", tool_call_id=tool_call["id"])],
-                        'args': tool_call["args"]
-                    }
+                if tool_to_call is None:
+                    outputs.append(
+                        ToolMessage(
+                            content=f"TOOL {tool_call["name"]} NOT FOUND",
+                            tool_call_id=tool_call["id"],
+                        )
+                    )
+                    continue
+
+                tool_type = tool_to_call.tool_type
+                if tool_type == ToolType.AGENT_REDIRECT:
+                    return Command(
+                        goto=tool_call['name'],
+                        update={
+                            'messages':[ToolMessage(content=f"Transferido para {tool_call['name']}", tool_call_id=tool_call["id"])],
+                            'args': tool_call["args"]
+                        }
+                    )
+
+                tool_result = await tool_to_call.ainvoke(
+                    {'args': tool_call["args"], 'id': tool_call["id"]}
+                )
+                outputs.append(
+                    tool_result
+                )
+                state_updates.update(self.__invalidate_state_cache(state, tool_to_call.name))
+            except Exception as e:
+                outputs.append(
+                    ToolMessage(
+                        content=f"ERROR TO EXECUTE TOOL: {tool_call["name"]}. ERROR: {str(e)}",
+                        tool_call_id=tool_call["id"],
+                    )
                 )
 
-            tool_result = await tool_to_call.ainvoke(
-                {'args': tool_call["args"], 'id': tool_call["id"]}
-            )
-            outputs.append(
-                tool_result
-            )
-            state_updates.update(self.__invalidate_state_cache(state, tool_to_call.name))
 
         return Command(
             goto='main_maria_node',
