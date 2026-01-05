@@ -38,7 +38,7 @@ class MessageApplication:
                 await self.send_auth_link(user, chat_id)
                 return
 
-            answer = await self.__maria.get_maria_answer(user, message)
+            answer = await self.__maria.get_maria_answer(user, message['message'])
             await self.__message_service.send_message(chat_id, answer)
         except Exception as ex:
             print({

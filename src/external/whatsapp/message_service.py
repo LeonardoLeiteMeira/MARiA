@@ -27,8 +27,12 @@ class MessageService:
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(base_url, json=body, headers=headers)
+                if response.status_code != 201:
+                    print(f"Something went wrong to send message to {chat_id}")
+                else:
+                    print(f"Message send with success to {chat_id}")
         except Exception as e:
-            print("ERROR TO SEND WHATSAPP MESSAGE: ", e)
+            print(f"ERROR TO SEND WHATSAPP MESSAGE TO {chat_id}: ", e)
             raise e
         
     def is_event_a_new_message(self, data:dict) -> bool:
@@ -96,10 +100,6 @@ class MessageService:
             'error_message': "Desculpe! Não consigo ver essa mensagem!"
         }
         
-        
-
-
-    
     def get_chat_id(self, data: dict) -> str:
         return data['data']['key']['remoteJid']
     
