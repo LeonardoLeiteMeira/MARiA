@@ -92,11 +92,10 @@ class NotionTool:
         await self.__template_access.delete_page(id)
 
     async def get_month(self, month_id: str) -> dict:
-        month = await self.__template_access.get_page_by_id(
+        return await self.__template_access.get_page_by_id(
             month_id,
             ['Planejamentos', 'This (Não alterar)', 'Transações']
         )
-        return month
     
     async def get_plan_by_month(self, month_id) -> dict:
         return await self.__template_access.get_planning_by_month(month_id)

@@ -2,10 +2,10 @@
 class NotionProperties:
     BASIC_PROPERTIES = ['number', 'relation', 'date', 'created_time']
 
-    def __init__(self, name: str, propety: dict):
-        self.name = name
-        self.property = propety
-        self.property_type: str = propety["type"]
+    def __init__(self, key: str, property: dict):
+        self.key = key
+        self.property = property
+        self.property_type: str = property["type"]
         self.value = self.get_value()
 
     def get_value(self):
