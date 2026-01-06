@@ -26,9 +26,7 @@ class MessageService:
             headers = {"apikey": self.evolution_api_key}
 
             async with httpx.AsyncClient() as client:
-                print(f"Debug request: {base_url}, {str(body)}, {str(headers)}")
                 response = await client.post(base_url, json=body, headers=headers)
-                print(f"Debug response: {str(response)}")
                 if response.status_code != 201:
                     print(f"Something went wrong to send message to {chat_id}")
                 else:
