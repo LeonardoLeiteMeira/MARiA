@@ -14,6 +14,7 @@ class MessageApplication:
 
     async def new_message(self, message_data:dict):
         try:
+            print(f"Debug new message event: {str(message_data)}")
             is_new_message = self.__message_service.is_event_a_new_message(message_data)
             if not is_new_message:
                 return
