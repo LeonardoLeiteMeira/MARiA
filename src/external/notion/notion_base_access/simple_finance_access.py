@@ -234,6 +234,12 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         )
         return await self.notion_external.process_datasource_registers(data)
     
+    async def get_accounts_with_balance(self) -> dict:
+        balance_id = await self.get_property_id_from_datasource_by_property_name(NotionDatasourceEnum.CARDS, 'Saldo')
+        if balance_id is None:
+            raise ValueError("It's not possible to identify balance column. Contact admin!")
+        return await self.get_simple_data(datasource=NotionDatasourceEnum.CARDS, property_ids=[balance_id])
+    
     async def __create_new_transaction(
             self,
             name: str,

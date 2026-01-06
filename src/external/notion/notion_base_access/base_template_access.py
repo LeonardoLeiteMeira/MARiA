@@ -85,6 +85,10 @@ class BaseTemplateAccessInterface(ABC):
     async def get_planning_by_month(self, month_id) -> dict:
         pass
     
+    @abstractmethod
+    async def get_accounts_with_balance(self) -> dict:
+        pass
+    
     async def __get_properties(self, datasource: NotionDatasourceEnum) -> dict:
         if 'properties' in self.datasources[datasource.value]:
             return self.datasources[datasource.value]['properties']
@@ -135,6 +139,13 @@ class BaseTemplateAccessInterface(ABC):
 
     async def delete_page(self, page_id: str):
         await self.notion_external.delete_page(page_id)
+
+    async def get_property_id_from_datasource_by_property_name(self, datasource: NotionDatasourceEnum, property_name: str) -> str | None:
+        full_properties = await self.__get_properties(datasource)
+        for key, value in full_properties.items():
+            if key == property_name:
+                return value['id']
+        return None
 
     def __get_title_property_from_schema(self, schema:dict) -> str:
         for key, value in schema.items():

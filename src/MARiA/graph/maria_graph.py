@@ -12,7 +12,7 @@ from ..agent_base import AgentBase
 from ..tools import (ToolInterface, ToolType, CreateCard, CreateNewIncome, CreateNewMonth,
                          CreateNewOutTransactionV2, CreateNewPlanning,
                          CreateNewTransfer, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent, GetCardsWithBalance)
 from .transactions_agent_graph import TransactionsAgentGraph
 from external.notion import NotionUserData, NotionTool
 from langchain.chat_models import init_chat_model
@@ -46,6 +46,7 @@ class MariaGraph:
             DeleteData,
             ReadUserBaseData,
             GetMonthData,
+            GetCardsWithBalance
             # RedirectTransactionsAgent
         ]
     

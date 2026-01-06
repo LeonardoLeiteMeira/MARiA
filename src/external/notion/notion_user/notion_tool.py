@@ -128,3 +128,6 @@ class NotionTool:
     
     def ger_transaction_types(self):
         return self.__template_access.get_transaction_enum()
+    
+    async def get_accounts_with_balance(self) -> dict:
+        return await self.__template_access.get_accounts_with_balance()
