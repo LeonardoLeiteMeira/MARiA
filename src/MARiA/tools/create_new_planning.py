@@ -43,7 +43,7 @@ class CreateNewPlanning(ToolInterface):
             {month["Name"].upper(): month["Name"] for month in months},
         )
 
-        InputModel = create_model(
+        InputModelUnit = create_model(
             "CreateNewOutTransactionInputDynamic",
             name=(str | None, Field(..., description="Apenas um nome para identificar. Constuma ser o mesmo valor da categoria, mas pode ser outra da preferencia.")),
             category=(
@@ -58,28 +58,44 @@ class CreateNewPlanning(ToolInterface):
             text=(str, Field(..., description="Texto de observação sobre esse planejamento. Pode ser algo do usuário ou percepção sua.")),
         )
 
+        InputModel = create_model(
+            "CreateNewOutTransactionInputDynamic",
+            plans=(list[InputModelUnit], Field(..., description="Lista de planejamentos a serem criados"))
+        )
+
+
         tool = CreateNewPlanning(state=state, notion_tool=notion_tool)
         tool.args_schema = InputModel
         return tool
 
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
-            name = parms['args']['name']
-            category = parms['args']['category']
-            month = parms['args']['month']
-            amount = parms['args']['amount']
-            text = parms['args']['text']
-     
-            month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
-            category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
+            plans = parms['args']['plans']
 
-            await self.__notion_tool.create_plan(
-                name,
-                month_id,
-                category_id,
-                amount,
-                text
-            )
+            if not isinstance(plans, list):
+                return ToolMessage(
+                    content="Error: plans should be a list",
+                    tool_call_id=parms['id'],
+                )
+            
+            for plan in plans:
+                name = plan['name']
+                category = plan['category']
+                month = plan['month']
+                amount = plan['amount']
+                text = plan['text']
+        
+                month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+                category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
+
+                # One post for each item because notion api doesn't support batch creation
+                await self.__notion_tool.create_plan(
+                    name,
+                    month_id,
+                    category_id,
+                    amount,
+                    text
+                )
 
             return ToolMessage(
                 content="Criado com sucesso!",
