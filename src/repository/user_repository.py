@@ -3,7 +3,7 @@ from .db_models.user_model import UserModel
 from .db_models.thread_model import ThreadModel
 from .db_models.notion_datasource_model import NotionDatasourceModel
 from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload, with_loader_criteria
 from datetime import datetime
 
 
@@ -40,9 +40,15 @@ class UserRepository(BaseRepository):
         stmt = (
             select(UserModel)
             .options(joinedload(UserModel.notion_authorization))
-            .options(joinedload(UserModel.notion_datasources))
+            .options(selectinload(UserModel.notion_datasources))
+            .options(
+                with_loader_criteria(
+                    NotionDatasourceModel,
+                    NotionDatasourceModel.tag.isnot(None),
+                    include_aliases=True,
+                )
+            )
             .where(UserModel.phone_number == phone_number)
-            .where(NotionDatasourceModel.tag != None)
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
