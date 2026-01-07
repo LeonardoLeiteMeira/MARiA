@@ -42,6 +42,7 @@ services:
       - .env
     depends_on:
       - evolution-api
+      - database
     #   evolution-api:
     #     condition: service_healthy 
     restart: always
@@ -105,7 +106,7 @@ services:
 
   database:
     container_name: postgres_db
-    image: postgres:latest
+    image: postgres:17
     mem_limit: "1g"
     cpus: "1.0"
     pids_limit: 2048
