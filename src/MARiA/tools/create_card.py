@@ -12,7 +12,7 @@ from MARiA.graph.state import State
 
 class CreateCard(ToolInterface):
     name: str = "criar_nova_conta_ou_cartao"
-    description: str = "Cria uma nova conta ou cartão para registrar entras e saidas"
+    description: str = "Cria uma nova conta ou cartão para registrar entras e saidas. Retorna o cartao criado."
     args_schema: Type[BaseModel] = None
     __notion_tool: NotionTool = PrivateAttr()
 
@@ -28,7 +28,7 @@ class CreateCard(ToolInterface):
         InputModel = create_model(
             "CreateCardInput",
             name=(str, Field(..., description="Nome do cartao")),
-            initial_balance=(float, Field(..., description="Saldo inicial da conta ou cartão")),
+            initial_balance=(float, Field(default=0, description="Saldo inicial da conta ou cartão. Default 0")),
         )
 
         tool = CreateCard(state=state, notion_tool=notion_tool)
@@ -38,7 +38,7 @@ class CreateCard(ToolInterface):
     async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
         try:
             name = parms['args']['name']
-            initial_balance = parms['args']['initial_balance']
+            initial_balance = parms['args'].get('initial_balance', 0)
 
             new_card = await self.__notion_tool.create_card(name, initial_balance)
 

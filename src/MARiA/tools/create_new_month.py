@@ -12,7 +12,7 @@ from MARiA.graph.state import State
 
 class CreateNewMonth(ToolInterface):
     name: str = "criar_novo_mes"
-    description: str = "Cria um novo mes para realizar a gestão financeira."
+    description: str = "Cria um novo mes para realizar a gestão financeira. Retorna o mes criado."
     args_schema: Type[BaseModel] = None
     __notion_tool: NotionTool = PrivateAttr()
 

@@ -15,7 +15,7 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 
 class CreateNewTransfer(ToolInterface):
     name: str = "criar_nova_transferencia"
-    description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito."
+    description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito. Retorna a trasação criada."
     args_schema: Type[BaseModel] = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()

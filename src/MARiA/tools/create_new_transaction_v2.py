@@ -14,7 +14,7 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 
 class CreateNewOutTransactionV2(ToolInterface):
     name: str = "criar_nova_transacao_de_saida"
-    description: str = "Cria uma nova transação de saída com os dados fornecidos. Apenas categoria e macro-categoria sao opcionais!"
+    description: str = "Cria uma nova transação de saída com os dados fornecidos. Apenas categoria e macro-categoria sao opcionais! Retorna a trasação criada."
     args_schema: Type[BaseModel] = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()

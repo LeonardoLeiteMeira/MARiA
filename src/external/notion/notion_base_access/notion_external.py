@@ -52,7 +52,7 @@ class NotionExternal:
                             }
                         }]}},]
         response = await self.notion_client.pages.create(**page)
-        return response
+        return await self.process_page_register(response)
 
     async def process_datasource_registers(self, data) -> dict:
         full_data = {

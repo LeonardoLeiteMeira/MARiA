@@ -13,7 +13,7 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 
 class CreateNewIncome(ToolInterface):
     name: str = "criar_nova_transacao_de_entrada"
-    description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar."
+    description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar. Retorna a trasação criada."
     args_schema: Type[BaseModel] = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()

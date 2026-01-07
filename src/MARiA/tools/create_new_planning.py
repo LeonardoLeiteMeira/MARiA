@@ -14,7 +14,7 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 
 class CreateNewPlanning(ToolInterface):
     name: str = "criar_novo_planejamento"
-    description: str = "Criar um novo planejamento associado um mes"
+    description: str = "Criar um novo planejamento associado um mes. Retorna os planejamentos criados."
     args_schema: Type[BaseModel] = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
