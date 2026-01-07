@@ -1,7 +1,7 @@
 services:
   # Para receber os webhooks de dentro do container basta configurar com http://host.docker.internal:8000
   evolution-api:
-    image: atendai/evolution-api:latest
+    image: evoapicloud/evolution-api:v2.3.7
     container_name: evolution-api
     restart: always
     mem_limit: "768m"
