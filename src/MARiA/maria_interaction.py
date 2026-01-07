@@ -60,10 +60,9 @@ class MariaInteraction:
         return current_thread
     
     def __get_notion_instances(self, user: UserModel) -> tuple[NotionUserData, NotionTool]:
-        is_default_template = user.phone_number!='5531933057272' #TODO como sou apenas eu, manter a sim por enquanto
         notion_factory = NotionFactory()
         notion_factory.set_user_access_token(user.notion_authorization.access_token)
-        notion_factory.set_user_datasources(user.notion_datasources, is_default_template)
+        notion_factory.set_user_datasources(user.notion_datasources)
 
         notion_user_data = notion_factory.create_notion_user_data()
         notion_tool = notion_factory.create_notion_tool()
