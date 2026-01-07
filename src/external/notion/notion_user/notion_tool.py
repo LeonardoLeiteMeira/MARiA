@@ -13,8 +13,8 @@ class NotionTool:
         date: str,
         card_id: str,
         hasPaid: bool = True
-    ):
-        await self.__template_access.create_in_transaction(
+    )-> dict:
+        return await self.__template_access.create_in_transaction(
             name = name,
             month_id = month_id,
             amount = amount,
@@ -31,8 +31,8 @@ class NotionTool:
         category_id: str | None,
         marco_category_id: str | None,
         hasPaid: bool
-    ):
-        await self.__template_access.create_out_transaction(
+    ) -> dict :
+        return await self.__template_access.create_out_transaction(
             name,
             month_id,
             amount,
@@ -52,8 +52,8 @@ class NotionTool:
         enter_in: str,
         out_of: str,
         hasPaid: bool
-    ):
-        await self.__template_access.create_transfer_transaction(
+    ) -> dict :
+        return await self.__template_access.create_transfer_transaction(
             name,
             month_id,
             amount,
@@ -63,11 +63,11 @@ class NotionTool:
             hasPaid
         )
 
-    async def create_card(self, name: str, initial_balance: float):
-        await self.__template_access.create_card(name, initial_balance)
+    async def create_card(self, name: str, initial_balance: float)-> dict:
+        return await self.__template_access.create_card(name, initial_balance)
 
-    async def create_month(self, name:str, start_date: str, finish_date: str):
-        await self.__template_access.create_month(
+    async def create_month(self, name:str, start_date: str, finish_date: str)-> dict:
+        return await self.__template_access.create_month(
             name,
             start_date,
             finish_date
@@ -79,8 +79,8 @@ class NotionTool:
         category_id: str,
         amount: str,
         text: str
-    ):
-        await self.__template_access.create_planning(
+    )-> dict:
+        return await self.__template_access.create_planning(
             name,
             month_id,
             category_id,

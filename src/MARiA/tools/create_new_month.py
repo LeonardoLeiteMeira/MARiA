@@ -43,14 +43,14 @@ class CreateNewMonth(ToolInterface):
             start_date = parms['args']['start_date']
             finish_date = parms['args']['finish_date']
 
-            await self.__notion_tool.create_month(
+            new_month = await self.__notion_tool.create_month(
                 name,
                 start_date,
                 finish_date
             )
 
             return ToolMessage(
-                content="Criado com sucesso",
+                content=new_month,
                 tool_call_id=parms['id'],
             )
         except Exception as e:

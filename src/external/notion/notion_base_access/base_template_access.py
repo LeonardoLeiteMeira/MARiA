@@ -51,15 +51,15 @@ class BaseTemplateAccessInterface(ABC):
         pass
     
     @abstractmethod
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True):
+    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True)-> dict:
         pass
 
     @abstractmethod
-    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True):
+    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True)-> dict:
         pass
 
     @abstractmethod
-    async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True):
+    async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True)-> dict:
         pass
     
     @abstractmethod
@@ -70,15 +70,15 @@ class BaseTemplateAccessInterface(ABC):
         category_id,
         amount,
         text 
-    ):
+    )-> dict:
         pass
 
     @abstractmethod
-    async def create_card(self, name: str, initial_balance: float):
+    async def create_card(self, name: str, initial_balance: float)-> dict:
         pass
 
     @abstractmethod
-    async def create_month(self, name: str, start_date:str, finish_date:str):
+    async def create_month(self, name: str, start_date:str, finish_date:str)-> dict:
         pass
 
     @abstractmethod

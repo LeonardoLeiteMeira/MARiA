@@ -86,7 +86,7 @@ class CreateNewTransfer(ToolInterface):
             enter_in = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
             out_of = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, out_of)
 
-            await self.__notion_tool.create_transfer(
+            new_transfer = await self.__notion_tool.create_transfer(
                 name,
                 month_id,
                 amount,
@@ -96,7 +96,7 @@ class CreateNewTransfer(ToolInterface):
                 hasPaid
             )
             return ToolMessage(
-                content="Criado com sucesso",
+                content=new_transfer,
                 tool_call_id=parms['id'],
             )
         except Exception as e:

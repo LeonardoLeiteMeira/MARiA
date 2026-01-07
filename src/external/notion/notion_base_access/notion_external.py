@@ -41,7 +41,7 @@ class NotionExternal:
     async def retrieve_datasource(self, datasource_id: str) -> dict:
         return await self.notion_client.data_sources.retrieve(datasource_id)
     
-    async def create_page(self, page: dict):
+    async def create_page(self, page: dict) -> dict:
         page["children"] = [{
                 "object": "block",
                 "heading_1": {
@@ -52,7 +52,7 @@ class NotionExternal:
                             }
                         }]}},]
         response = await self.notion_client.pages.create(**page)
-        print(response)
+        return response
 
     async def process_datasource_registers(self, data) -> dict:
         full_data = {

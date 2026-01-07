@@ -74,7 +74,7 @@ class CreateNewIncome(ToolInterface):
             month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
             card_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, card_or_account)
 
-            await self.__notion_tool.create_income(
+            new_income = await self.__notion_tool.create_income(
                 name = name,
                 month_id = month_id,
                 amount = amount,
@@ -83,7 +83,7 @@ class CreateNewIncome(ToolInterface):
                 hasPaid = hasPaid,
             )
             return ToolMessage(
-                content="Criado com sucesso",
+                content=new_income,
                 tool_call_id=parms['id'],
             )
         except Exception as e:

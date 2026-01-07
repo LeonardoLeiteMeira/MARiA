@@ -128,8 +128,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_datasource_registers(data)
     
     
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, type_id:str | None, status: bool = True):
-        await self.__create_new_transaction(
+    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, type_id:str | None, status: bool = True)-> dict:
+        return await self.__create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
@@ -141,8 +141,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             status=status
         )
        
-    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True):
-        await self.__create_new_transaction(
+    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True)-> dict:
+        return await self.__create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
@@ -152,8 +152,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             transaction_type=TransactionType.INCOME,
         )
 
-    async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True):
-        await self.__create_new_transaction(
+    async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True)-> dict:
+        return await self.__create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
@@ -171,7 +171,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             category_id,
             amount,
             text 
-        ):
+        )-> dict:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -184,9 +184,9 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
                 "Planejado": {"number": amount},
             },
         }
-        await self.notion_external.create_page(page)
+        return await self.notion_external.create_page(page)
 
-    async def create_card(self, name: str, initial_balance: float):
+    async def create_card(self, name: str, initial_balance: float)-> dict:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -203,9 +203,9 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
                 },
             },
         }
-        await self.notion_external.create_page(page)
+        return await self.notion_external.create_page(page)
 
-    async def create_month(self, name: str, start_date:str, finish_date:str):
+    async def create_month(self, name: str, start_date:str, finish_date:str)-> dict:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -220,7 +220,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
                 "MesData": {"date":{"start": start_date, "end": finish_date}},
             },
         }
-        await self.notion_external.create_page(page)
+        return await self.notion_external.create_page(page)
 
     async def get_planning_by_month(self, month_id) -> dict:
         datasource_id = self.datasources[NotionDatasourceEnum.PLANNING.value]['id']
@@ -252,7 +252,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             category_id: str| None = None, 
             type_id: str| None = None, 
             status: bool = True
-        ):
+        )-> dict:
         properties = {
             **({"Name": {"title": [{"text": {"content": name}}]}} if name is not None else {}),
             **({"Categoria": {"relation": [{"id": category_id}]}} if category_id is not None else {}),
@@ -268,4 +268,4 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             "parent": {"type": "data_source_id","data_source_id": self.datasources[NotionDatasourceEnum.TRANSACTIONS.value]['id']},
             "properties": properties,
         }
-        await self.notion_external.create_page(page)
+        return await self.notion_external.create_page(page)

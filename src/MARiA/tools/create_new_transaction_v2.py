@@ -98,7 +98,7 @@ class CreateNewOutTransactionV2(ToolInterface):
             category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category) if category else None
             macro_category_id = get_data_id_from_state(self.__state, UserDataTypes.MACRO_CATEGORIES, macro_category) if macro_category else None
 
-            await self.__notion_tool.create_expense(
+            new_transaction = await self.__notion_tool.create_expense(
                 name,
                 month_id,
                 amount,
@@ -109,7 +109,7 @@ class CreateNewOutTransactionV2(ToolInterface):
                 hasPaid
             )
             return ToolMessage(
-                content="Criado com sucesso! Retorne para o usuário para ele saber exatamente o que foi criado!",
+                content=new_transaction,
                 tool_call_id=parms['id'],
             )
         except Exception as e:

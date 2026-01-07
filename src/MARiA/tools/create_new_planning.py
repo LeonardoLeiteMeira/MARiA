@@ -78,6 +78,8 @@ class CreateNewPlanning(ToolInterface):
                     tool_call_id=parms['id'],
                 )
             
+            plans_created = []
+            
             for plan in plans:
                 name = plan['name']
                 category = plan['category']
@@ -89,16 +91,18 @@ class CreateNewPlanning(ToolInterface):
                 category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
 
                 # One post for each item because notion api doesn't support batch creation
-                await self.__notion_tool.create_plan(
-                    name,
-                    month_id,
-                    category_id,
-                    amount,
-                    text
-                )
+                plans_created.append(
+                    await self.__notion_tool.create_plan(
+                        name,
+                        month_id,
+                        category_id,
+                        amount,
+                        text
+                    )
+                ) 
 
             return ToolMessage(
-                content="Criado com sucesso!",
+                content=plans_created,
                 tool_call_id=parms['id'],
             )
         except Exception as e:
