@@ -40,10 +40,10 @@ class CreateCard(ToolInterface):
             name = parms['args']['name']
             initial_balance = parms['args']['initial_balance']
 
-            await self.__notion_tool.create_card(name, initial_balance)
+            new_card = await self.__notion_tool.create_card(name, initial_balance)
 
             return ToolMessage(
-                content="Criado com sucesso",
+                content=new_card,
                 tool_call_id=parms['id'],
             )
         except Exception as e:
