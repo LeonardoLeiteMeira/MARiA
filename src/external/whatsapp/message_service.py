@@ -106,11 +106,11 @@ class MessageService:
         return data['data']['key']['remoteJid']
     
 
-    async def download_and_decrypt_audio(self, url_enc: str, media_key: str, mime_type: str) -> bytes:
+    async def download_and_decrypt_audio(self, url_enc: str, media_key: dict, mime_type: str) -> bytes:
         async with httpx.AsyncClient() as client:
             enc_bytes = (await client.get(url_enc)).content
-            media_key_base64 = base64.b64decode(media_key)
-            decrypted_bytes = decrypt(enc_bytes, media_key_base64, mime_type, None)
+            media_key_bytes = bytes(media_key[str(i)] for i in range(len(media_key)))
+            decrypted_bytes = decrypt(enc_bytes, media_key_bytes, mime_type, None)
             return decrypted_bytes
     
     def __get_phone_number_from_remote_jid(self, remote_jid:str) -> str:
