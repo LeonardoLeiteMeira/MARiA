@@ -2,7 +2,7 @@ from enum import Enum
 from datetime import datetime
 import urllib.parse
 
-from ..enum import NotionDatasourceEnum
+from ..enum import NotionDatasourceEnum, GlobalTransactionType
 from .base_template_access import BaseTemplateAccessInterface
 
 class TransactionType(str, Enum):
@@ -131,40 +131,40 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_datasource_registers(data)
     
     
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, type_id:str | None, status: bool = True)-> dict:
-        return await self.__create_new_transaction(
+    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, macro_category_id:str | None, status: bool = True)-> dict:
+        return await self.create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
             date=date,
-            transaction_type=TransactionType.OUTCOME,
-            card_id_out=card_id,
+            transaction_type=GlobalTransactionType.OUTCOME,
+            debit_account_id=card_id,
             category_id=category_id,
-            type_id=type_id,
+            macro_category_id=macro_category_id,
             status=status
         )
        
     async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True, hasPaid: bool = True)-> dict:
-        return await self.__create_new_transaction(
+        return await self.create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
             date=date,
-            card_id_enter=card_id,
+            enter_account_id=card_id,
             status=status,
-            transaction_type=TransactionType.INCOME,
+            transaction_type=GlobalTransactionType.INCOME,
         )
 
     async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True)-> dict:
-        return await self.__create_new_transaction(
+        return await self.create_new_transaction(
             name=name,
             month_id=month_id,
             amount=amount,
             date=date,
-            card_id_enter=account_id_in,
-            card_id_out=account_id_out,
+            enter_account_id=account_id_in,
+            debit_account_id=account_id_out,
             status=status,
-            transaction_type=TransactionType.TRANSFER,
+            transaction_type=GlobalTransactionType.TRANSFER,
         )
 
     async def create_planning(
@@ -245,29 +245,30 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             raise ValueError("It's not possible to identify balance column. Contact admin!")
         return await self.get_simple_data(datasource=NotionDatasourceEnum.CARDS, property_ids=[balance_id])
     
-    async def __create_new_transaction(
+    async def create_new_transaction(
             self,
             name: str,
             month_id: str,
             amount: float,
             date: str,
-            transaction_type: TransactionType,
-            card_id_enter: str|None = None, 
-            card_id_out: str|None = None, 
+            transaction_type: GlobalTransactionType,
+            enter_account_id: str|None = None, 
+            debit_account_id: str|None = None, 
             category_id: str| None = None, 
-            type_id: str| None = None, 
+            macro_category_id: str| None = None, 
             status: bool = True
         )-> dict:
+        template_transaction_type = self.__convert_global_transaction_type(transaction_type)
         properties = {
             **({"Name": {"title": [{"text": {"content": name}}]}} if name is not None else {}),
             **({"Categoria": {"relation": [{"id": category_id}]}} if category_id is not None else {}),
             **({"Gestão": {"relation": [{"id": month_id}]}} if month_id is not None else {}),
-            **({"Entrada em": {"relation": [{"id": card_id_enter}]}} if card_id_enter is not None else {}),
-            **({"Saida de": {"relation": [{"id": card_id_out}]}} if card_id_out is not None else {}),
-            **({"Macro Categorias": {"relation": [{"id": type_id}]}} if type_id is not None else {}),
+            **({"Entrada em": {"relation": [{"id": enter_account_id}]}} if enter_account_id is not None else {}),
+            **({"Saida de": {"relation": [{"id": debit_account_id}]}} if debit_account_id is not None else {}),
+            **({"Macro Categorias": {"relation": [{"id": macro_category_id}]}} if macro_category_id is not None else {}),
             **({"Valor": {"number": amount}} if amount is not None else {}),
             **({"Data Planejada": {"date": {"start": date}}} if date is not None else {}),
-            **({"Tipo de Transação": {"select": {"name": transaction_type.value}}} if transaction_type is not None else {}),
+            **({"Tipo de Transação": {"select": {"name": template_transaction_type.value}}} if template_transaction_type is not None else {}),
             **({'Status': {'status': {'name': 'Pago' if status else 'Pendente'}}} if status is not None else {}),
         }
         page = {
@@ -275,3 +276,14 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
             "properties": properties,
         }
         return await self.notion_external.create_page(page)
+    
+    
+    def __convert_global_transaction_type(self,transaction_type: GlobalTransactionType) -> TransactionType:
+        match(transaction_type):
+            case GlobalTransactionType.INCOME:
+                return TransactionType.INCOME
+            case GlobalTransactionType.OUTCOME:
+                return TransactionType.OUTCOME
+            case GlobalTransactionType.TRANSFER | GlobalTransactionType.PAY_CREDIT_CARD:
+                return TransactionType.TRANSFER
+

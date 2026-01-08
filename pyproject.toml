@@ -31,6 +31,7 @@ dependencies = [
     "passlib[bcrypt] (>=1.7.4,<2.0.0)",
     "uvicorn (>=0.35.0,<0.36.0)",
     "pycryptodome (>=3.23.0,<4.0.0)",
+    "mypy (>=1.19.1,<2.0.0)",
 ]
 
 [tool.poetry]
@@ -53,6 +54,13 @@ packages = [
 ipykernel = "^6.29.5"
 langgraph-checkpoint-sqlite = "^2.0.10"
 pytest = "^8.4.1"
+
+
+[tool.mypy]
+warn_return_any = true
+ignore_missing_imports = true
+python_version = "3.12"
+strict = true
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]

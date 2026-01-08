@@ -3,7 +3,7 @@ import urllib.parse
 
 from repository.db_models.notion_datasource_model import NotionDatasourceModel
 from .notion_external import NotionExternal
-from ..enum import NotionDatasourceEnum, TemplateTypes
+from ..enum import NotionDatasourceEnum, TemplateTypes, GlobalTransactionType
 from enum import Enum
 
 
@@ -51,7 +51,7 @@ class BaseTemplateAccessInterface(ABC):
         pass
     
     @abstractmethod
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, type_id:str, status: bool = True)-> dict:
+    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str, macro_category_id:str, status: bool = True)-> dict:
         pass
 
     @abstractmethod
@@ -87,6 +87,22 @@ class BaseTemplateAccessInterface(ABC):
     
     @abstractmethod
     async def get_accounts_with_balance(self) -> dict:
+        pass
+    
+    @abstractmethod
+    async def create_new_transaction(
+            self,
+            name: str,
+            month_id: str,
+            amount: float,
+            date: str,
+            transaction_type: GlobalTransactionType,
+            enter_account_id: str|None = None, 
+            debit_account_id: str|None = None, 
+            category_id: str| None = None, 
+            macro_category_id: str| None = None, 
+            status: bool = True
+        )-> dict:
         pass
     
     async def __get_properties(self, datasource: NotionDatasourceEnum) -> dict:

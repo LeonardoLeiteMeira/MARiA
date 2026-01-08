@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from ..notion_base_access import BaseTemplateAccessInterface
+from ..enum import GlobalTransactionType
 
 class NotionTool:
     def __init__(self, template_access: BaseTemplateAccessInterface):
@@ -21,6 +22,31 @@ class NotionTool:
             date = date,
             card_id = card_id,
             status = hasPaid,
+        )
+    
+    async def create_new_transaction(self,
+        name: str,
+        month_id: str,
+        amount: float,
+        date: str,
+        enter_account_id: str,
+        debit_account_id: str,
+        category_id: str,
+        macro_category_id: str,
+        transaction_type: GlobalTransactionType,
+        hasPaid: bool
+    ) -> dict:
+        return await self.__template_access.create_new_transaction(
+            name=name,
+            month_id=month_id,
+            amount=amount,
+            date=date,
+            transaction_type=transaction_type,
+            enter_account_id=enter_account_id,
+            debit_account_id=debit_account_id,
+            category_id=category_id,
+            macro_category_id=macro_category_id,
+            status=hasPaid
         )
 
     async def create_expense(self,name: str,

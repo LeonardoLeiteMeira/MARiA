@@ -22,3 +22,9 @@ class UserDataTypes(str, Enum):
 class TemplateTypes(str, Enum):
     SIMPLE_TEMPLATE = 'SIMPLE_TEMPLATE'
     EJ_FINANCE_TEMPLATE = 'EJ_FINANCE_TEMPLATE'
+
+class GlobalTransactionType(str, Enum):
+    INCOME = 'Entrada'
+    OUTCOME = 'Saida'
+    TRANSFER = 'Movimentação Interna'
+    PAY_CREDIT_CARD = 'Pagar fatura cartão'
