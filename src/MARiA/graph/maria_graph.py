@@ -4,7 +4,6 @@ from langchain_core.messages import SystemMessage
 from langchain_core.messages.tool import ToolMessage
 from langgraph.types import Command
 
-from dto import UserAnswerDataDTO
 from external.notion import NotionFactory
 
 from .state import State
@@ -20,11 +19,9 @@ from ..tools import (
     ReadUserBaseData,
     SearchTransactionV2,
     GetMonthData,
-    RedirectTransactionsAgent,
     GetCardsWithBalance,
     CreateNewTransaction,
 )
-from .transactions_agent_graph import TransactionsAgentGraph
 from external.notion import NotionUserData, NotionTool
 from langchain.chat_models import init_chat_model
 

@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING, Any
 from sqlalchemy import or_
 
 if TYPE_CHECKING:
-    from ..db_models.transaction_model import TransactionModel
-    from controllers.request_models.transaction import TransactionFilter
+    pass
 
 
 class TransactionFilterToSqlAlchemyMixin:

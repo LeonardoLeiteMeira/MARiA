@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from application import MessageApplication
 from collections.abc import Callable, Awaitable

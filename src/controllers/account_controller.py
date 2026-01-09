@@ -2,13 +2,13 @@ from collections.abc import Callable
 from uuid import UUID
 from typing import Any, cast
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
-from typing import Annotated, List
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from typing import List
 
 from application import AccountApplication
 from dto.aggregates.accout_with_balance_aggregate import AccountWithBalanceAggregate
 from .request_models.account import AccountRequest
-from .response_models.account import AccountResponse, AccountListResponse
+from .response_models.account import AccountResponse
 
 
 class AccountController(APIRouter):

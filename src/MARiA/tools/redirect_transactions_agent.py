@@ -2,7 +2,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Type
 from langchain_core.messages.tool import ToolMessage
-from pydantic import create_model, Field
+from pydantic import create_model
 
 from .tool_interface import ToolInterface
 from .tool_type_enum import ToolType

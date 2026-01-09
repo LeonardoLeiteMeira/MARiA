@@ -1,6 +1,6 @@
 from typing import Any, Optional, cast
 
-from ..enum import NotionDatasourceEnum, UserDataTypes, TemplateTypes
+from ..enum import NotionDatasourceEnum, TemplateTypes
 from .. import BaseTemplateAccessInterface, EjFinanceAccess, SimpleFinanceAccess
 
 

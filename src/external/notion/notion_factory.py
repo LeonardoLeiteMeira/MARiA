@@ -1,16 +1,18 @@
+from typing import Optional
+
 from notion_client import AsyncClient
 
 from repository.db_models.notion_datasource_model import NotionDatasourceModel
-from .notion_base_access.notion_external import NotionExternal
+
 from .notion_base_access import (
+    BaseTemplateAccessInterface,
     EjFinanceAccess,
     SimpleFinanceAccess,
-    BaseTemplateAccessInterface,
 )
+from .notion_base_access.notion_external import NotionExternal
+from .notion_user.notion_authorization_data import NotionAuthorizationData
 from .notion_user.notion_tool import NotionTool
 from .notion_user.notion_user_data import NotionUserData
-from .notion_user.notion_authorization_data import NotionAuthorizationData
-from typing import Optional
 
 
 class NotionFactory:
@@ -38,7 +40,7 @@ class NotionFactory:
         self.__default_template = use_default_template
 
     def create_notion_tool(self) -> NotionTool:
-        if self.__notion_tool != None:
+        if self.__notion_tool is not None:
             return self.__notion_tool
 
         self.__create_base_classes()
@@ -48,7 +50,7 @@ class NotionFactory:
         return self.__notion_tool
 
     def create_notion_user_data(self) -> NotionUserData:
-        if self.__notion_user_data != None:
+        if self.__notion_user_data is not None:
             return self.__notion_user_data
 
         self.__create_base_classes()
@@ -69,7 +71,7 @@ class NotionFactory:
         self.__create_access_classes()
         assert self.__notion_external is not None
 
-        if self.__template_access == None:
+        if self.__template_access is None:
             self.__template_access = (
                 SimpleFinanceAccess(self.__notion_external, self.__user_datasources)
                 if self.__default_template
@@ -77,11 +79,11 @@ class NotionFactory:
             )
 
     def __create_access_classes(self) -> None:
-        if self.__notion_client == None:
+        if self.__notion_client is None:
             self.__notion_client = AsyncClient(
                 auth=self.__access_token, notion_version="2025-09-03"
             )
 
-        if self.__notion_external == None:
+        if self.__notion_external is None:
             assert self.__notion_client is not None
             self.__notion_external = NotionExternal(self.__notion_client)

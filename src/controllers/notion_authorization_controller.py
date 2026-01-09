@@ -1,8 +1,8 @@
 from collections.abc import Callable, Awaitable
-from typing import cast, Annotated
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Query, HTTPException
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from application import NotionAuthorizationApplication
 

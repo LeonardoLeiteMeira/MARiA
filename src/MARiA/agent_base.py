@@ -1,13 +1,10 @@
-from langgraph.prebuilt import create_react_agent
-from dto import UserAnswerDataDTO
-from external.notion import NotionFactory
-from MARiA.tools import ToolInterface
-from langchain_openai import ChatOpenAI
-from external.notion import NotionTool
-from MARiA.graph.state import State
 from typing import Any, Type
 
 from langchain.chat_models import init_chat_model
+
+from external.notion import NotionTool
+from MARiA.graph.state import State
+from MARiA.tools import ToolInterface
 
 
 class AgentBase:
@@ -43,8 +40,8 @@ class AgentBase:
         )
 
     async def set_structured_output(self, structured_model: Any) -> None:
-        if self.agent == None:
+        if self.agent is None:
             raise ValueError("AgentBase - Agent not Initialized")
 
-        if self.agent_with_tools != None:
+        if self.agent_with_tools is not None:
             self.agent_with_structured_output = self.agent_with_tools.with_str

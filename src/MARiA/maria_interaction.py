@@ -1,6 +1,5 @@
 from contextlib import _AsyncGeneratorContextManager
 from typing import Any, cast
-from langgraph.graph.state import CompiledStateGraph
 from langchain_core.messages import HumanMessage
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
 from langgraph.types import Command
@@ -8,10 +7,8 @@ from datetime import datetime
 from langchain_core.runnables import RunnableConfig
 
 from .graph import MariaGraph
-from dto import UserAnswerDataDTO
 from domain import UserDomain
 from repository import UserModel, ThreadModel
-from repository.db_models.notion_datasource_model import NotionDatasourceModel
 from external.notion import NotionFactory, NotionUserData, NotionTool
 
 

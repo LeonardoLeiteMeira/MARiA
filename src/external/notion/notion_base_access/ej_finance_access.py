@@ -1,9 +1,9 @@
-from enum import Enum
-from datetime import datetime
 import urllib.parse
+from datetime import datetime
+from enum import Enum
 from typing import Any, cast
 
-from ..enum import NotionDatasourceEnum, GlobalTransactionType
+from ..enum import GlobalTransactionType, NotionDatasourceEnum
 from .base_template_access import BaseTemplateAccessInterface
 
 
@@ -24,7 +24,7 @@ class EjFinanceAccess(BaseTemplateAccessInterface):
         filter: dict[str, Any] | None = None,
         properties: list[Any] | None = None,
     ) -> dict[str, Any]:
-        if properties != None:
+        if properties is not None:
             properties = [urllib.parse.unquote(id) for id in properties]
         data = await self.notion_external.get_datasource(
             self.datasources[NotionDatasourceEnum.TRANSACTIONS.value]["id"],

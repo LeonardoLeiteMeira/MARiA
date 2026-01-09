@@ -1,6 +1,6 @@
 from database.configs.base import Base
 from sqlalchemy import String, ForeignKey, TIMESTAMP
-from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime

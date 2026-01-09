@@ -3,8 +3,7 @@ from datetime import timezone, datetime
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..db_models.management_period_model import ManagementPeriodModel
-    from controllers.request_models.management_period import ManagementPeriodFilter
+    pass
 
 
 class ManagementPeriodFilterToSqlAlchemyMixin:

@@ -5,8 +5,8 @@ import hashlib
 import hmac
 import sys
 from typing import cast
-from Crypto.Cipher import AES
 
+from Crypto.Cipher import AES
 
 appInfo: dict[str, bytes] = {
     "image": b"WhatsApp Image Keys",
@@ -60,13 +60,13 @@ def decrypt(
     fileName: bytes | str, mediaKey: bytes, mediaType: str, output: str | None
 ) -> bytes:
     mediaKeyExpanded = HKDF(mediaKey, 112, appInfo[mediaType])
-    macKey = mediaKeyExpanded[48:80]
+    # macKey = mediaKeyExpanded[48:80]
 
     mediaData = cast(bytes, fileName)
     # mediaData = open(fileName, "rb").read()
 
     file = mediaData[:-10]
-    mac = mediaData[-10:]
+    # mac = mediaData[-10:]
 
     data = AESDecrypt(mediaKeyExpanded[16:48], file, mediaKeyExpanded[:16])
 

@@ -1,8 +1,7 @@
 from typing import TYPE_CHECKING, Any
 
 if TYPE_CHECKING:
-    from ..db_models.management_planning_model import ManagementPlanningModel
-    from controllers.request_models.management_planning import ManagementPlanningFilter
+    pass
 
 
 class ManagementPlanningFilterToSqlAlchemyMixin:

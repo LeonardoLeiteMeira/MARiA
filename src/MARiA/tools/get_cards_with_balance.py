@@ -1,16 +1,12 @@
-from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
+from pydantic import BaseModel
 from typing import Any, Optional, Type, cast
 from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import PrivateAttr
-from pydantic import create_model, Field
 
 from MARiA.tools.tool_interface import ToolInterface
 from external.notion import NotionTool
-from external.notion.enum import UserDataTypes
 from MARiA.graph.state import State
-from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
 
 class GetCardsWithBalance(ToolInterface):

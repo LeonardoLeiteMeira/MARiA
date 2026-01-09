@@ -49,16 +49,16 @@ class PluggyAuthLoader:
             async with httpx.AsyncClient() as client:
                 json_body: dict[str, Any] = {}
 
-                if webhook_url != None:
+                if webhook_url is not None:
                     json_body["webhookUrl"] = webhook_url
 
-                if webhook_url != None:
+                if webhook_url is not None:
                     json_body["oauthRedirectUri"] = oauth_redirect_uri
 
-                if webhook_url != None:
+                if webhook_url is not None:
                     json_body["avoidDuplicates"] = avoid_duplicates
 
-                if webhook_url != None:
+                if webhook_url is not None:
                     json_body["clientUserId"] = client_user_id
 
                 response = await client.post(

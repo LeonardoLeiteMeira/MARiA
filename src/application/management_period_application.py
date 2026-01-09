@@ -1,28 +1,27 @@
 from datetime import datetime
-from uuid import UUID
 from typing import TYPE_CHECKING, Any, Dict, List, cast
-
-from domain import (
-    ManagementPeriodDomain,
-    ManagementPlanningDomain,
-    CategoryDomain,
-    MacroCategoryDomain,
-    TransactionDomain,
-)
-from dto.models.transaction_dto import TransactionType
-from repository import ManagementPeriodModel, CategoryModel, MacroCategoryModel
-from dto import PaginatedDataListDto
-from dto.models import ManagementPeriodDto, ManagementPlanningDto, TransactionDto
-from dto.aggregates import (
-    DashboardAggregate,
-    PlanningAggregate,
-    CategoryTransactionAggregate,
-    MacroCategoryTransactionAggregate,
-)
+from uuid import UUID
 
 from controllers.request_models.management_period import ManagementPeriodFilter
 from controllers.request_models.management_planning import ManagementPlanningFilter
 from controllers.request_models.transaction import TransactionFilter
+from domain import (
+    CategoryDomain,
+    MacroCategoryDomain,
+    ManagementPeriodDomain,
+    ManagementPlanningDomain,
+    TransactionDomain,
+)
+from dto import PaginatedDataListDto
+from dto.aggregates import (
+    CategoryTransactionAggregate,
+    DashboardAggregate,
+    MacroCategoryTransactionAggregate,
+    PlanningAggregate,
+)
+from dto.models import ManagementPeriodDto, ManagementPlanningDto, TransactionDto
+from dto.models.transaction_dto import TransactionType
+from repository import CategoryModel, MacroCategoryModel, ManagementPeriodModel
 
 if TYPE_CHECKING:
     from controllers.request_models.management_period import ManagementPeriodRequest
@@ -70,13 +69,13 @@ class ManagementPeriodApplication:
     async def get_current_period_resume(
         self, user_id: UUID, period_id: UUID | None
     ) -> DashboardAggregate:
-        if period_id == None:
+        if period_id is None:
             current_period: Any = await self.get_current_management_period(user_id)
         else:
             periods = await self._domain.get_by_ids([period_id], user_id)
             current_period = periods[0] if len(periods) > 0 else None
 
-        if current_period == None:
+        if current_period is None:
             raise Exception("No period found")
 
         plans = await self.__get_management_plan(user_id, current_period.id)
@@ -122,7 +121,7 @@ class ManagementPeriodApplication:
         expenses_by_category: Dict[str, CategoryTransactionAggregate] = {}
         for expense in all_expenses:
             key = str(expense.category_id)
-            if not (key in expenses_by_category):
+            if key not in expenses_by_category:
                 category = categories_by_id[key]
                 plan_for_category: ManagementPlanningDto | None = plans_by_category.get(
                     key, None
@@ -134,10 +133,10 @@ class ManagementPeriodApplication:
                     category_name=category.name,
                     icon=category.icon,
                     plan_value=plan_for_category.planned_value_cents
-                    if plan_for_category != None
+                    if plan_for_category is not None
                     else None,
                     plan_name=cast(str, plan_for_category.name)
-                    if plan_for_category != None
+                    if plan_for_category is not None
                     else None,
                 )
                 expenses_by_category[key] = aggregate
@@ -149,7 +148,7 @@ class ManagementPeriodApplication:
         expenses_by_macro_category: Dict[str, MacroCategoryTransactionAggregate] = {}
         for expense in all_expenses:
             key = str(expense.macro_category_id)
-            if not (key in expenses_by_macro_category):
+            if key not in expenses_by_macro_category:
                 macro_cat = macro_categories_by_id[key]
                 macro_aggregate = MacroCategoryTransactionAggregate(
                     macro_category_id=cast(UUID, expense.macro_category_id),
@@ -166,7 +165,7 @@ class ManagementPeriodApplication:
         plan_aggregate: List[PlanningAggregate] = []
         for plan_item in plans:
             expense_data = expenses_by_category.get(str(plan_item.category_id), None)
-            total_expenses_plan = expense_data.total if expense_data != None else 0
+            total_expenses_plan = expense_data.total if expense_data is not None else 0
             category = categories_by_id[str(plan_item.category_id)]
             new_plan = PlanningAggregate(
                 plan_id=plan_item.id,
@@ -177,7 +176,9 @@ class ManagementPeriodApplication:
                 name=plan_item.name,
                 category_name=category.name,
                 category_icon=category.icon,
-                transactions=expense_data.transactions if expense_data != None else [],
+                transactions=expense_data.transactions
+                if expense_data is not None
+                else [],
             )
 
             plan_aggregate.append(new_plan)

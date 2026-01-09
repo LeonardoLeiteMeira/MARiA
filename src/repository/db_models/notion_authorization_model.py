@@ -6,7 +6,7 @@ from sqlalchemy import TIMESTAMP
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy import ForeignKey, String, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from database.configs.base import Base
 from secrets_functions.secret_utils import custom_decrypt, custom_encrypt

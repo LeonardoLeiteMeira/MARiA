@@ -2,7 +2,7 @@ from .base_repository import BaseRepository
 from .db_models.user_model import UserModel
 from .db_models.thread_model import ThreadModel
 from .db_models.notion_datasource_model import NotionDatasourceModel
-from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
+from sqlalchemy import select, update, desc
 from sqlalchemy.orm import joinedload, selectinload, with_loader_criteria
 from datetime import datetime
 from typing import Any, cast

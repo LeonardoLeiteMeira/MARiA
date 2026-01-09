@@ -22,7 +22,7 @@ class NotionProperties:
         return self.property[self.property_type]
 
     def __select(self) -> Any:
-        if self.property["select"] != None:
+        if self.property["select"] is not None:
             return self.property["select"]["name"]
         return None
 

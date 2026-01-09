@@ -9,7 +9,7 @@ from .db_models.pluggy_investment_transaction_model import (
 )
 from .db_models.pluggy_loan_model import PluggyLoanModel
 
-from sqlalchemy import text, Column, String, Integer, select, update, delete, desc
+from sqlalchemy import select
 
 import uuid
 

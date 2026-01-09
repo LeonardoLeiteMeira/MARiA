@@ -1,8 +1,9 @@
+from datetime import datetime
+
+from sqlalchemy import select, update
+
 from .base_repository import BaseRepository
 from .db_models.notion_datasource_model import NotionDatasourceModel
-
-from datetime import datetime
-from sqlalchemy import select, update
 
 
 class NotionDatasourceRepository(BaseRepository):
@@ -46,7 +47,7 @@ class NotionDatasourceRepository(BaseRepository):
             stmt = (
                 select(NotionDatasourceModel)
                 .where(NotionDatasourceModel.user_id == user_id)
-                .where(NotionDatasourceModel.tag != None)
+                .where(NotionDatasourceModel.tag.is_not(None))
             )
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())

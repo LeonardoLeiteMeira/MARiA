@@ -5,8 +5,6 @@ from sqlalchemy import text
 import uuid
 import subprocess
 from config import get_settings
-from alembic.config import Config
-from alembic import command
 
 DEFAULT_USER = {
     "name": "Leonardo Leite",

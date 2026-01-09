@@ -8,7 +8,6 @@ from application import CategoryApplication
 from .request_models.category import CategoryRequest
 from .response_models.category import (
     CategoryResponse,
-    CategoryListResponse,
     MacroCategoryResponse,
     MacroCategoryListResponse,
 )

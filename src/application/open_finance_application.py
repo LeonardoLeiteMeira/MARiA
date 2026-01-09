@@ -1,20 +1,20 @@
+import uuid
 from datetime import datetime, timedelta
 from typing import Any, TypedDict, cast
-import uuid
+
+import httpx
 
 from domain import PluggyItemDomain
+from external.pluggy import PluggyAuthLoader
 from repository import (
-    PluggyItemModel,
     PluggyAccountModel,
-    PluggyTransactionModel,
     PluggyCardBillModel,
     PluggyInvestmentModel,
     PluggyInvestmentTransactionModel,
+    PluggyItemModel,
     PluggyLoanModel,
+    PluggyTransactionModel,
 )
-from external.pluggy import PluggyAuthLoader
-
-import httpx
 
 
 class ApiKeyControll(TypedDict):
@@ -249,7 +249,7 @@ class OpenFinanceApplication:
 
     async def __get_api_key(self) -> str:
         date_now = datetime.now()
-        if self.__pluggy_api_key == None or date_now - self.__pluggy_api_key[
+        if self.__pluggy_api_key is None or date_now - self.__pluggy_api_key[
             "created_at"
         ] > timedelta(minutes=30):
             api_key = cast(str, await self.__pluggy_auth_loader.get_api_key())

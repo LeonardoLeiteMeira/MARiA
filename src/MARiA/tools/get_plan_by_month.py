@@ -1,10 +1,9 @@
 from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
 from typing import Any, Optional, Type, cast
 from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import PrivateAttr
-from pydantic import create_model, Field
+from pydantic import create_model
 
 from MARiA.tools.tool_interface import ToolInterface
 from external.notion import NotionTool

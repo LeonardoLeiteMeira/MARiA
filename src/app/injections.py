@@ -39,7 +39,6 @@ from MARiA.tools import (
     ReadUserBaseData,
     SearchTransactionV2,
     GetMonthData,
-    RedirectTransactionsAgent,
     ToolInterface,
 )
 from external.whatsapp import MessageService, MessageServiceDev

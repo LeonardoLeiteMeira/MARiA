@@ -1,7 +1,7 @@
-from typing import Sequence
 import uuid
+from typing import Sequence
 
-from sqlalchemy import select, update, delete, inspect
+from sqlalchemy import delete, inspect, select, update
 
 from .base_repository import BaseRepository
 from .db_models.account_model import AccountModel
@@ -72,7 +72,7 @@ class AccountRepository(BaseRepository):
         else:
             stmt.where(
                 AccountModel.user_id == user_id,
-                AccountModel.deleted_at != None,
+                AccountModel.deleted_at.is_not(None),
             )
         async with self.session() as session:
             cursor = await session.execute(stmt)

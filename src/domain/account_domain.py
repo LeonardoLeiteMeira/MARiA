@@ -1,7 +1,7 @@
 from uuid import UUID
 from datetime import datetime
 
-from repository import AccountRepository, AccountModel, AccountType
+from repository import AccountRepository, AccountModel
 
 
 class AccountDomain:
