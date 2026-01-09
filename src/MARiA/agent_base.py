@@ -3,8 +3,9 @@ from typing import Any, Type
 from langchain.chat_models import init_chat_model
 
 from external.notion import NotionTool
-from MARiA.graph.state import State
-from MARiA.tools import ToolInterface
+
+from .graph.state import State
+from .tools import ToolInterface
 
 
 class AgentBase:

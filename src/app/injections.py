@@ -1,64 +1,69 @@
 from collections.abc import Callable
-from typing import Any, Awaitable, cast, Type
+from typing import Any, Awaitable, Type, cast
 
 from fastapi import Depends
 
 from application import (
+    AccountApplication,
+    AuthApplication,
+    CategoryApplication,
+    ManagementPeriodApplication,
+    ManagementPlanningApplication,
     MessageApplication,
     NotionAuthorizationApplication,
-    AuthApplication,
     OpenFinanceApplication,
-    ManagementPeriodApplication,
-    CategoryApplication,
-    ManagementPlanningApplication,
-    AccountApplication,
     TransactionApplication,
     UserApplication,
 )
+from config import get_settings
 from domain import (
-    UserDomain,
-    NotionAuthorizationDomain,
-    PluggyItemDomain,
+    AccountDomain,
     AuthDomain,
-    ManagementPeriodDomain,
     CategoryDomain,
     MacroCategoryDomain,
+    ManagementPeriodDomain,
     ManagementPlanningDomain,
-    AccountDomain,
-    TransactionDomain,
+    NotionAuthorizationDomain,
+    PluggyItemDomain,
     RecoverPasswordDomain,
+    TransactionDomain,
+    UserDomain,
 )
-from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
-from MARiA import AgentBase, prompt_main_agent
+from external.notion import NotionFactory
+from external.pluggy import PluggyAuthLoader
+from external.whatsapp import MessageService, MessageServiceDev
+from MARiA import (
+    AgentBase,
+    MariaGraph,
+    MariaInteraction,
+    get_checkpointer_manager,
+    prompt_main_agent,
+)
 from MARiA.tools import (
     CreateCard,
     CreateNewMonth,
     CreateNewPlanning,
     DeleteData,
+    GetMonthData,
     GetPlanByMonth,
     ReadUserBaseData,
     SearchTransactionV2,
-    GetMonthData,
     ToolInterface,
 )
-from external.whatsapp import MessageService, MessageServiceDev
 from repository import (
-    UserRepository,
-    NotionAuthorizationRepository,
-    NotionDatasourceRepository,
+    AccountRepository,
     AuthRepository,
-    PluggyItemRepository,
-    ManagementPeriodRepository,
     CategoryRepository,
     MacroCategoryRepository,
+    ManagementPeriodRepository,
     ManagementPlanningRepository,
-    AccountRepository,
-    TransactionRepository,
+    NotionAuthorizationRepository,
+    NotionDatasourceRepository,
+    PluggyItemRepository,
     RecoverPasswordRepository,
+    TransactionRepository,
+    UserRepository,
 )
-from external.notion import NotionFactory
-from external.pluggy import PluggyAuthLoader
-from config import get_settings
 
 from .custom_state import CustomState
 
@@ -106,10 +111,9 @@ def create_agente_base() -> Callable[[], AgentBase]:
 
 def create_maria_graph() -> Callable[[], MariaGraph]:
     def dependency(
-        agent_base: AgentBase = Depends(create_agente_base()),
         notion_factory: NotionFactory = Depends(create_notion_factory()),
     ) -> MariaGraph:
-        return MariaGraph(agent_base, prompt_main_agent, notion_factory)
+        return MariaGraph(prompt_main_agent, notion_factory)
 
     return dependency
 

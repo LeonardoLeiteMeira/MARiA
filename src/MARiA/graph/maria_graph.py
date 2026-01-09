@@ -1,36 +1,32 @@
 from typing import Any, Optional, cast
-from langgraph.graph import StateGraph, END, START
+
+from langchain.chat_models import init_chat_model
 from langchain_core.messages import SystemMessage
 from langchain_core.messages.tool import ToolMessage
+from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command
 
-from external.notion import NotionFactory
+from external.notion import NotionFactory, NotionTool, NotionUserData
 
-from .state import State
-from ..agent_base import AgentBase
 from ..tools import (
-    ToolInterface,
-    ToolType,
     CreateCard,
     CreateNewMonth,
     CreateNewPlanning,
+    CreateNewTransaction,
     DeleteData,
+    GetCardsWithBalance,
+    GetMonthData,
     GetPlanByMonth,
     ReadUserBaseData,
     SearchTransactionV2,
-    GetMonthData,
-    GetCardsWithBalance,
-    CreateNewTransaction,
+    ToolInterface,
+    ToolType,
 )
-from external.notion import NotionUserData, NotionTool
-from langchain.chat_models import init_chat_model
+from .state import State
 
 
 class MariaGraph:
-    def __init__(
-        self, agent: AgentBase, initial_prompt: str, notion_factory: NotionFactory
-    ):
-        self.main_agent = agent
+    def __init__(self, initial_prompt: str, notion_factory: NotionFactory):
         self.prompt = initial_prompt
         self.__notion_factory = notion_factory
         self.__notion_user_data: Optional[NotionUserData] = None
