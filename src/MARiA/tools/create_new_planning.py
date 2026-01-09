@@ -1,16 +1,14 @@
-from pydantic import BaseModel, Field
-from langchain_core.tools import BaseTool
-from typing import Optional, Type, Any, cast
-from langchain_core.messages.tool import ToolMessage, ToolCall
-from langchain_core.runnables import RunnableConfig
-from pydantic import create_model, Field
-from pydantic import PrivateAttr
+from typing import Any, Optional, Type, cast
 
-from MARiA.tools.tool_interface import ToolInterface
+from langchain_core.messages.tool import ToolCall, ToolMessage
+from langchain_core.runnables import RunnableConfig
+from pydantic import BaseModel, Field, PrivateAttr, create_model
+
 from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
 from MARiA.graph.state import State
 from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
+from MARiA.tools.tool_interface import ToolInterface
 
 
 class CreateNewPlanning(ToolInterface):
@@ -83,9 +81,9 @@ class CreateNewPlanning(ToolInterface):
         InputModel = create_model(
             "CreateNewOutTransactionInputDynamic",
             plans=(
-                list[InputModelUnit],
+                list[InputModelUnit],  # type: ignore[valid-type]
                 Field(..., description="Lista de planejamentos a serem criados"),
-            ),  # type: ignore[valid-type]
+            ),
         )
 
         tool = CreateNewPlanning(state=state, notion_tool=notion_tool)
