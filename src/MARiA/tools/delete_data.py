@@ -1,13 +1,14 @@
-from pydantic import BaseModel, Field
 from typing import Any, Optional, Type, cast
-from langchain_core.messages.tool import ToolMessage, ToolCall
+from uuid import UUID
+
+from langchain_core.messages.tool import ToolCall, ToolMessage
 from langchain_core.runnables import RunnableConfig
-from pydantic import create_model
-from pydantic import PrivateAttr
+from pydantic import BaseModel, Field, PrivateAttr, create_model
 
 from external.notion import NotionTool
-from .tool_interface import ToolInterface
 from MARiA.graph.state import State
+
+from .tool_interface import ToolInterface
 
 
 class DeleteData(ToolInterface):
@@ -29,7 +30,10 @@ class DeleteData(ToolInterface):
     ) -> "DeleteData":
         InputModel = create_model(
             "DeleteDataInput",
-            register_id=(str, Field(..., description="Id da pagina a ser deletada")),
+            register_id=(
+                str,
+                Field(..., description="Id da pagina a ser deletada. Deve ser o UUID"),
+            ),
         )
 
         tool = DeleteData(state=state, notion_tool=notion_tool)
@@ -46,6 +50,12 @@ class DeleteData(ToolInterface):
             input_dict = cast(dict[str, Any], input)
             register_id = input_dict["args"]["register_id"]
 
+            if not self.__is_uuid(register_id):
+                return ToolMessage(
+                    content="It's necessary to use a valid UUID",
+                    tool_call_id=input_dict["id"],
+                )
+
             await self.__notion_tool.delete_data(register_id)
 
             return ToolMessage(
@@ -54,3 +64,10 @@ class DeleteData(ToolInterface):
             )
         except Exception as e:
             return self.handle_tool_exception(e, input_dict["id"])
+
+    def __is_uuid(self, value: str) -> bool:
+        try:
+            UUID(value)
+            return True
+        except (TypeError, ValueError):
+            return False
