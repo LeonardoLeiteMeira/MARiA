@@ -20,3 +20,6 @@ maria1.pem
 /jupyter_test/checkpoint.db
 
 .pytest_cache
+
+.ruff_cache
+.mypy_cache
