@@ -9,10 +9,10 @@ from external.notion import NotionFactory
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (ToolInterface, ToolType, CreateCard, CreateNewIncome, CreateNewMonth,
-                         CreateNewOutTransactionV2, CreateNewPlanning,
-                         CreateNewTransfer, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent, GetCardsWithBalance, CreateNewTransaction)
+from ..tools import (ToolInterface, ToolType, CreateCard, CreateNewMonth,
+                         CreateNewPlanning, DeleteData, GetPlanByMonth,
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent, 
+                         GetCardsWithBalance, CreateNewTransaction)
 from .transactions_agent_graph import TransactionsAgentGraph
 from external.notion import NotionUserData, NotionTool
 from langchain.chat_models import init_chat_model
@@ -36,9 +36,6 @@ class MariaGraph:
             CreateNewTransaction,
             SearchTransactionV2,
             # TODO Apagar essas tools
-            # CreateNewIncome,
-            # CreateNewOutTransactionV2,
-            # CreateNewTransfer,
             #=====
 
             CreateCard,

@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, Awaitable, cast
+from typing import Any, Awaitable, cast, Type
 
 from fastapi import Depends
 
@@ -30,10 +30,9 @@ from domain import (
 )
 from MARiA import MariaGraph, MariaInteraction, get_checkpointer_manager
 from MARiA import AgentBase, prompt_main_agent
-from MARiA.tools import (CreateCard, CreateNewIncome, CreateNewMonth,
-                         CreateNewOutTransactionV2, CreateNewPlanning,
-                         CreateNewTransfer, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent)
+from MARiA.tools import (CreateCard, CreateNewMonth, CreateNewPlanning,
+                         DeleteData, GetPlanByMonth,
+                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent, ToolInterface)
 from external.whatsapp import MessageService, MessageServiceDev
 from repository import (
     UserRepository,
@@ -74,12 +73,9 @@ def create_message_service() -> Callable[[], MessageService]:
 
 def create_agente_base() -> Callable[[], AgentBase]:
     def dependency() -> AgentBase:
-        tools: list[type[Any]] = [
+        tools: list[Type[ToolInterface]] = [
             #Tools do transaction agent
             SearchTransactionV2,
-            CreateNewIncome,
-            CreateNewOutTransactionV2,
-            CreateNewTransfer,
             #=====
 
             CreateCard,

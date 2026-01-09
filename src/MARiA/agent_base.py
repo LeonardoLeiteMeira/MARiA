@@ -5,7 +5,7 @@ from MARiA.tools import ToolInterface
 from langchain_openai import ChatOpenAI
 from external.notion import NotionTool
 from MARiA.graph.state import State
-from typing import Any, Sequence
+from typing import Any, Type
 
 from langchain.chat_models import init_chat_model
 
@@ -13,7 +13,7 @@ from langchain.chat_models import init_chat_model
 class AgentBase:
     def __init__(
         self,
-        tools: Sequence[type[Any]],
+        tools: list[Type[ToolInterface]],
         model: str | None = None,
     ) -> None:
         self.model_name = model or "openai:gpt-4.1" 

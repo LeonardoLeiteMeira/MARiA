@@ -2,17 +2,17 @@ from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, END, START
 from langgraph.types import Command, interrupt
 from langchain_core.messages.tool import ToolMessage
-from typing import Any, Optional
+from typing import Any, Optional, Type
 
 from external.notion import NotionFactory
 from ..agent_base import AgentBase
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (TransactionOperationEnum, CreateNewIncome, CreateCard, CreateNewMonth,
-    CreateNewOutTransactionV2, CreateNewPlanning, CreateNewTransfer, DeleteData, GetPlanByMonth,
+from ..tools import (TransactionOperationEnum, CreateCard, CreateNewMonth,
+    CreateNewPlanning, DeleteData, GetPlanByMonth,
     ReadUserBaseData, SearchTransactionV2, GetMonthData, AskUserData, GoToSupervisor,
-    ToolType
+    ToolType, ToolInterface
 )
 
 class TransactionsAgentGraph:
@@ -57,27 +57,27 @@ class TransactionsAgentGraph:
 
     def __select_operation(self, state: State) -> Command[str]:
         operation_type: Any = state['args'].get('operation_type')
-        base_tools = [AskUserData, GoToSupervisor]
+        base_tools: list[Type[ToolInterface]] = [AskUserData, GoToSupervisor]
         
+        # TODO adicionar a nova de criar transacao
+        # Alguns ficaram so com o base - Reavaliar antes de usar
         match (operation_type):
             case TransactionOperationEnum.CREATE_INCOME.value:
-                tools = [*base_tools, CreateNewIncome]
+                tools = [*base_tools]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.CREATE_OUTCOME.value:
-                tools = [*base_tools, CreateNewOutTransactionV2]
+                tools = [*base_tools]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.PAY_CREDIT_CARD.value | TransactionOperationEnum.CREATE_TRANSFER.value:
-                tools = [*base_tools, CreateNewTransfer]
+                tools = [*base_tools]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.QUERY_DATA.value:
                 tools = [*base_tools, SearchTransactionV2]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.UPDATE_DATA.value:
+                # TODO adicionar a nova de criar transacao
                 tools = [*base_tools, 
                     SearchTransactionV2,
-                    CreateNewIncome,
-                    CreateNewOutTransactionV2,
-                    CreateNewTransfer,
                     DeleteData
                 ]
                 self.agent = AgentBase(tools)
