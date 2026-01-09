@@ -4,6 +4,7 @@ from .health_check import HealthCheckController
 from .open_finance_connection_controller import OpenFinanceConnectionController
 from .auth_controller import AuthController
 from .user_controller import UserController
+
 # Newly created controllers for financial management
 from .management_period_controller import ManagementPeriodController
 from .category_controller import CategoryController

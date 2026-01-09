@@ -7,7 +7,10 @@ from dto.models import ManagementPlanningDto
 from dto import PaginatedDataListDto
 
 if TYPE_CHECKING:
-    from controllers.request_models.management_planning import ManagementPlanningRequest, ManagementPlanningFilter
+    from controllers.request_models.management_planning import (
+        ManagementPlanningRequest,
+        ManagementPlanningFilter,
+    )
 
 
 class ManagementPlanningApplication:
@@ -16,11 +19,15 @@ class ManagementPlanningApplication:
     def __init__(self, domain: ManagementPlanningDomain):
         self._domain = domain
 
-    async def create(self, plan: List["ManagementPlanningRequest"]) -> List[ManagementPlanningModel]:
+    async def create(
+        self, plan: List["ManagementPlanningRequest"]
+    ) -> List[ManagementPlanningModel]:
         planning = [ManagementPlanningModel(**(data.model_dump())) for data in plan]
         return await self._domain.create(planning)
 
-    async def update(self, planning_id: UUID, data: "ManagementPlanningRequest") -> ManagementPlanningModel:
+    async def update(
+        self, planning_id: UUID, data: "ManagementPlanningRequest"
+    ) -> ManagementPlanningModel:
         planning = ManagementPlanningModel(**(data.model_dump()))
         planning.id = planning_id
         return await self._domain.update(planning)
@@ -28,8 +35,12 @@ class ManagementPlanningApplication:
     async def delete(self, planning_id: UUID, user_id: UUID) -> None:
         await self._domain.delete(planning_id, user_id)
 
-    async def get_by_ids(self, planning_ids: list[UUID]) -> list[ManagementPlanningModel]:
+    async def get_by_ids(
+        self, planning_ids: list[UUID]
+    ) -> list[ManagementPlanningModel]:
         return await self._domain.get_by_ids(planning_ids)
 
-    async def get_by_user_id(self, filter: 'ManagementPlanningFilter') -> PaginatedDataListDto[ManagementPlanningDto]:
+    async def get_by_user_id(
+        self, filter: "ManagementPlanningFilter"
+    ) -> PaginatedDataListDto[ManagementPlanningDto]:
         return await self._domain.get_by_user_id(filter)

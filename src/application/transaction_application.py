@@ -7,7 +7,10 @@ from dto import PaginatedDataListDto
 from dto.models import TransactionDto
 
 if TYPE_CHECKING:
-    from controllers.request_models.transaction import TransactionRequest, TransactionFilter
+    from controllers.request_models.transaction import (
+        TransactionRequest,
+        TransactionFilter,
+    )
 
 
 class TransactionApplication:
@@ -33,7 +36,9 @@ class TransactionApplication:
         )
         return await self._domain.create(trx)
 
-    async def update(self, transaction_id: UUID, data: "TransactionRequest") -> TransactionModel:
+    async def update(
+        self, transaction_id: UUID, data: "TransactionRequest"
+    ) -> TransactionModel:
         trx = TransactionModel(
             id=transaction_id,
             user_id=data.user_id,
@@ -57,5 +62,7 @@ class TransactionApplication:
     async def get_by_ids(self, transaction_ids: list[UUID]) -> list[TransactionModel]:
         return await self._domain.get_by_ids(transaction_ids)
 
-    async def get_user_transactions_with_filter(self, filter: "TransactionFilter") -> PaginatedDataListDto[TransactionDto]:
+    async def get_user_transactions_with_filter(
+        self, filter: "TransactionFilter"
+    ) -> PaginatedDataListDto[TransactionDto]:
         return await self._domain.get_user_transactions_with_filter(filter)

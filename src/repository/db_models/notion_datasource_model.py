@@ -5,20 +5,23 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
 
+
 class NotionDatasourceModel(Base):
-    __tablename__ = 'notion_databases'
+    __tablename__ = "notion_databases"
 
     id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4
+        UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
-    user_id:Mapped[str] = mapped_column(UUID(as_uuid=True), ForeignKey('users.id'), nullable=False)
+    user_id: Mapped[str] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=False
+    )
     table_name: Mapped[str] = mapped_column(String(length=123), nullable=False)
     table_id: Mapped[str] = mapped_column(String(), nullable=False)
     tag: Mapped[str] = mapped_column(String(), nullable=True)
-    created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
-    updated_at:Mapped[datetime] = mapped_column(TIMESTAMP,  default=datetime.now, onupdate=datetime.now)
+    created_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
+    updated_at: Mapped[datetime] = mapped_column(
+        TIMESTAMP, default=datetime.now, onupdate=datetime.now
+    )
 
     def __repr__(self) -> str:
         return f"{self.table_name} - {self.tag} - {self.table_id} "

@@ -8,8 +8,14 @@ from config import get_settings
 
 settings = get_settings()
 
+
 class MessageApplication:
-    def __init__(self, user_domain: UserDomain, maria: MariaInteraction, message_service: MessageService):
+    def __init__(
+        self,
+        user_domain: UserDomain,
+        maria: MariaInteraction,
+        message_service: MessageService,
+    ):
         self.__user_domain = user_domain
         self.__maria = maria
         self.__message_service = message_service
@@ -22,33 +28,43 @@ class MessageApplication:
                 return
 
             phone_number = self.__message_service.get_phone_number(message_data)
-            user_name = self.__message_service.get_name(message_data) # Usar o nome do whatsapp para atualizar o nome do DB
+            user_name = self.__message_service.get_name(
+                message_data
+            )  # Usar o nome do whatsapp para atualizar o nome do DB
             chat_id = self.__message_service.get_chat_id(message_data)
 
-            user = await self.__user_domain.get_user_by_phone_number_with_notion_data(phone_number)
+            user = await self.__user_domain.get_user_by_phone_number_with_notion_data(
+                phone_number
+            )
             if not user or not user.enable:
                 print(f"{phone_number}: {user_name}")
-                await self.__message_service.send_message(chat_id, 'Desculpe! Mas a MARiA ainda nao esta atendendo!')
+                await self.__message_service.send_message(
+                    chat_id, "Desculpe! Mas a MARiA ainda nao esta atendendo!"
+                )
                 return
 
             message = await self.__message_service.get_message(message_data)
 
-            if not message['status']:
-                await self.__message_service.send_message(chat_id, message['error_message'])
+            if not message["status"]:
+                await self.__message_service.send_message(
+                    chat_id, message["error_message"]
+                )
                 return
 
             if not user.notion_authorization:
                 await self.send_auth_link(user, chat_id)
                 return
 
-            answer = await self.__maria.get_maria_answer(user, message['message'])
+            answer = await self.__maria.get_maria_answer(user, message["message"])
             await self.__message_service.send_message(chat_id, answer)
         except Exception as ex:
-            print({
-                "message":"Error while deal with new user message",
-                "error": ex,
-                "message_data": message_data
-            })
+            print(
+                {
+                    "message": "Error while deal with new user message",
+                    "error": ex,
+                    "message_data": message_data,
+                }
+            )
             raise ex
 
     async def send_auth_link(self, user: UserModel, chat_id: str) -> None:
@@ -56,10 +72,9 @@ class MessageApplication:
         name = user.name
         await self.__message_service.send_message(
             chat_id,
-            f"Olá {name}! Para a MARiA começar a te atender preciso que você avise o Notion que permite ela acessar as informações. Acesse o link abaixo e selecione o sistema financeiro dentro do seu workspace. Quando finalizar so voltar aqui!\n\n{link}"
+            f"Olá {name}! Para a MARiA começar a te atender preciso que você avise o Notion que permite ela acessar as informações. Acesse o link abaixo e selecione o sistema financeiro dentro do seu workspace. Quando finalizar so voltar aqui!\n\n{link}",
         )
 
-        
     def __get_auth_link(self, user_id: str) -> str:
         client_id = settings.notion_client_id
         redirect_uri = settings.notion_redirect_uri
@@ -67,9 +82,9 @@ class MessageApplication:
 
         base_url = f"https://www.notion.so/install-integration?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&state={user_id}"
         return base_url
-    
+
     async def check_db_conn(self) -> bool:
         data = await self.__user_domain.select_all_users()
-        if(len(data) > 0):
-            return True;
+        if len(data) > 0:
+            return True
         return False

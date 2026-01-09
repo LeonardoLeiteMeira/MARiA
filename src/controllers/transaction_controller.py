@@ -10,23 +10,28 @@ from dto.models import TransactionDto
 
 from .request_models.transaction import TransactionRequest, TransactionFilter
 
+
 class TransactionController(APIRouter):
     """Controller exposing transaction endpoints."""
 
-    def __init__(self, jwt_dependency: Callable[..., Any], app_dependency: Callable[[], TransactionApplication]):
+    def __init__(
+        self,
+        jwt_dependency: Callable[..., Any],
+        app_dependency: Callable[[], TransactionApplication],
+    ):
         super().__init__(prefix="/transactions", dependencies=[Depends(jwt_dependency)])
 
         PaginatedTransactionsDto: TypeAlias = PaginatedDataListDto[TransactionDto]
+
         @self.get("", response_model=PaginatedTransactionsDto)
         async def get_transactions(
             request: Request,
             filter: Annotated[TransactionFilter, Query()],
-            app: TransactionApplication = Depends(app_dependency)
+            app: TransactionApplication = Depends(app_dependency),
         ) -> PaginatedTransactionsDto:
             filter.user_id = request.state.user.id
             transaction_list = await app.get_user_transactions_with_filter(filter)
             return transaction_list
-
 
         @self.post("", response_model=TransactionDto)
         async def create_transaction(

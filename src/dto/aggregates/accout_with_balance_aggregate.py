@@ -4,6 +4,7 @@ from datetime import datetime
 
 from repository.db_models.account_model import AccountType
 
+
 class AccountWithBalanceAggregate(BaseModel):
     id: UUID
     user_id: UUID
@@ -12,7 +13,7 @@ class AccountWithBalanceAggregate(BaseModel):
     icon: str | None
     currency: str
     name: str | None
-    balance_cents: float|None = 0
+    balance_cents: float | None = 0
     balance_date: datetime = Field(default_factory=datetime.now)
 
     model_config = ConfigDict(from_attributes=True)

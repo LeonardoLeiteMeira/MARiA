@@ -35,4 +35,3 @@ class RecoverPasswordModel(Base):
         server_default=func.now(),
         nullable=False,
     )
-

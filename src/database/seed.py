@@ -14,15 +14,14 @@ DEFAULT_USER = {
     "email": "leonardo.leitemeira10@gmail.com",
 }
 
+
 async def seed_database(base_db: BaseDatabase) -> None:
     settings = get_settings()
     if not settings.is_production:
         return
 
     async with base_db.session() as session:
-        query = text(
-            "SELECT id FROM users WHERE phone_number = :phone_number LIMIT 1"
-        )
+        query = text("SELECT id FROM users WHERE phone_number = :phone_number LIMIT 1")
         result = await session.execute(
             query, {"phone_number": DEFAULT_USER["phone_number"]}
         )
@@ -51,7 +50,7 @@ async def ensure_migrations() -> None:
     settings = get_settings()
     if not settings.is_production:
         return
-    
+
     subprocess.run(
         ["alembic", "upgrade", "head"],
         check=True,

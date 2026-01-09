@@ -12,11 +12,13 @@ from MARiA.graph.state import State
 
 class ToolInterface(BaseTool, ABC):
     name: str
-    tool_type: ToolType = ToolType.EXECUTION 
-    
+    tool_type: ToolType = ToolType.EXECUTION
+
     @classmethod
     @abstractmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'ToolInterface':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "ToolInterface":
         pass
 
     def handle_tool_exception(self, error: Exception, tool_call_id: str) -> ToolMessage:

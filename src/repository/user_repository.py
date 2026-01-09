@@ -17,27 +17,21 @@ class UserRepository(BaseRepository):
     async def update_user(self, user: UserModel) -> None:
         if user.id is None:
             raise ValueError("user id is not defined")
-        stmt = (
-            update(UserModel)
-            .where(UserModel.id == user.id)
-            .values(cast(Any, user))
-        )
+        stmt = update(UserModel).where(UserModel.id == user.id).values(cast(Any, user))
         async with self.session() as session:
             await session.execute(stmt)
             await session.commit()
 
     async def get_user_by_id(self, user_id: str) -> UserModel | None:
-        stmt = (
-            select(UserModel)
-            .where(UserModel.id == user_id)
-        )
+        stmt = select(UserModel).where(UserModel.id == user_id)
         async with self.session() as session:
             cursor = await session.execute(stmt)
             user_tuple: Any = cursor.scalars().first()
             return user_tuple[0] if user_tuple else None
-        
 
-    async def get_user_by_phone_number_with_notion_data(self, phone_number: str) -> UserModel | None:
+    async def get_user_by_phone_number_with_notion_data(
+        self, phone_number: str
+    ) -> UserModel | None:
         stmt = (
             select(UserModel)
             .options(joinedload(UserModel.notion_authorization))
@@ -55,7 +49,6 @@ class UserRepository(BaseRepository):
             cursor = await session.execute(stmt)
             user = cursor.scalars().first()
             return user if user else None
-    
 
     async def get_user_valid_threads_by_user_id(
         self,
@@ -66,14 +59,13 @@ class UserRepository(BaseRepository):
             select(ThreadModel)
             .where(
                 ThreadModel.user_id == user_id,
-                ThreadModel.updated_at >= last_valid_date
+                ThreadModel.updated_at >= last_valid_date,
             )
             .order_by(desc(ThreadModel.updated_at))
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
-    
 
     async def create_user_new_thread(self, new_thread: ThreadModel) -> ThreadModel:
         async with self.session() as session:
@@ -86,25 +78,19 @@ class UserRepository(BaseRepository):
         stmt = (
             update(ThreadModel)
             .where(ThreadModel.id == thread_id)
-            .values(
-                {'updated_at': new_updated_at}
-            )
+            .values({"updated_at": new_updated_at})
             .returning(ThreadModel)
         )
         async with self.session() as session:
             data = await session.execute(stmt)
             await session.commit()
             return data
-        
+
     async def get_all_users(self) -> list[UserModel]:
         async with self.session() as session:
-            stmt = (
-                select(UserModel)
-            )
+            stmt = select(UserModel)
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
-    
-
 
     # async def get_user_with_last_thread(self, phone_number: str):
     #     last_thread_subq = (

@@ -10,22 +10,22 @@ from .seed import seed_database, ensure_migrations
 #     database1 = BaseDatabase()
 #     database2 = BaseDatabase()
 #     database3 = BaseDatabase()
-    # repo = UserRepository(database)
+# repo = UserRepository(database)
 
-    # user = await repo.get_user_last_thread_by_phone_number('5531933057272')
-    # if not user:
-    #     return
-    
-    # threads = await repo.get_user_last_thread_by_user_id(user.id)
+# user = await repo.get_user_last_thread_by_phone_number('5531933057272')
+# if not user:
+#     return
 
-    # if not threads:
-    #     threads = [await repo.create_user_new_thread(user.id)]
+# threads = await repo.get_user_last_thread_by_user_id(user.id)
 
-    # if len(threads)>1:
-    #     thread = threads[0]
-    
+# if not threads:
+#     threads = [await repo.create_user_new_thread(user.id)]
 
-    # await database.dispose()
+# if len(threads)>1:
+#     thread = threads[0]
+
+
+# await database.dispose()
 
 
 # if __name__ == '__main__':

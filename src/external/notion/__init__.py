@@ -1,4 +1,8 @@
-from .notion_base_access import EjFinanceAccess, BaseTemplateAccessInterface, SimpleFinanceAccess
+from .notion_base_access import (
+    EjFinanceAccess,
+    BaseTemplateAccessInterface,
+    SimpleFinanceAccess,
+)
 from .notion_base_access.notion_external import NotionExternal
 from .notion_factory import NotionFactory
 

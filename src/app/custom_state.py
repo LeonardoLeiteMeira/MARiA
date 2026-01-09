@@ -2,6 +2,7 @@ from typing import Any
 
 from starlette.datastructures import State
 
+
 class CustomState(State):
     # checkpointer: AsyncPostgresSaver
     # database: Database

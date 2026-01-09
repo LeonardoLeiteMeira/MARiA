@@ -11,10 +11,18 @@ from external.notion import NotionTool
 
 class AskUserData(ToolInterface):
     name: str = "ask_user_data"
-    description: str = "Pedir dados ao usuário para que seja possível concluir alguma ação."
+    description: str = (
+        "Pedir dados ao usuário para que seja possível concluir alguma ação."
+    )
     args_schema: Type[BaseModel] = create_model(
         "AskUserDataInput",
-        question=(str, Field(..., description="Pergunta em linguagem natural e clara sobre dados necessários para conluir uma ação. A pergunta será enviada diretamente para o usuário via Whatsapp. Lembre-se que o usuário não tem dados técnicos."))
+        question=(
+            str,
+            Field(
+                ...,
+                description="Pergunta em linguagem natural e clara sobre dados necessários para conluir uma ação. A pergunta será enviada diretamente para o usuário via Whatsapp. Lembre-se que o usuário não tem dados técnicos.",
+            ),
+        ),
     )
     tool_type: ToolType = ToolType.AGENT_REDIRECT
 
@@ -22,5 +30,7 @@ class AskUserData(ToolInterface):
         return cast(ToolMessage, None)
 
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'AskUserData':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool | None
+    ) -> "AskUserData":
         return AskUserData()

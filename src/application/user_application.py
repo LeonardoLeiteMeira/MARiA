@@ -1,6 +1,7 @@
 from repository import UserModel
 from domain import UserDomain, CategoryDomain
 
+
 class UserApplication:
     def __init__(self, user_domain: UserDomain, category_domain: CategoryDomain):
         self.__user_domain = user_domain

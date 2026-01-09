@@ -47,9 +47,7 @@ class AuthApplication:
             raise ValueError("Invalid credentials")
         token = self._create_access_token(user)
         return AuthUserDto(
-            user=UserDto.model_validate(user),
-            token_type='bearer',
-            access_token=token
+            user=UserDto.model_validate(user), token_type="bearer", access_token=token
         )
 
     async def logout(self, token: str) -> None:
@@ -71,11 +69,10 @@ class AuthApplication:
             "sub": user.email,
             "user_id": str(user.id),
             "jti": str(uuid.uuid4()),
-            "exp": datetime.now(timezone.utc)
-            + timedelta(minutes=ACCESS_TOKEN_MINUTES),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_MINUTES),
         }
         return cast(str, jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM))
-    
+
     async def get_recover_code(self, user_email: str) -> None:
         user = await self._domain.get_full_user_by_email(user_email)
         if not user:
@@ -93,15 +90,16 @@ class AuthApplication:
         )
 
         message = (
-            "Seu código de recuperação de senha é "
-            f"{code}. Ele expira em 15 minutos."
+            f"Seu código de recuperação de senha é {code}. Ele expira em 15 minutos."
         )
         await self.__mensage_service.send_message(
             chat_id=user.phone_number,
             message=message,
         )
 
-    async def update_password_by_code(self, user_email: str, code: str, new_password: str) -> None:
+    async def update_password_by_code(
+        self, user_email: str, code: str, new_password: str
+    ) -> None:
         user = await self._domain.get_full_user_by_email(user_email)
         if not user:
             raise ValueError("User not found")

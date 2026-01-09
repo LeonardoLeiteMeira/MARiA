@@ -9,7 +9,12 @@ from external.notion import NotionFactory
 
 
 class NotionAuthorizationApplication:
-    def __init__(self, domain: NotionAuthorizationDomain, user_domain: UserDomain, notion_factory: NotionFactory) -> None:
+    def __init__(
+        self,
+        domain: NotionAuthorizationDomain,
+        user_domain: UserDomain,
+        notion_factory: NotionFactory,
+    ) -> None:
         self.__notion_auth_domain = domain
         self.__user_domain = user_domain
         self._settings = get_settings()
@@ -24,9 +29,13 @@ class NotionAuthorizationApplication:
 
         user_data_sources = await notion_auth_data.get_all_data_sources()
 
-        await self.__user_domain.save_user_notion_datasources(user_id, user_data_sources)
-    
-    async def __store_notion_authorization(self, user_id: str, payload: dict[str, Any]) -> NotionAuthorizationModel:
+        await self.__user_domain.save_user_notion_datasources(
+            user_id, user_data_sources
+        )
+
+    async def __store_notion_authorization(
+        self, user_id: str, payload: dict[str, Any]
+    ) -> NotionAuthorizationModel:
         owner = payload.get("owner", {})
         owner_type = owner.get("type", "workspace")
         owner_id = cast(str | None, owner.get(f"{owner_type}_id"))

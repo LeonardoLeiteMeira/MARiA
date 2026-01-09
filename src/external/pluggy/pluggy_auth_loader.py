@@ -2,6 +2,7 @@ from typing import Any, cast
 
 import httpx
 
+
 class PluggyAuthLoader:
     def __init__(self, client_id: str, client_secret: str) -> None:
         self.__client_id = client_id
@@ -12,10 +13,13 @@ class PluggyAuthLoader:
             async with httpx.AsyncClient() as client:
                 response = await client.post(
                     "https://api.pluggy.ai/auth",
-                    json={"clientId": self.__client_id, "clientSecret": self.__client_secret},
+                    json={
+                        "clientId": self.__client_id,
+                        "clientSecret": self.__client_secret,
+                    },
                     headers={
                         "accept": "application/json",
-                        "content-type": "application/json"
+                        "content-type": "application/json",
                     },
                 )
                 resp_json = response.json()
@@ -46,25 +50,25 @@ class PluggyAuthLoader:
                 json_body: dict[str, Any] = {}
 
                 if webhook_url != None:
-                    json_body['webhookUrl'] = webhook_url
+                    json_body["webhookUrl"] = webhook_url
 
                 if webhook_url != None:
-                    json_body['oauthRedirectUri'] = oauth_redirect_uri
+                    json_body["oauthRedirectUri"] = oauth_redirect_uri
 
                 if webhook_url != None:
-                    json_body['avoidDuplicates'] = avoid_duplicates
+                    json_body["avoidDuplicates"] = avoid_duplicates
 
                 if webhook_url != None:
-                    json_body['clientUserId'] = client_user_id
+                    json_body["clientUserId"] = client_user_id
 
                 response = await client.post(
                     "https://api.pluggy.ai/connect_token",
                     headers={
                         "X-API-KEY": cast(str, api_key),
                         "accept": "application/json",
-                        "content-type": "application/json"
+                        "content-type": "application/json",
                     },
-                    json=json_body
+                    json=json_body,
                 )
                 resp_json = response.json()
                 return cast(dict[str, Any], resp_json)

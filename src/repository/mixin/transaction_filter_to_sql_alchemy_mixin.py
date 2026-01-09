@@ -3,9 +3,11 @@ from datetime import timezone, datetime
 from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import or_
+
 if TYPE_CHECKING:
     from ..db_models.transaction_model import TransactionModel
     from controllers.request_models.transaction import TransactionFilter
+
 
 class TransactionFilterToSqlAlchemyMixin:
     def apply_transaction_filters(
@@ -18,25 +20,35 @@ class TransactionFilterToSqlAlchemyMixin:
             query = query.where(Transaction.user_id == filters.user_id)
 
         if filters.destination_account_id:
-            query = query.where(Transaction.destination_account_id.in_(filters.destination_account_id))
+            query = query.where(
+                Transaction.destination_account_id.in_(filters.destination_account_id)
+            )
 
         if filters.source_account_id:
-            query = query.where(Transaction.source_account_id.in_(filters.source_account_id))
+            query = query.where(
+                Transaction.source_account_id.in_(filters.source_account_id)
+            )
 
         if filters.any_accounts_id:
-            query = query.where(or_(
-                Transaction.source_account_id.in_(filters.any_accounts_id),
-                Transaction.destination_account_id.in_(filters.any_accounts_id)
-            ))
+            query = query.where(
+                or_(
+                    Transaction.source_account_id.in_(filters.any_accounts_id),
+                    Transaction.destination_account_id.in_(filters.any_accounts_id),
+                )
+            )
 
         if filters.management_period_id:
-            query = query.where(Transaction.management_period_id.in_(filters.management_period_id))
+            query = query.where(
+                Transaction.management_period_id.in_(filters.management_period_id)
+            )
 
         if filters.type:
             query = query.where(Transaction.type.in_(filters.type))
 
         if filters.macro_category_id:
-            query = query.where(Transaction.macro_category_id.in_(filters.macro_category_id))
+            query = query.where(
+                Transaction.macro_category_id.in_(filters.macro_category_id)
+            )
 
         if filters.category_id:
             query = query.where(Transaction.category_id.in_(filters.category_id))
@@ -60,13 +72,13 @@ class TransactionFilterToSqlAlchemyMixin:
             query = query.where(Transaction.name.ilike(f"%{filters.name}%"))
 
         if filters.sort_order:
-            if filters.sort_order == 'desc':
+            if filters.sort_order == "desc":
                 query = query.order_by(Transaction.occurred_at.desc())
             else:
                 query = query.order_by(Transaction.occurred_at.asc())
 
         return query
-    
+
     def __fix_time_zone(self, dateTime: datetime) -> datetime:
         if dateTime.tzinfo is not None:
             dateTime = dateTime.astimezone(timezone.utc).replace(tzinfo=None)

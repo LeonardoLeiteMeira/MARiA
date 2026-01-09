@@ -40,4 +40,3 @@ class TransactionFilter(BaseModel):
     sort_order: Optional[Literal["asc", "desc"]] = "desc"
     page: int = 1
     page_size: int = 25
-

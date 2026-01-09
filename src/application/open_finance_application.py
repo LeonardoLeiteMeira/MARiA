@@ -16,28 +16,34 @@ from external.pluggy import PluggyAuthLoader
 
 import httpx
 
+
 class ApiKeyControll(TypedDict):
     created_at: datetime
     key: str
 
+
 class OpenFinanceApplication:
-    def __init__(self, pluggy_item_domain: PluggyItemDomain, pluggy_auth_loader: PluggyAuthLoader) -> None:
+    def __init__(
+        self, pluggy_item_domain: PluggyItemDomain, pluggy_auth_loader: PluggyAuthLoader
+    ) -> None:
         self.__pluggy_item_domain = pluggy_item_domain
         self.__pluggy_auth_loader = pluggy_auth_loader
         self.__pluggy_api_key: ApiKeyControll | None = None
 
     async def create_new_item(self, pluggy_item: PluggyItemModel) -> None:
-        updated_pluggy_item = await self.__pluggy_item_domain.create_if_not_exist(pluggy_item)
+        updated_pluggy_item = await self.__pluggy_item_domain.create_if_not_exist(
+            pluggy_item
+        )
         if not updated_pluggy_item:
             return
-        
+
         for product in updated_pluggy_item.products:
-            match (product):
-                case 'ACCOUNTS':
+            match product:
+                case "ACCOUNTS":
                     await self.load_accounts(updated_pluggy_item)
-                case 'INVESTMENTS':
+                case "INVESTMENTS":
                     await self.load_investiments(updated_pluggy_item)
-                case 'LOANS':
+                case "LOANS":
                     await self.load_loan(updated_pluggy_item)
 
     async def load_accounts(self, updated_pluggy_item: PluggyItemModel) -> None:
@@ -45,17 +51,20 @@ class OpenFinanceApplication:
         item_id = str(updated_pluggy_item.id)
         accounts = []
         async with httpx.AsyncClient() as client:
-            response = await client.get(f"https://api.pluggy.ai/accounts?itemId={item_id}", headers={"X-API-KEY": api_key})
+            response = await client.get(
+                f"https://api.pluggy.ai/accounts?itemId={item_id}",
+                headers={"X-API-KEY": api_key},
+            )
             accounts = response.json().get("results", [])
 
         created_accounts = []
         for acct in accounts:
             new_account = PluggyAccountModel()
-            new_account.id = acct['id']
+            new_account.id = acct["id"]
             new_account.user_id = updated_pluggy_item.user_id
-            new_account.name = acct['name']
-            new_account.type = acct['type']
-            new_account.marketing_name = acct['marketingName']
+            new_account.name = acct["name"]
+            new_account.type = acct["type"]
+            new_account.marketing_name = acct["marketingName"]
             new_account.complementary_data = acct
             created_accounts.append(new_account)
 
@@ -63,34 +72,37 @@ class OpenFinanceApplication:
         await self.load_transactions(created_accounts, item_id)
         await self.load_credit_card_bills(created_accounts)
 
-    async def load_transactions(self, accounts: list[PluggyAccountModel], item_id: str) -> None:
+    async def load_transactions(
+        self, accounts: list[PluggyAccountModel], item_id: str
+    ) -> None:
         api_key = await self.__get_api_key()
         all_account_transactions = []
         for acc in accounts:
             account_id = str(acc.id)
             transactions = []
             async with httpx.AsyncClient() as client:
-                response = await client.get(f"https://api.pluggy.ai/transactions?itemId={item_id}&accountId={account_id}", headers={"X-API-KEY": api_key})
+                response = await client.get(
+                    f"https://api.pluggy.ai/transactions?itemId={item_id}&accountId={account_id}",
+                    headers={"X-API-KEY": api_key},
+                )
                 transactions = response.json().get("results", [])
-            
+
             for transaction in transactions:
                 new_transaction = PluggyTransactionModel()
-                new_transaction.id = transaction['id']
+                new_transaction.id = transaction["id"]
                 new_transaction.user_id = acc.user_id
                 new_transaction.account_id = acc.id
-                new_transaction.amount = transaction['amount']
-                new_transaction.balance = transaction['balance']
-                new_transaction.category = transaction['category']
-                new_transaction.description = transaction['description']
-                new_transaction.status = transaction['status']
-                new_transaction.type = transaction['type']
+                new_transaction.amount = transaction["amount"]
+                new_transaction.balance = transaction["balance"]
+                new_transaction.category = transaction["category"]
+                new_transaction.description = transaction["description"]
+                new_transaction.status = transaction["status"]
+                new_transaction.type = transaction["type"]
                 new_transaction.complementary_data = transaction
 
                 all_account_transactions.append(new_transaction)
 
         await self.__pluggy_item_domain.create_transactions(all_account_transactions)
-        
-
 
     async def load_credit_card_bills(self, accounts: list[PluggyAccountModel]) -> None:
         api_key = await self.__get_api_key()
@@ -100,24 +112,25 @@ class OpenFinanceApplication:
                 continue
             account_id = str(acc.id)
             async with httpx.AsyncClient() as client:
-                response = await client.get(f"https://api.pluggy.ai/bills?accountId={account_id}", headers={"X-API-KEY": api_key})
+                response = await client.get(
+                    f"https://api.pluggy.ai/bills?accountId={account_id}",
+                    headers={"X-API-KEY": api_key},
+                )
                 bills = response.json().get("results", [])
 
             for bill in bills:
                 bill_model = PluggyCardBillModel()
-                bill_model.id = bill['id']
+                bill_model.id = bill["id"]
                 bill_model.account_id = cast(uuid.UUID, account_id)
                 bill_model.user_id = acc.user_id
-                bill_model.total_amount = bill['totalAmount']
-                bill_model.minimum_payment_amount = bill['minimumPaymentAmount']
+                bill_model.total_amount = bill["totalAmount"]
+                bill_model.minimum_payment_amount = bill["minimumPaymentAmount"]
                 bill_model.complementary_data = bill
 
                 all_bills.append(bill_model)
 
-        
         if len(all_bills) > 0:
             await self.__pluggy_item_domain.create_bills(all_bills)
-
 
     async def load_investiments(self, updated_pluggy_item: PluggyItemModel) -> None:
         api_key = await self.__get_api_key()
@@ -147,7 +160,9 @@ class OpenFinanceApplication:
             await self.__pluggy_item_domain.create_investments(investments)
             await self.load_investiments_transactions(investments)
 
-    async def load_investiments_transactions(self, investments: list[PluggyInvestmentModel]) -> None:
+    async def load_investiments_transactions(
+        self, investments: list[PluggyInvestmentModel]
+    ) -> None:
         api_key = await self.__get_api_key()
         all_transactions: list[PluggyInvestmentTransactionModel] = []
         for inv in investments:
@@ -175,7 +190,9 @@ class OpenFinanceApplication:
                 all_transactions.append(trx_model)
 
         if all_transactions:
-            await self.__pluggy_item_domain.create_investment_transactions(all_transactions)
+            await self.__pluggy_item_domain.create_investment_transactions(
+                all_transactions
+            )
 
     async def load_loan(self, updated_pluggy_item: PluggyItemModel) -> None:
         api_key = await self.__get_api_key()
@@ -204,44 +221,41 @@ class OpenFinanceApplication:
         if loans:
             await self.__pluggy_item_domain.create_loans(loans)
 
-
     async def get_accounts(self, user_id: uuid.UUID) -> list[PluggyAccountModel]:
         return await self.__pluggy_item_domain.get_accounts(user_id)
 
-    async def get_account_transactions(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyTransactionModel]:
+    async def get_account_transactions(
+        self, user_id: uuid.UUID, account_id: uuid.UUID
+    ) -> list[PluggyTransactionModel]:
         return await self.__pluggy_item_domain.get_transactions(user_id, account_id)
 
-    async def get_card_bills(self, user_id: uuid.UUID, account_id: uuid.UUID) -> list[PluggyCardBillModel]:
+    async def get_card_bills(
+        self, user_id: uuid.UUID, account_id: uuid.UUID
+    ) -> list[PluggyCardBillModel]:
         return await self.__pluggy_item_domain.get_bills(user_id, account_id)
 
     async def get_investments(self, user_id: uuid.UUID) -> list[PluggyInvestmentModel]:
         return await self.__pluggy_item_domain.get_investments(user_id)
 
-    async def get_investment_transactions(self, user_id: uuid.UUID, investment_id: uuid.UUID) -> list[PluggyInvestmentTransactionModel]:
-        return await self.__pluggy_item_domain.get_investment_transactions(user_id, investment_id)
+    async def get_investment_transactions(
+        self, user_id: uuid.UUID, investment_id: uuid.UUID
+    ) -> list[PluggyInvestmentTransactionModel]:
+        return await self.__pluggy_item_domain.get_investment_transactions(
+            user_id, investment_id
+        )
 
     async def get_loans(self, user_id: uuid.UUID) -> list[PluggyLoanModel]:
         return await self.__pluggy_item_domain.get_loans(user_id)
 
     async def __get_api_key(self) -> str:
         date_now = datetime.now()
-        if self.__pluggy_api_key == None or date_now - self.__pluggy_api_key['created_at'] > timedelta(minutes=30):
+        if self.__pluggy_api_key == None or date_now - self.__pluggy_api_key[
+            "created_at"
+        ] > timedelta(minutes=30):
             api_key = cast(str, await self.__pluggy_auth_loader.get_api_key())
-            self.__pluggy_api_key = {
-                'created_at': datetime.now(),
-                'key': api_key
-            }
+            self.__pluggy_api_key = {"created_at": datetime.now(), "key": api_key}
 
-        return self.__pluggy_api_key['key']
-
-
-
-
-
-
-
-
-
+        return self.__pluggy_api_key["key"]
 
     # Codigo gerado pelo chat
     async def handle_webhook(self, payload: dict[str, Any]) -> None:
@@ -300,4 +314,3 @@ class OpenFinanceApplication:
         tx_ids = payload.get("transactionIds", [])
         print(f"{len(tx_ids)} transações deletadas: {tx_ids}")
         # Remover do banco de dados local
-

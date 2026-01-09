@@ -8,13 +8,20 @@ from dto import PaginatedDataListDto
 
 from .base_repository import BaseRepository
 from .db_models.management_planning_model import ManagementPlanningModel
-from .mixin.management_planning_filter_to_sql_alchemy_mixin import ManagementPlanningFilterToSqlAlchemyMixin
+from .mixin.management_planning_filter_to_sql_alchemy_mixin import (
+    ManagementPlanningFilterToSqlAlchemyMixin,
+)
 
 if TYPE_CHECKING:
     from controllers.request_models.management_planning import ManagementPlanningFilter
 
-class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSqlAlchemyMixin):
-    async def create(self, planning: List[ManagementPlanningModel]) -> List[ManagementPlanningModel]:
+
+class ManagementPlanningRepository(
+    BaseRepository, ManagementPlanningFilterToSqlAlchemyMixin
+):
+    async def create(
+        self, planning: List[ManagementPlanningModel]
+    ) -> List[ManagementPlanningModel]:
         async with self.session() as session:
             session.add_all(planning)
             await session.commit()
@@ -47,35 +54,37 @@ class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSql
     async def delete(self, planning: ManagementPlanningModel) -> None:
         if planning.id is None:
             raise Exception("management planning id is not defined")
-        stmt = (
-            delete(ManagementPlanningModel)
-            .where(
-                ManagementPlanningModel.id == planning.id,
-                ManagementPlanningModel.user_id == planning.user_id,
-            )
+        stmt = delete(ManagementPlanningModel).where(
+            ManagementPlanningModel.id == planning.id,
+            ManagementPlanningModel.user_id == planning.user_id,
         )
         async with self.session() as session:
             await session.execute(stmt)
             await session.commit()
 
     async def get_by_id(self, planning_id: uuid.UUID) -> ManagementPlanningModel | None:
-        stmt = (
-            select(ManagementPlanningModel)
-            .where(ManagementPlanningModel.id == planning_id)
+        stmt = select(ManagementPlanningModel).where(
+            ManagementPlanningModel.id == planning_id
         )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return cursor.scalars().first()
 
-    async def get_by_ids(self, planning_ids: Sequence[uuid.UUID]) -> list[ManagementPlanningModel]:
+    async def get_by_ids(
+        self, planning_ids: Sequence[uuid.UUID]
+    ) -> list[ManagementPlanningModel]:
         if not planning_ids:
             return []
-        stmt = select(ManagementPlanningModel).where(ManagementPlanningModel.id.in_(planning_ids))
+        stmt = select(ManagementPlanningModel).where(
+            ManagementPlanningModel.id.in_(planning_ids)
+        )
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_user_id(self, filter: 'ManagementPlanningFilter') -> PaginatedDataListDto[ManagementPlanningDto]:
+    async def get_by_user_id(
+        self, filter: "ManagementPlanningFilter"
+    ) -> PaginatedDataListDto[ManagementPlanningDto]:
         stmt = select(ManagementPlanningModel)
         stmt = self.apply_filters(stmt, filter, ManagementPlanningModel)
 
@@ -88,11 +97,13 @@ class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSql
             cursor = await session.execute(stmt_paginated)
             planning_list = list(cursor.scalars().all())
 
-        planning_list_dto = [ManagementPlanningDto.model_validate(model) for model in planning_list]
+        planning_list_dto = [
+            ManagementPlanningDto.model_validate(model) for model in planning_list
+        ]
 
         return PaginatedDataListDto[ManagementPlanningDto](
             list_data=planning_list_dto,
             page=filter.page,
             page_size=len(planning_list),
-            total_count=total_count
+            total_count=total_count,
         )

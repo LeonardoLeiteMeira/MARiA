@@ -1,5 +1,4 @@
-from .db_models.notion_authorization_model import (NotionAuthorizationModel,
-                                                   OwnerType)
+from .db_models.notion_authorization_model import NotionAuthorizationModel, OwnerType
 from .db_models.thread_model import ThreadModel
 from .db_models.user_model import UserModel
 from .db_models.pluggy_item_model import PluggyItemModel
@@ -9,7 +8,9 @@ from .db_models.revoked_token_model import RevokedToken
 from .db_models.pluggy_account_model import PluggyAccountModel
 from .db_models.pluggy_card_bill_model import PluggyCardBillModel
 from .db_models.pluggy_investment_model import PluggyInvestmentModel
-from .db_models.pluggy_investment_transaction_model import PluggyInvestmentTransactionModel
+from .db_models.pluggy_investment_transaction_model import (
+    PluggyInvestmentTransactionModel,
+)
 from .db_models.pluggy_loan_model import PluggyLoanModel
 from .db_models.management_period_model import ManagementPeriodModel
 from .db_models.category_model import CategoryModel

@@ -3,6 +3,7 @@ from openai import OpenAI
 
 settings = get_settings()
 
+
 class OpenAiUtils:
     def __init__(self) -> None:
         self.__client = OpenAI(api_key=settings.openai_api_key)

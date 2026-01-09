@@ -7,6 +7,7 @@ from .planning_aggregate import PlanningAggregate
 from .macro_category_transaction_aggregate import MacroCategoryTransactionAggregate
 from .category_transaction_aggregate import CategoryTransactionAggregate
 
+
 class DashboardAggregate(BaseModel):
     management_period_id: UUID
     start_period: datetime

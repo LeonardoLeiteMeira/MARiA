@@ -5,6 +5,7 @@ Revises: b99a84c24571
 Create Date: 2025-10-07 21:52:57.383301
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -12,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '90f0b1625fc3'
-down_revision: Union[str, None] = 'b99a84c24571'
+revision: str = "90f0b1625fc3"
+down_revision: Union[str, None] = "b99a84c24571"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

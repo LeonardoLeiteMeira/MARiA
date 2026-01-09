@@ -7,6 +7,7 @@ from application.auth_application import AuthApplication
 from controllers.request_models.recover_password import RecoverPasswordRequest
 from dto.models.auth_user_dto import AuthUserDto
 
+
 class AuthController(APIRouter):
     def __init__(self, app_dependency: Callable[[], AuthApplication]) -> None:
         super().__init__(prefix="/auth")
@@ -43,7 +44,7 @@ class AuthController(APIRouter):
         ) -> dict[str, str]:
             await app.logout(token)
             return {"detail": "revoked"}
-        
+
         @self.post("/recover-code")
         async def get_recover_code(
             email: str,
@@ -55,7 +56,7 @@ class AuthController(APIRouter):
         @self.post("/recover")
         async def recover(
             recoverData: RecoverPasswordRequest,
-            app: AuthApplication = Depends(app_dependency)
+            app: AuthApplication = Depends(app_dependency),
         ) -> None:
             await app.update_password_by_code(
                 recoverData.user_email,

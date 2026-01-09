@@ -12,6 +12,7 @@ from external.notion.enum import UserDataTypes
 from MARiA.graph.state import State
 from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
+
 class GetMonthData(ToolInterface):
     name: str = "buscar_dados_mes"
     description: str = "Busca todos os dados de um mês especifico. Inclui os totais planejado, gasto, receitas, valores previstos e concluidos e mais."
@@ -27,12 +28,14 @@ class GetMonthData(ToolInterface):
     def _run(self, *args: object, **kwargs: object) -> ToolMessage | None:
         return None
 
-
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'GetMonthData':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "GetMonthData":
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
+
         MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
@@ -41,9 +44,9 @@ class GetMonthData(ToolInterface):
         InputModel = create_model(
             "GetMonthInputData",
             month=(
-                MonthsEnum|None,
+                MonthsEnum | None,
                 Field(..., description="Filtrar o Mês"),
-            )
+            ),
         )
 
         tool = GetMonthData(state=state, notion_tool=notion_tool)
@@ -58,15 +61,17 @@ class GetMonthData(ToolInterface):
     ) -> ToolMessage:
         try:
             input_dict = cast(dict[str, Any], input)
-            month = input_dict['args']['month']
+            month = input_dict["args"]["month"]
 
-            month_id = cast(str, get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month))
+            month_id = cast(
+                str, get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
+            )
 
             month = await self.__notion_tool.get_month(month_id)
 
             return ToolMessage(
                 content=cast(str, month),
-                tool_call_id=input_dict['id'],
+                tool_call_id=input_dict["id"],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, input_dict['id'])
+            return self.handle_tool_exception(e, input_dict["id"])

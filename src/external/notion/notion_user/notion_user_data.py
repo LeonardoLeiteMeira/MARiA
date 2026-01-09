@@ -11,6 +11,7 @@ class UserData:
     months: dict[str, Any] | None = None
     is_loaded: bool | None = None
 
+
 class NotionUserData:
     _initialized: bool = False
 
@@ -20,30 +21,38 @@ class NotionUserData:
         self.user_data.is_loaded = False
         self._template_type: Optional[TemplateTypes] = None
         self.__class__._initialized = True
-    
+
     async def get_user_cards(self) -> dict[str, Any]:
-        if getattr(self.user_data, 'cards', None):
+        if getattr(self.user_data, "cards", None):
             return cast(dict[str, Any], self.user_data.cards)
-        self.user_data.cards = await self.template_access.get_simple_data(NotionDatasourceEnum.CARDS)
+        self.user_data.cards = await self.template_access.get_simple_data(
+            NotionDatasourceEnum.CARDS
+        )
         return self.user_data.cards
 
     async def get_user_categories(self) -> dict[str, Any]:
-        if getattr(self.user_data, 'categories', None):
+        if getattr(self.user_data, "categories", None):
             return cast(dict[str, Any], self.user_data.categories)
-        self.user_data.categories = await self.template_access.get_simple_data(NotionDatasourceEnum.CATEGORIES)
+        self.user_data.categories = await self.template_access.get_simple_data(
+            NotionDatasourceEnum.CATEGORIES
+        )
         return self.user_data.categories
 
     async def get_user_macro_categories(self) -> dict[str, Any]:
-        if getattr(self.user_data, 'macroCategories', None):
+        if getattr(self.user_data, "macroCategories", None):
             return cast(dict[str, Any], self.user_data.macroCategories)
-        self.user_data.macroCategories = await self.template_access.get_simple_data(NotionDatasourceEnum.MACRO_CATEGORIES)
+        self.user_data.macroCategories = await self.template_access.get_simple_data(
+            NotionDatasourceEnum.MACRO_CATEGORIES
+        )
         return self.user_data.macroCategories
 
     async def get_user_months(self) -> dict[str, Any]:
-        if getattr(self.user_data, 'months', None):
+        if getattr(self.user_data, "months", None):
             return cast(dict[str, Any], self.user_data.months)
         template_type = self.__get_template_type()
-        self.user_data.months = await self.template_access.get_simple_data(datasource=NotionDatasourceEnum.MONTHS, template_type=template_type)
+        self.user_data.months = await self.template_access.get_simple_data(
+            datasource=NotionDatasourceEnum.MONTHS, template_type=template_type
+        )
         return self.user_data.months
 
     def __get_template_type(self) -> TemplateTypes:
@@ -55,6 +64,6 @@ class NotionUserData:
         elif isinstance(self.template_access, SimpleFinanceAccess):
             self._template_type = TemplateTypes.SIMPLE_TEMPLATE
         else:
-            raise ValueError('Unsupported template access type')
+            raise ValueError("Unsupported template access type")
 
         return self._template_type

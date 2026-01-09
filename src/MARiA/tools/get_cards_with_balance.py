@@ -12,6 +12,7 @@ from external.notion.enum import UserDataTypes
 from MARiA.graph.state import State
 from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by_type
 
+
 class GetCardsWithBalance(ToolInterface):
     name: str = "buscar_cartoes_e_contas_com_saldo"
     description: str = "Buscar a lista de cartoes e contas com o respectivo saldo."
@@ -27,9 +28,10 @@ class GetCardsWithBalance(ToolInterface):
     def _run(self, *args: object, **kwargs: object) -> ToolMessage | None:
         return None
 
-
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'GetCardsWithBalance':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "GetCardsWithBalance":
         tool = GetCardsWithBalance(state=state, notion_tool=notion_tool)
         return tool
 
@@ -44,7 +46,7 @@ class GetCardsWithBalance(ToolInterface):
 
             return ToolMessage(
                 content=cast(str, accounts),
-                tool_call_id=cast(dict[str, Any], input)['id'],
+                tool_call_id=cast(dict[str, Any], input)["id"],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, cast(dict[str, Any], input)['id'])
+            return self.handle_tool_exception(e, cast(dict[str, Any], input)["id"])

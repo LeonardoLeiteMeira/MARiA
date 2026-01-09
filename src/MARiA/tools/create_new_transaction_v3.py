@@ -13,6 +13,7 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 
 from typing import Union, Any, cast
 
+
 class CreateNewTransaction(ToolInterface):
     description: str = """
 Responsável por criar uma transação e retornar ela com o id.
@@ -35,15 +36,19 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
     def _run(self, *args: Any, **kwargs: Any) -> Any:
         return None
 
-
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'CreateNewTransaction':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "CreateNewTransaction":
         cards = get_state_records_by_type(state, UserDataTypes.CARDS_AND_ACCOUNTS)
         categories = get_state_records_by_type(state, UserDataTypes.CATEGORIES)
-        macroCategories = get_state_records_by_type(state, UserDataTypes.MACRO_CATEGORIES)
+        macroCategories = get_state_records_by_type(
+            state, UserDataTypes.MACRO_CATEGORIES
+        )
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
+
         CardEnum = Enum(  # type: ignore[misc]
             "CardEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
@@ -65,8 +70,20 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
             "CreateNewOutTransactionInputDynamic",
             name=(str, Field(..., description="Nome escolhido para a transação")),
             amount=(float, Field(..., description="Valor da transação")),
-            date=(str, Field(..., description="Data ISO da transação. Use a data correta. Se o usuario nao fornecer use a de hoje!")),
-            hasPaid=(bool, Field(default=True, description="Se a transação foi paga ou não. Se o usuário não informar, deve ser True!")),
+            date=(
+                str,
+                Field(
+                    ...,
+                    description="Data ISO da transação. Use a data correta. Se o usuario nao fornecer use a de hoje!",
+                ),
+            ),
+            hasPaid=(
+                bool,
+                Field(
+                    default=True,
+                    description="Se a transação foi paga ou não. Se o usuário não informar, deve ser True!",
+                ),
+            ),
             enter_account=(
                 Optional[CardEnum],
                 Field(..., description="Cartão ou conta onde o dinheiro entrou."),
@@ -77,7 +94,9 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
             ),
             category=(
                 Optional[CategoriesEnum],
-                Field(None, description="Categoria que classifica essa saída. Opcional."),
+                Field(
+                    None, description="Categoria que classifica essa saída. Opcional."
+                ),
             ),
             macro_category=(
                 Optional[MacroCategoriesEnum],
@@ -89,8 +108,8 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
             ),
             transaction_type=(
                 GlobalTransactionType,
-                Field(..., description="Tipo da transação que deve ser criada.")
-            )
+                Field(..., description="Tipo da transação que deve ser criada."),
+            ),
         )
 
         tool = CreateNewTransaction(state=state, notion_tool=notion_tool)
@@ -105,36 +124,54 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
     ) -> ToolMessage:
         try:
             input_dict: dict[str, Any] = cast(dict[str, Any], input)
-            args_data: dict[str, Any] = cast(dict[str, Any], input_dict['args'])
+            args_data: dict[str, Any] = cast(dict[str, Any], input_dict["args"])
 
-            validation_result = self.__validate_transaction_data(args_data, input_dict['id'])
+            validation_result = self.__validate_transaction_data(
+                args_data, input_dict["id"]
+            )
 
             if validation_result is not None:
                 return validation_result
 
-            name = args_data['name']
-            amount = args_data['amount']
-            month = args_data['month']
-            date = args_data['date']
-            transaction_type: GlobalTransactionType = GlobalTransactionType(args_data['transaction_type'])
+            name = args_data["name"]
+            amount = args_data["amount"]
+            month = args_data["month"]
+            date = args_data["date"]
+            transaction_type: GlobalTransactionType = GlobalTransactionType(
+                args_data["transaction_type"]
+            )
 
-            enter_account = args_data.get('enter_account')
-            debit_account = args_data.get('debit_account')
+            enter_account = args_data.get("enter_account")
+            debit_account = args_data.get("debit_account")
 
-            category = args_data.get('category')
-            macro_category = args_data.get('macro_category')
-            hasPaid: bool = args_data.get('hasPaid', True)
+            category = args_data.get("category")
+            macro_category = args_data.get("macro_category")
+            hasPaid: bool = args_data.get("hasPaid", True)
 
             month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
-            enter_account_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, enter_account)
-            debit_account_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, debit_account)
-            category_id = get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category) if category else None
-            macro_category_id = get_data_id_from_state(self.__state, UserDataTypes.MACRO_CATEGORIES, macro_category) if macro_category else None
+            enter_account_id = get_data_id_from_state(
+                self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, enter_account
+            )
+            debit_account_id = get_data_id_from_state(
+                self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, debit_account
+            )
+            category_id = (
+                get_data_id_from_state(self.__state, UserDataTypes.CATEGORIES, category)
+                if category
+                else None
+            )
+            macro_category_id = (
+                get_data_id_from_state(
+                    self.__state, UserDataTypes.MACRO_CATEGORIES, macro_category
+                )
+                if macro_category
+                else None
+            )
 
             if month_id is None:
                 return ToolMessage(
                     content="Wasn't possible to identify id of month",
-                    tool_call_id=input_dict['id'],
+                    tool_call_id=input_dict["id"],
                 )
 
             new_transaction = await self.__notion_tool.create_new_transaction(
@@ -150,35 +187,45 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
                 hasPaid,
             )
             return ToolMessage(
-                content='Criado com sucesso!',
+                content="Criado com sucesso!",
                 artifact=new_transaction,
-                tool_call_id=input_dict['id'],
+                tool_call_id=input_dict["id"],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, input_dict['id'])
-        
-    def __validate_transaction_data(self, args_data: dict[str, Any], call_id: str) -> ToolMessage | None:
-        name = args_data.get('name')
-        amount = args_data.get('amount')
-        month = args_data.get('month')
-        date = args_data.get('date')
-        transaction_type_str: GlobalTransactionType | None = args_data.get('transaction_type', None)
+            return self.handle_tool_exception(e, input_dict["id"])
 
-        if name is None or amount is None or month is None or date is None or transaction_type_str is None:
+    def __validate_transaction_data(
+        self, args_data: dict[str, Any], call_id: str
+    ) -> ToolMessage | None:
+        name = args_data.get("name")
+        amount = args_data.get("amount")
+        month = args_data.get("month")
+        date = args_data.get("date")
+        transaction_type_str: GlobalTransactionType | None = args_data.get(
+            "transaction_type", None
+        )
+
+        if (
+            name is None
+            or amount is None
+            or month is None
+            or date is None
+            or transaction_type_str is None
+        ):
             return ToolMessage(
-                content='Some mandatory field is None. name or amout or month or date or transaction_type',
+                content="Some mandatory field is None. name or amout or month or date or transaction_type",
                 tool_call_id=call_id,
             )
-        
+
         transaction_type = GlobalTransactionType(transaction_type_str)
 
-        enter_account = args_data.get('enter_account')
-        debit_account = args_data.get('debit_account')
+        enter_account = args_data.get("enter_account")
+        debit_account = args_data.get("debit_account")
 
-        category = args_data.get('category')
-        macro_category = args_data.get('macro_category')
+        category = args_data.get("category")
+        macro_category = args_data.get("macro_category")
 
-        match (transaction_type):
+        match transaction_type:
             case GlobalTransactionType.INCOME:
                 if debit_account or category or macro_category:
                     return ToolMessage(
@@ -191,7 +238,7 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
                         content=f"{transaction_type.value} doesn't have enter_accoun.",
                         tool_call_id=call_id,
                     )
-                
+
                 if category is None or macro_category is None:
                     return ToolMessage(
                         content=f"{transaction_type.value} should have category and macro category.",
@@ -211,15 +258,19 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
                     )
             case _:
                 return ToolMessage(
-                    content=cast(str, {
-                        'status': 'Error',
-                        'error_message': "Invalid transaction type."
-                    }),
+                    content=cast(
+                        str,
+                        {
+                            "status": "Error",
+                            "error_message": "Invalid transaction type.",
+                        },
+                    ),
                     tool_call_id=call_id,
                 )
 
         return None
-        
+
+
 # if __name__ == "__main__":
 
 #     import asyncio

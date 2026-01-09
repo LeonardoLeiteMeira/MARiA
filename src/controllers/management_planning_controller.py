@@ -8,12 +8,21 @@ from application import ManagementPlanningApplication
 from dto.models import ManagementPlanningDto
 from dto import PaginatedDataListDto
 
-from .request_models.management_planning import ManagementPlanningRequest, ManagementPlanningFilter
+from .request_models.management_planning import (
+    ManagementPlanningRequest,
+    ManagementPlanningFilter,
+)
 
 
 class ManagementPlanningController(APIRouter):
-    def __init__(self, jwt_dependency: Callable[..., Any], app_dependency: Callable[[], ManagementPlanningApplication]):
-        super().__init__(prefix="/management-plannings", dependencies=[Depends(jwt_dependency)])
+    def __init__(
+        self,
+        jwt_dependency: Callable[..., Any],
+        app_dependency: Callable[[], ManagementPlanningApplication],
+    ):
+        super().__init__(
+            prefix="/management-plannings", dependencies=[Depends(jwt_dependency)]
+        )
 
         @self.post("/", response_model=List[ManagementPlanningDto])
         async def create_planning(
@@ -55,8 +64,11 @@ class ManagementPlanningController(APIRouter):
             if not plannings:
                 raise HTTPException(status_code=404, detail="planning not found")
             return cast(ManagementPlanningDto, plannings[0])
-        
-        PaginatedManagementPlanning: TypeAlias = PaginatedDataListDto[ManagementPlanningDto]
+
+        PaginatedManagementPlanning: TypeAlias = PaginatedDataListDto[
+            ManagementPlanningDto
+        ]
+
         @self.get("/", response_model=PaginatedManagementPlanning)
         async def get_plannings(
             request: Request,

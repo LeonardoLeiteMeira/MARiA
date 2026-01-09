@@ -2,18 +2,37 @@ from collections.abc import Callable
 from uuid import UUID
 from typing import Annotated, Any, cast, TypeAlias
 
-from fastapi import APIRouter, Depends, HTTPException, Request, Response, status, Query, Response
+from fastapi import (
+    APIRouter,
+    Depends,
+    HTTPException,
+    Request,
+    Response,
+    status,
+    Query,
+    Response,
+)
 
 from application import ManagementPeriodApplication
 from dto.aggregates import DashboardAggregate
 from dto.models import ManagementPeriodDto
 from dto import PaginatedDataListDto
 
-from .request_models.management_period import ManagementPeriodRequest, ManagementPeriodFilter
+from .request_models.management_period import (
+    ManagementPeriodRequest,
+    ManagementPeriodFilter,
+)
+
 
 class ManagementPeriodController(APIRouter):
-    def __init__(self, jwt_dependency: Callable[..., Any], app_dependency: Callable[[], ManagementPeriodApplication]):
-        super().__init__(prefix="/management-periods", dependencies=[Depends(jwt_dependency)])
+    def __init__(
+        self,
+        jwt_dependency: Callable[..., Any],
+        app_dependency: Callable[[], ManagementPeriodApplication],
+    ):
+        super().__init__(
+            prefix="/management-periods", dependencies=[Depends(jwt_dependency)]
+        )
 
         @self.post("", response_model=ManagementPeriodDto)
         async def create_period(
@@ -23,8 +42,8 @@ class ManagementPeriodController(APIRouter):
         ) -> ManagementPeriodDto:
             data.user_id = request.state.user.id
             return cast(ManagementPeriodDto, await app.create(data))
-        
-        @self.get('/resume', response_model=DashboardAggregate)
+
+        @self.get("/resume", response_model=DashboardAggregate)
         async def get_resume_current_period(
             request: Request,
             period_id: Annotated[UUID | None, Query()] = None,
@@ -62,10 +81,15 @@ class ManagementPeriodController(APIRouter):
             user_id = request.state.user.id
             periods = await app.get_by_ids([period_id], user_id)
             if not periods:
-                raise HTTPException(status_code=404, detail="management period not found")
+                raise HTTPException(
+                    status_code=404, detail="management period not found"
+                )
             return cast(ManagementPeriodDto, periods[0])
 
-        PaginatedManagementPeriodDto: TypeAlias = PaginatedDataListDto[ManagementPeriodDto]
+        PaginatedManagementPeriodDto: TypeAlias = PaginatedDataListDto[
+            ManagementPeriodDto
+        ]
+
         @self.get("", response_model=PaginatedManagementPeriodDto)
         async def get_periods(
             request: Request,

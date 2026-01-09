@@ -47,6 +47,4 @@ class PluggyInvestmentModel(BaseModel):
     )
 
     def __repr__(self) -> str:
-        return (
-            f"<PluggyInvestmentModel(id={self.id}, user_id={self.user_id}, name={self.name}, type={self.type})>"
-        )
+        return f"<PluggyInvestmentModel(id={self.id}, user_id={self.user_id}, name={self.name}, type={self.type})>"

@@ -9,35 +9,47 @@ from external.notion import NotionFactory
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (ToolInterface, ToolType, CreateCard, CreateNewMonth,
-                         CreateNewPlanning, DeleteData, GetPlanByMonth,
-                         ReadUserBaseData, SearchTransactionV2, GetMonthData, RedirectTransactionsAgent, 
-                         GetCardsWithBalance, CreateNewTransaction)
+from ..tools import (
+    ToolInterface,
+    ToolType,
+    CreateCard,
+    CreateNewMonth,
+    CreateNewPlanning,
+    DeleteData,
+    GetPlanByMonth,
+    ReadUserBaseData,
+    SearchTransactionV2,
+    GetMonthData,
+    RedirectTransactionsAgent,
+    GetCardsWithBalance,
+    CreateNewTransaction,
+)
 from .transactions_agent_graph import TransactionsAgentGraph
 from external.notion import NotionUserData, NotionTool
 from langchain.chat_models import init_chat_model
 
 
 class MariaGraph:
-    def __init__(self, agent: AgentBase, initial_prompt: str, notion_factory: NotionFactory):
+    def __init__(
+        self, agent: AgentBase, initial_prompt: str, notion_factory: NotionFactory
+    ):
         self.main_agent = agent
         self.prompt = initial_prompt
         self.__notion_factory = notion_factory
         self.__notion_user_data: Optional[NotionUserData] = None
         self.__notion_tool: Optional[NotionTool] = None
         self.__agent_with_tools: Any = None
-        self.__model_name = "openai:gpt-4.1" 
+        self.__model_name = "openai:gpt-4.1"
 
         self.__tools_by_name: dict[str, ToolInterface] = {}
         self.__state_keys_cache_by_tool: dict[str, tuple[str, ...]] = {}
 
         self.__tools: list[type[ToolInterface]] = [
-            #Tools do transaction agent
+            # Tools do transaction agent
             CreateNewTransaction,
             SearchTransactionV2,
             # TODO Apagar essas tools
-            #=====
-
+            # =====
             CreateCard,
             CreateNewMonth,
             CreateNewPlanning,
@@ -45,11 +57,13 @@ class MariaGraph:
             DeleteData,
             ReadUserBaseData,
             GetMonthData,
-            GetCardsWithBalance
+            GetCardsWithBalance,
             # RedirectTransactionsAgent
         ]
-    
-    async def get_state_graph(self, notion_user_data: NotionUserData, notion_tool: NotionTool) -> StateGraph:
+
+    async def get_state_graph(
+        self, notion_user_data: NotionUserData, notion_tool: NotionTool
+    ) -> StateGraph:
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
 
@@ -59,7 +73,7 @@ class MariaGraph:
         # transactions_agent = transactions_agent_graph.compile()
 
         state_graph = StateGraph(State)
-        
+
         state_graph.add_node("start_node", self.__start_message)
         state_graph.add_node("main_maria_node", self.main_maria_node)
         state_graph.add_node("tools", self.__tool_node)
@@ -68,15 +82,12 @@ class MariaGraph:
         state_graph.add_edge(START, "start_node")
         state_graph.add_edge("start_node", "main_maria_node")
         state_graph.add_conditional_edges(
-            'main_maria_node',
-            self.__router,
-            {'tools': 'tools', END: END}
+            "main_maria_node", self.__router, {"tools": "tools", END: END}
         )
 
         # state_graph.add_edge('transactions_agent', 'main_maria_node')
 
         return state_graph
-    
 
     async def __create_agent(self, state: State) -> None:
         assert self.__notion_user_data is not None
@@ -91,12 +102,14 @@ class MariaGraph:
             state["categories"] = await self.__notion_user_data.get_user_categories()
 
         if not state.get("macroCategories"):
-            state["macroCategories"] = await self.__notion_user_data.get_user_macro_categories()
+            state[
+                "macroCategories"
+            ] = await self.__notion_user_data.get_user_macro_categories()
 
         if not state.get("transaction_types"):
             transaction_enum = self.__notion_tool.ger_transaction_types()
             state["transaction_types"] = [member.value for member in transaction_enum]
-        
+
         instanciated_tools = []
         for Tool in self.__tools:
             tool_created = await Tool.instantiate_tool(state, self.__notion_tool)
@@ -106,22 +119,22 @@ class MariaGraph:
         self.__create_state_keys_cache_by_tool()
         agent = init_chat_model(self.__model_name, temperature=0.2)
         self.__agent_with_tools = agent.bind_tools(instanciated_tools)
-    
+
     async def __start_message(self, state: State) -> dict[str, Any]:
         messages = state["messages"]
         await self.__create_agent(state)
         if len(messages) != 0:
             return {"messages": [state["user_input"]]}
-        
+
         system = SystemMessage(self.prompt)
         return {**state, "messages": [system, state["user_input"]]}
 
     async def main_maria_node(self, state: State) -> dict[str, Any]:
-        """ Node with chatbot logic """
+        """Node with chatbot logic"""
         messages = state["messages"]
         chain_output = await self.__agent_with_tools.ainvoke(messages)
         return {**state, "messages": [chain_output]}
-    
+
     def __router(self, state: State) -> str:
         if messages := state.get("messages", []):
             ai_message = messages[-1]
@@ -145,7 +158,7 @@ class MariaGraph:
                 if tool_to_call is None:
                     outputs.append(
                         ToolMessage(
-                            content=f"TOOL {tool_call["name"]} NOT FOUND",
+                            content=f"TOOL {tool_call['name']} NOT FOUND",
                             tool_call_id=tool_call["id"],
                         )
                     )
@@ -154,32 +167,36 @@ class MariaGraph:
                 tool_type = tool_to_call.tool_type
                 if tool_type == ToolType.AGENT_REDIRECT:
                     return Command(
-                        goto=tool_call['name'],
+                        goto=tool_call["name"],
                         update={
-                            'messages':[ToolMessage(content=f"Transferido para {tool_call['name']}", tool_call_id=tool_call["id"])],
-                            'args': tool_call["args"]
-                        }
+                            "messages": [
+                                ToolMessage(
+                                    content=f"Transferido para {tool_call['name']}",
+                                    tool_call_id=tool_call["id"],
+                                )
+                            ],
+                            "args": tool_call["args"],
+                        },
                     )
 
                 tool_result = await tool_to_call.ainvoke(
-                    {'args': tool_call["args"], 'id': tool_call["id"]}
+                    {"args": tool_call["args"], "id": tool_call["id"]}
                 )
-                outputs.append(
-                    tool_result
+                outputs.append(tool_result)
+                state_updates.update(
+                    self.__invalidate_state_cache(state, tool_to_call.name)
                 )
-                state_updates.update(self.__invalidate_state_cache(state, tool_to_call.name))
             except Exception as e:
                 outputs.append(
                     ToolMessage(
-                        content=f"ERROR TO EXECUTE TOOL: {tool_call["name"]}. ERROR: {str(e)}",
+                        content=f"ERROR TO EXECUTE TOOL: {tool_call['name']}. ERROR: {str(e)}",
                         tool_call_id=tool_call["id"],
                     )
                 )
 
-
         updates: dict[str, Any] = {"messages": outputs, **state_updates}
         return Command(
-            goto='main_maria_node',
+            goto="main_maria_node",
             update=updates,
         )
 
@@ -194,7 +211,6 @@ class MariaGraph:
                 state_dict[key] = None
                 updates[key] = None
         return updates
-    
 
     def __create_state_keys_cache_by_tool(self) -> None:
         for tool in self.__tools_by_name.values():
@@ -207,5 +223,5 @@ class MariaGraph:
                     "cards",
                     "categories",
                     "macroCategories",
-                    "months"
+                    "months",
                 )

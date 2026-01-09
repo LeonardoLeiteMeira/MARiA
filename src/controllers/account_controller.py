@@ -14,7 +14,11 @@ from .response_models.account import AccountResponse, AccountListResponse
 class AccountController(APIRouter):
     """Controller for account CRUD operations."""
 
-    def __init__(self, jwt_dependency: Callable[..., Any], app_dependency: Callable[[], AccountApplication]):
+    def __init__(
+        self,
+        jwt_dependency: Callable[..., Any],
+        app_dependency: Callable[[], AccountApplication],
+    ):
         super().__init__(prefix="/accounts", dependencies=[Depends(jwt_dependency)])
 
         @self.get("", response_model=list[AccountResponse])
@@ -36,9 +40,9 @@ class AccountController(APIRouter):
 
         @self.get("/with-balance", response_model=List[AccountWithBalanceAggregate])
         async def get_accounts_with_balance(
-                request: Request,
-                app: AccountApplication = Depends(app_dependency),
-            ) -> List[AccountWithBalanceAggregate]:
+            request: Request,
+            app: AccountApplication = Depends(app_dependency),
+        ) -> List[AccountWithBalanceAggregate]:
             user_id = request.state.user.id
             account_list = await app.get_accounts_with_balance(user_id)
             return account_list
@@ -65,8 +69,7 @@ class AccountController(APIRouter):
 
         @self.get("/{account_id}", response_model=AccountResponse)
         async def get_account(
-            account_id: UUID,
-            app: AccountApplication = Depends(app_dependency)
+            account_id: UUID, app: AccountApplication = Depends(app_dependency)
         ) -> AccountResponse:
             accounts = await app.get_by_ids([account_id])
             if not accounts:

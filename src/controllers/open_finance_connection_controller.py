@@ -16,6 +16,7 @@ from .response_models.open_finance_connection import (
     PluggyLoanResponse,
 )
 
+
 class OpenFinanceConnectionController(APIRouter):
     def __init__(
         self,
@@ -23,10 +24,7 @@ class OpenFinanceConnectionController(APIRouter):
         pluggy_auth_dependency: Callable[..., Any],
         open_finance_app: Callable[..., Any],
     ):
-        super().__init__(
-            prefix='/open-finance',
-            dependencies=[Depends(jwt_dependency)]
-        )
+        super().__init__(prefix="/open-finance", dependencies=[Depends(jwt_dependency)])
 
         @self.post("/connect-token")
         async def get_connect_token(
@@ -36,10 +34,10 @@ class OpenFinanceConnectionController(APIRouter):
             user = request.state.user
             connect_token = await pluggy_auth_loader.get_connect_token(
                 webhook_url="https://maria_pluggy_test.requestcatcher.com/pluggy",
-                client_user_id=str(user.id)
+                client_user_id=str(user.id),
             )
             return connect_token
-            
+
         @self.post("/webhook")
         async def webhook() -> None:
             return None
@@ -60,25 +58,39 @@ class OpenFinanceConnectionController(APIRouter):
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyAccountResponse]:
             user = request.state.user
-            return cast(list[PluggyAccountResponse], await open_finance_app.get_accounts(user.id))
+            return cast(
+                list[PluggyAccountResponse],
+                await open_finance_app.get_accounts(user.id),
+            )
 
-        @self.get("/accounts/{account_id}/transactions", response_model=list[PluggyTransactionResponse])
+        @self.get(
+            "/accounts/{account_id}/transactions",
+            response_model=list[PluggyTransactionResponse],
+        )
         async def get_account_transactions(
             request: Request,
             account_id: UUID,
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyTransactionResponse]:
             user = request.state.user
-            return cast(list[PluggyTransactionResponse], await open_finance_app.get_account_transactions(user.id, account_id))
+            return cast(
+                list[PluggyTransactionResponse],
+                await open_finance_app.get_account_transactions(user.id, account_id),
+            )
 
-        @self.get("/accounts/{account_id}/bills", response_model=list[PluggyCardBillResponse])
+        @self.get(
+            "/accounts/{account_id}/bills", response_model=list[PluggyCardBillResponse]
+        )
         async def get_card_bills(
             request: Request,
             account_id: UUID,
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyCardBillResponse]:
             user = request.state.user
-            return cast(list[PluggyCardBillResponse], await open_finance_app.get_card_bills(user.id, account_id))
+            return cast(
+                list[PluggyCardBillResponse],
+                await open_finance_app.get_card_bills(user.id, account_id),
+            )
 
         @self.get("/investments", response_model=list[PluggyInvestmentResponse])
         async def get_investments(
@@ -86,16 +98,27 @@ class OpenFinanceConnectionController(APIRouter):
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyInvestmentResponse]:
             user = request.state.user
-            return cast(list[PluggyInvestmentResponse], await open_finance_app.get_investments(user.id))
+            return cast(
+                list[PluggyInvestmentResponse],
+                await open_finance_app.get_investments(user.id),
+            )
 
-        @self.get("/investments/{investment_id}/transactions", response_model=list[PluggyInvestmentTransactionResponse])
+        @self.get(
+            "/investments/{investment_id}/transactions",
+            response_model=list[PluggyInvestmentTransactionResponse],
+        )
         async def get_investment_transactions(
             request: Request,
             investment_id: UUID,
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyInvestmentTransactionResponse]:
             user = request.state.user
-            return cast(list[PluggyInvestmentTransactionResponse], await open_finance_app.get_investment_transactions(user.id, investment_id))
+            return cast(
+                list[PluggyInvestmentTransactionResponse],
+                await open_finance_app.get_investment_transactions(
+                    user.id, investment_id
+                ),
+            )
 
         @self.get("/loans", response_model=list[PluggyLoanResponse])
         async def get_loans(
@@ -103,5 +126,6 @@ class OpenFinanceConnectionController(APIRouter):
             open_finance_app: OpenFinanceApplication = Depends(open_finance_app),
         ) -> list[PluggyLoanResponse]:
             user = request.state.user
-            return cast(list[PluggyLoanResponse], await open_finance_app.get_loans(user.id))
-        
+            return cast(
+                list[PluggyLoanResponse], await open_finance_app.get_loans(user.id)
+            )

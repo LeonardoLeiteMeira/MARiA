@@ -4,10 +4,12 @@ from uuid import UUID
 from datetime import datetime
 from enum import Enum
 
+
 class TransactionType(str, Enum):
-    INCOME = 'INCOME'
-    EXPENSE = 'EXPENSE'
-    TRANSFER = 'TRANSFER'
+    INCOME = "INCOME"
+    EXPENSE = "EXPENSE"
+    TRANSFER = "TRANSFER"
+
 
 class TransactionDto(BaseModel):
     id: UUID

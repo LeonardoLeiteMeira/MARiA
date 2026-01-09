@@ -6,7 +6,9 @@ from .db_models.recover_password_model import RecoverPasswordModel
 
 
 class RecoverPasswordRepository(BaseRepository):
-    async def create(self, recover_password: RecoverPasswordModel) -> RecoverPasswordModel:
+    async def create(
+        self, recover_password: RecoverPasswordModel
+    ) -> RecoverPasswordModel:
         async with self.session() as session:
             session.add(recover_password)
             await session.commit()
@@ -14,7 +16,9 @@ class RecoverPasswordRepository(BaseRepository):
         return recover_password
 
     async def delete_by_user(self, user_id: UUID) -> None:
-        stmt = delete(RecoverPasswordModel).where(RecoverPasswordModel.user_id == user_id)
+        stmt = delete(RecoverPasswordModel).where(
+            RecoverPasswordModel.user_id == user_id
+        )
         async with self.session() as session:
             await session.execute(stmt)
             await session.commit()

@@ -4,6 +4,7 @@ from typing_extensions import TypedDict, NotRequired
 from langchain_core.messages import HumanMessage
 from enum import Enum
 
+
 class State(TypedDict):
     messages: Annotated[list[Any], add_messages]
     transactions_agent_messages: Annotated[list[Any], add_messages]

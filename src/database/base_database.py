@@ -7,10 +7,11 @@ from typing import Optional, cast
 
 from config import get_settings
 
-class BaseDatabase:
-    __instance: Optional['BaseDatabase'] = None
 
-    def __new__(cls) -> 'BaseDatabase':
+class BaseDatabase:
+    __instance: Optional["BaseDatabase"] = None
+
+    def __new__(cls) -> "BaseDatabase":
         if cls.__instance is None:
             db_instance = super(BaseDatabase, cls).__new__(cls)
             db_instance.__start_engine()
@@ -29,7 +30,7 @@ class BaseDatabase:
             pool_size=10,
             max_overflow=0,
             pool_pre_ping=True,
-            pool_recycle=1800
+            pool_recycle=1800,
         )
 
     def __start_session_maker(self) -> None:
@@ -40,4 +41,3 @@ class BaseDatabase:
 
     def session(self) -> AsyncSession:
         return self.SessionMk()
-    

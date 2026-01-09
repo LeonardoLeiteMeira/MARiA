@@ -12,4 +12,3 @@ class ManagementPeriodDto(BaseModel):
     end_date: datetime | None
 
     model_config = ConfigDict(from_attributes=True)
-

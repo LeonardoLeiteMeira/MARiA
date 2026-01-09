@@ -35,7 +35,7 @@ from .injections import (
     create_management_planning_application,
     create_account_application,
     create_transaction_application,
-    create_user_application
+    create_user_application,
 )
 from .lifespan import lifespan
 
@@ -56,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
 app.state = cast(CustomState, app.state)
 
 
-origins = ['*']
+origins = ["*"]
 # origins = [
 #     "http://localhost:8081"
 # ]
@@ -82,7 +82,13 @@ api.include_router(NotionAuthorizationController(notion_app_dependency))
 api.include_router(HealthCheckController(inject_application))
 api.include_router(AuthController(auth_app_dependency))
 api.include_router(UserController(jwt_dependency, create_user_application(app.state)))
-api.include_router(OpenFinanceConnectionController(jwt_dependency, create_pluggy_auth_loader(), create_open_finance_application(app.state)))
+api.include_router(
+    OpenFinanceConnectionController(
+        jwt_dependency,
+        create_pluggy_auth_loader(),
+        create_open_finance_application(app.state),
+    )
+)
 
 # Dependencies for newly created application layers
 management_period_app = create_management_period_application(app.state)
@@ -94,7 +100,9 @@ transaction_app = create_transaction_application(app.state)
 # Register routers that expose the business features
 api.include_router(ManagementPeriodController(jwt_dependency, management_period_app))
 api.include_router(CategoryController(jwt_dependency, category_app))
-api.include_router(ManagementPlanningController(jwt_dependency, management_planning_app))
+api.include_router(
+    ManagementPlanningController(jwt_dependency, management_planning_app)
+)
 api.include_router(AccountController(jwt_dependency, account_app))
 api.include_router(TransactionController(jwt_dependency, transaction_app))
 

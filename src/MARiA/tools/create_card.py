@@ -9,6 +9,7 @@ from external.notion import NotionTool
 from .tool_interface import ToolInterface
 from MARiA.graph.state import State
 
+
 class CreateCard(ToolInterface):
     name: str = "criar_nova_conta_ou_cartao"
     description: str = "Cria uma nova conta ou cartão para registrar entras e saidas. Retorna o cartao criado."
@@ -23,11 +24,18 @@ class CreateCard(ToolInterface):
         return None
 
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'CreateCard':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "CreateCard":
         InputModel = create_model(
             "CreateCardInput",
             name=(str, Field(..., description="Nome do cartao")),
-            initial_balance=(float, Field(default=0, description="Saldo inicial da conta ou cartão. Default 0")),
+            initial_balance=(
+                float,
+                Field(
+                    default=0, description="Saldo inicial da conta ou cartão. Default 0"
+                ),
+            ),
         )
 
         tool = CreateCard(state=state, notion_tool=notion_tool)
@@ -42,14 +50,14 @@ class CreateCard(ToolInterface):
     ) -> ToolMessage:
         try:
             input_dict = cast(dict[str, Any], input)
-            name = input_dict['args']['name']
-            initial_balance = input_dict['args'].get('initial_balance', 0)
+            name = input_dict["args"]["name"]
+            initial_balance = input_dict["args"].get("initial_balance", 0)
 
             new_card = await self.__notion_tool.create_card(name, initial_balance)
 
             return ToolMessage(
                 content=cast(str, new_card),
-                tool_call_id=input_dict['id'],
+                tool_call_id=input_dict["id"],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, input_dict['id'])
+            return self.handle_tool_exception(e, input_dict["id"])

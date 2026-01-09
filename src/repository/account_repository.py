@@ -41,22 +41,16 @@ class AccountRepository(BaseRepository):
     async def delete(self, account: AccountModel) -> None:
         if account.id is None:
             raise Exception("account id is not defined")
-        stmt = (
-            delete(AccountModel)
-            .where(
-                AccountModel.id == account.id,
-                AccountModel.user_id == account.user_id,
-            )
+        stmt = delete(AccountModel).where(
+            AccountModel.id == account.id,
+            AccountModel.user_id == account.user_id,
         )
         async with self.session() as session:
             await session.execute(stmt)
             await session.commit()
 
     async def get_by_id(self, account_id: uuid.UUID) -> AccountModel | None:
-        stmt = (
-            select(AccountModel)
-            .where(AccountModel.id == account_id)
-        )
+        stmt = select(AccountModel).where(AccountModel.id == account_id)
         async with self.session() as session:
             cursor = await session.execute(stmt)
             return cursor.scalars().first()
@@ -69,7 +63,9 @@ class AccountRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return list(cursor.scalars().all())
 
-    async def get_by_user_id(self, user_id: uuid.UUID, withDeleted: bool = False) -> list[AccountModel]:
+    async def get_by_user_id(
+        self, user_id: uuid.UUID, withDeleted: bool = False
+    ) -> list[AccountModel]:
         stmt = select(AccountModel)
         if withDeleted:
             stmt.where(AccountModel.user_id == user_id)

@@ -4,6 +4,7 @@ from typing import List
 
 from ..models.transaction_dto import TransactionDto
 
+
 class PlanningAggregate(BaseModel):
     plan_id: UUID
     category_id: UUID

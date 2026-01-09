@@ -24,7 +24,9 @@ class DeleteData(ToolInterface):
         return None
 
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool) -> 'DeleteData':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool
+    ) -> "DeleteData":
         InputModel = create_model(
             "DeleteDataInput",
             register_id=(str, Field(..., description="Id da pagina a ser deletada")),
@@ -42,13 +44,13 @@ class DeleteData(ToolInterface):
     ) -> ToolMessage:
         try:
             input_dict = cast(dict[str, Any], input)
-            register_id = input_dict['args']['register_id']
+            register_id = input_dict["args"]["register_id"]
 
             await self.__notion_tool.delete_data(register_id)
 
             return ToolMessage(
                 content="Apagado com sucesso",
-                tool_call_id=input_dict['id'],
+                tool_call_id=input_dict["id"],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, input_dict['id'])
+            return self.handle_tool_exception(e, input_dict["id"])

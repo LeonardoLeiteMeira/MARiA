@@ -6,12 +6,16 @@ from sqlalchemy import select, update
 
 
 class NotionDatasourceRepository(BaseRepository):
-    async def create_new_datasources(self, new_datasources: list[NotionDatasourceModel]) -> None:
+    async def create_new_datasources(
+        self, new_datasources: list[NotionDatasourceModel]
+    ) -> None:
         async with self.session() as session:
             session.add_all(new_datasources)
             await session.commit()
 
-    async def upsert_datasources(self, datasources: list[NotionDatasourceModel]) -> None:
+    async def upsert_datasources(
+        self, datasources: list[NotionDatasourceModel]
+    ) -> None:
         async with self.session() as session:
             for datasource in datasources:
                 stmt = (

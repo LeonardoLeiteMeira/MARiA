@@ -17,7 +17,11 @@ from .response_models.category import (
 class CategoryController(APIRouter):
     """Controller grouping category and macro category endpoints."""
 
-    def __init__(self, jwt_dependency: Callable[..., Any], app_dependency: Callable[[], CategoryApplication]):
+    def __init__(
+        self,
+        jwt_dependency: Callable[..., Any],
+        app_dependency: Callable[[], CategoryApplication],
+    ):
         super().__init__(dependencies=[Depends(jwt_dependency)])
 
         # --- Category endpoints -----------------------------------------
@@ -93,7 +97,9 @@ class CategoryController(APIRouter):
             user_id = request.state.user.id
             for cat in data:
                 cat.user_id = user_id
-            return cast(List[MacroCategoryResponse], await app.create_macro_category(data))
+            return cast(
+                List[MacroCategoryResponse], await app.create_macro_category(data)
+            )
 
         @self.put("/macro-categories/{macro_id}")
         async def update_macro_category(
@@ -142,4 +148,6 @@ class CategoryController(APIRouter):
         ) -> MacroCategoryListResponse:
             ids = ids or []
             macros = await app.get_macro_categories_by_ids(ids)
-            return MacroCategoryListResponse(data=cast(list[MacroCategoryResponse], macros))
+            return MacroCategoryListResponse(
+                data=cast(list[MacroCategoryResponse], macros)
+            )

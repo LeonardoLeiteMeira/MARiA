@@ -4,6 +4,7 @@ from uuid import UUID
 
 from ..models.transaction_dto import TransactionDto
 
+
 class MacroCategoryTransactionAggregate(BaseModel):
     macro_category_id: UUID
     total: float

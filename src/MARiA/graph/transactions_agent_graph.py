@@ -9,18 +9,28 @@ from ..agent_base import AgentBase
 
 from .state import State
 from ..agent_base import AgentBase
-from ..tools import (TransactionOperationEnum, CreateCard, CreateNewMonth,
-    CreateNewPlanning, DeleteData, GetPlanByMonth,
-    ReadUserBaseData, SearchTransactionV2, GetMonthData, AskUserData, GoToSupervisor,
-    ToolType, ToolInterface
+from ..tools import (
+    TransactionOperationEnum,
+    CreateCard,
+    CreateNewMonth,
+    CreateNewPlanning,
+    DeleteData,
+    GetPlanByMonth,
+    ReadUserBaseData,
+    SearchTransactionV2,
+    GetMonthData,
+    AskUserData,
+    GoToSupervisor,
+    ToolType,
+    ToolInterface,
 )
+
 
 class TransactionsAgentGraph:
     def __init__(self) -> None:
         self.agent: Optional[AgentBase] = None
         self.prompt = "Voce é um agente que tem a função de gerenciar transações do usuário. Um agente supervisor te envia tarefas de acordo com necessidade. Sua função é usar suas tools para atingir o objetivo de acordo com o pedido recebido e retornar uma resposta para o usuário. Nunca invente informação, caso não esteja explicito pergunte ao usuário!"
         self.__notion_factory: Optional[NotionFactory] = None
-
 
     def set_notion_factory(self, notion_factory: NotionFactory) -> None:
         self.__notion_factory = notion_factory
@@ -36,39 +46,37 @@ class TransactionsAgentGraph:
         state_graph.add_node("go_to_supervisor", self.__go_to_supervisor)
 
         state_graph.add_edge(START, "select_operation")
-        state_graph.add_edge('select_operation', "build_agent")
-        state_graph.add_edge('build_agent', "call_agent")
-        state_graph.add_edge('ask_user_data', 'call_agent')
-        state_graph.add_edge('ask_user_data', 'call_agent')
-        state_graph.add_edge('call_agent', END)
-        state_graph.add_edge('tools', END)
-        state_graph.add_edge('go_to_supervisor', END)
+        state_graph.add_edge("select_operation", "build_agent")
+        state_graph.add_edge("build_agent", "call_agent")
+        state_graph.add_edge("ask_user_data", "call_agent")
+        state_graph.add_edge("ask_user_data", "call_agent")
+        state_graph.add_edge("call_agent", END)
+        state_graph.add_edge("tools", END)
+        state_graph.add_edge("go_to_supervisor", END)
 
         state_graph.add_conditional_edges(
-            'call_agent',
-            self.__router,
-            {
-                'tools': 'tools',
-                END: END
-            }
+            "call_agent", self.__router, {"tools": "tools", END: END}
         )
 
         return state_graph
 
     def __select_operation(self, state: State) -> Command[str]:
-        operation_type: Any = state['args'].get('operation_type')
+        operation_type: Any = state["args"].get("operation_type")
         base_tools: list[Type[ToolInterface]] = [AskUserData, GoToSupervisor]
-        
+
         # TODO adicionar a nova de criar transacao
         # Alguns ficaram so com o base - Reavaliar antes de usar
-        match (operation_type):
+        match operation_type:
             case TransactionOperationEnum.CREATE_INCOME.value:
                 tools = [*base_tools]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.CREATE_OUTCOME.value:
                 tools = [*base_tools]
                 self.agent = AgentBase(tools)
-            case TransactionOperationEnum.PAY_CREDIT_CARD.value | TransactionOperationEnum.CREATE_TRANSFER.value:
+            case (
+                TransactionOperationEnum.PAY_CREDIT_CARD.value
+                | TransactionOperationEnum.CREATE_TRANSFER.value
+            ):
                 tools = [*base_tools]
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.QUERY_DATA.value:
@@ -76,15 +84,10 @@ class TransactionsAgentGraph:
                 self.agent = AgentBase(tools)
             case TransactionOperationEnum.UPDATE_DATA.value:
                 # TODO adicionar a nova de criar transacao
-                tools = [*base_tools, 
-                    SearchTransactionV2,
-                    DeleteData
-                ]
+                tools = [*base_tools, SearchTransactionV2, DeleteData]
                 self.agent = AgentBase(tools)
-        
-        return Command(
-            goto='build_agent'
-        )
+
+        return Command(goto="build_agent")
 
     async def __build_agent(self, state: State) -> Command[str]:
         assert self.__notion_factory is not None
@@ -98,21 +101,21 @@ class TransactionsAgentGraph:
         if not state.get("categories"):
             state["categories"] = await notion_user_data.get_user_categories()
         if not state.get("macroCategories"):
-            state["macroCategories"] = await notion_user_data.get_user_macro_categories()
+            state[
+                "macroCategories"
+            ] = await notion_user_data.get_user_macro_categories()
         if not state.get("transaction_types"):
             transaction_enum = notion_tool.ger_transaction_types()
             state["transaction_types"] = [member.value for member in transaction_enum]
         await self.agent.create_new_agent(state, notion_tool, True)
-        return Command(
-            goto='call_agent'
-        )
-        
+        return Command(goto="call_agent")
+
     async def __call_agent(self, state: State) -> Command[str]:
         assert self.agent is not None
         assert self.agent.agent_with_tools is not None
-        query = state['args'].get('query')
+        query = state["args"].get("query")
         # last_message = state["messages"][-1]
-        
+
         # # Verificar se a ultima e um retorno d tool ou nao
         # # Se for retorno da tool
         # last_message
@@ -124,10 +127,7 @@ class TransactionsAgentGraph:
         else:
             result = await self.agent.agent_with_tools.ainvoke([*messages, query])
 
-        return Command(
-            goto='router',
-            update={"transactions_agent_messages": [result]}
-        )
+        return Command(goto="router", update={"transactions_agent_messages": [result]})
 
     def __router(self, state: State) -> str:
         # TODO Todas as chamadas aqgora sao tool call, entao nao precisa mais desse nodo
@@ -140,7 +140,7 @@ class TransactionsAgentGraph:
         if hasattr(ai_message, "tool_calls") and len(ai_message.tool_calls) > 0:
             return "tools"
         return END
-    
+
     async def __tool_node(self, state: State) -> Command[str]:
         assert self.agent is not None
         if messages := state.get("transactions_agent_messages", []):
@@ -154,31 +154,31 @@ class TransactionsAgentGraph:
             tool_type = tool_to_call.tool_type
             if tool_type == ToolType.AGENT_REDIRECT:
                 return Command(
-                    goto=tool_call['name'],
+                    goto=tool_call["name"],
                     update={
-                        'messages':[ToolMessage(content=f"Indo para {tool_call['name']}", tool_call_id=tool_call["id"])],
-                        'args': tool_call["args"]
-                    }
+                        "messages": [
+                            ToolMessage(
+                                content=f"Indo para {tool_call['name']}",
+                                tool_call_id=tool_call["id"],
+                            )
+                        ],
+                        "args": tool_call["args"],
+                    },
                 )
 
             tool_result = await tool_to_call.ainvoke(
-                {'args': tool_call["args"], 'id': tool_call["id"]}
+                {"args": tool_call["args"], "id": tool_call["id"]}
             )
-            outputs.append(
-                tool_result
-            )
+            outputs.append(tool_result)
 
-        return Command(
-            goto=END,
-            update={"transactions_agent_messages": outputs}
-        )
+        return Command(goto=END, update={"transactions_agent_messages": outputs})
 
     async def __ask_user_data(self, state: State) -> dict[str, Any]:
         messages = state["transactions_agent_messages"]
         ai_message = messages[-1]
-        user_response = interrupt({"query": str(ai_message.tool_calls[0]['args'])})
-        return {'transactions_agent_messages': [user_response]}
-    
+        user_response = interrupt({"query": str(ai_message.tool_calls[0]["args"])})
+        return {"transactions_agent_messages": [user_response]}
+
     async def __go_to_supervisor(self, state: State) -> Command[str]:
         return Command(goto=END)
 
@@ -189,16 +189,16 @@ class TransactionsAgentGraph:
 # 3. Outra para ir para o supervisor, cancelando com justificativa
 # 4. Tool para enviar mensagem para o usuario pedindo algum dado faltante
 # 4.1 preciso modificar o MariaInteraction para identificar quando tem interrupt ou nao da seguinte forma:
-    # # <-- NOVO: verificar se há interrupt pendente
-    # snapshot = await compiled.aget_state(config, subgraphs=True)
+# # <-- NOVO: verificar se há interrupt pendente
+# snapshot = await compiled.aget_state(config, subgraphs=True)
 
-    # # Tente usar atributo direto; se não existir, derive a partir de tasks
-    # interrupts = getattr(snapshot, "interrupts", None)
-    # if interrupts is None:
-    #     interrupts = tuple(
-    #         intr
-    #         for task in getattr(snapshot, "tasks", ())
-    #         for intr in getattr(task, "interrupts", ())
-    #     )
+# # Tente usar atributo direto; se não existir, derive a partir de tasks
+# interrupts = getattr(snapshot, "interrupts", None)
+# if interrupts is None:
+#     interrupts = tuple(
+#         intr
+#         for task in getattr(snapshot, "tasks", ())
+#         for intr in getattr(task, "interrupts", ())
+#     )
 
-    # if interrupts:
+# if interrupts:

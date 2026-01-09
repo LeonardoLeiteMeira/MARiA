@@ -35,8 +35,10 @@ class AccountApplication:
 
     async def get_by_user_id(self, user_id: UUID) -> list[AccountModel]:
         return await self.__domain.get_by_user_id(user_id, withDeleted=True)
-    
-    async def get_accounts_with_balance(self, user_id: UUID) -> List[AccountWithBalanceAggregate]:
+
+    async def get_accounts_with_balance(
+        self, user_id: UUID
+    ) -> List[AccountWithBalanceAggregate]:
         accounts = await self.__domain.get_by_user_id(user_id)
 
         accounts_with_balance: List[AccountWithBalanceAggregate] = []
@@ -44,17 +46,21 @@ class AccountApplication:
             account_with_balance = AccountWithBalanceAggregate.model_validate(account)
             # TODO: Muito ineficiente - Preciso modificar a estrutura de transações
             # para agregar esses dados com uma busca direta no banco
-            total_income = await self.__transaction_domain.sum_transactions_from_destination_account(account.id, user_id)
-            total_outcome = await self.__transaction_domain.sum_transactions_from_source_account(account.id, user_id)
+            total_income = await self.__transaction_domain.sum_transactions_from_destination_account(
+                account.id, user_id
+            )
+            total_outcome = (
+                await self.__transaction_domain.sum_transactions_from_source_account(
+                    account.id, user_id
+                )
+            )
 
-            account_balance = (total_income - total_outcome) + float(account.opening_balance_cents)
+            account_balance = (total_income - total_outcome) + float(
+                account.opening_balance_cents
+            )
             account_with_balance.balance_cents = account_balance
             account_with_balance.balance_date = datetime.now()
 
             accounts_with_balance.append(account_with_balance)
 
         return accounts_with_balance
-        
-
-
-

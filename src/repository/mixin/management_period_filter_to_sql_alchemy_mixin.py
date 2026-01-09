@@ -1,9 +1,11 @@
 from datetime import timezone, datetime
 
 from typing import TYPE_CHECKING, Any
+
 if TYPE_CHECKING:
     from ..db_models.management_period_model import ManagementPeriodModel
     from controllers.request_models.management_period import ManagementPeriodFilter
+
 
 class ManagementPeriodFilterToSqlAlchemyMixin:
     def apply_filters(
@@ -32,14 +34,13 @@ class ManagementPeriodFilterToSqlAlchemyMixin:
             query = query.where(ManagementPeriod.end_date > end_date_min)
 
         if filters.order_start_date:
-            if filters.order_start_date == 'desc':
+            if filters.order_start_date == "desc":
                 query = query.order_by(ManagementPeriod.start_date.desc())
             else:
                 query = query.order_by(ManagementPeriod.start_date.asc())
 
         return query
 
-    
     # TODO Extrair para um lugar comum
     def __fix_time_zone(self, dateTime: datetime) -> datetime:
         if dateTime.tzinfo is not None:

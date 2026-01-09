@@ -1,22 +1,40 @@
-from repository import UserRepository, ThreadModel, UserModel, NotionDatasourceRepository, NotionDatasourceModel
+from repository import (
+    UserRepository,
+    ThreadModel,
+    UserModel,
+    NotionDatasourceRepository,
+    NotionDatasourceModel,
+)
 from external.notion.models import NotionBaseDatasource
 from datetime import datetime, timedelta
 import uuid
-from .domain_mixin.choose_notion_datasource_tag_mixin import ChooseNotionDatasourceTagMixin
+from .domain_mixin.choose_notion_datasource_tag_mixin import (
+    ChooseNotionDatasourceTagMixin,
+)
 
 
 class UserDomain(ChooseNotionDatasourceTagMixin):
-    def __init__(self, user_repository: UserRepository, notion_datasource_repo: NotionDatasourceRepository) -> None:
+    def __init__(
+        self,
+        user_repository: UserRepository,
+        notion_datasource_repo: NotionDatasourceRepository,
+    ) -> None:
         self.__user_repository = user_repository
         self.__notion_datasource_repo = notion_datasource_repo
 
         self.__valid_thread_period = (datetime.now()) - timedelta(hours=1)
 
-    async def get_user_by_phone_number_with_notion_data(self, phone_number: str) -> UserModel | None:
-        return await self.__user_repository.get_user_by_phone_number_with_notion_data(phone_number)
-    
+    async def get_user_by_phone_number_with_notion_data(
+        self, phone_number: str
+    ) -> UserModel | None:
+        return await self.__user_repository.get_user_by_phone_number_with_notion_data(
+            phone_number
+        )
+
     async def get_user_valid_thread(self, user_id: str) -> list[ThreadModel]:
-        return await self.__user_repository.get_user_valid_threads_by_user_id(user_id, self.__valid_thread_period)
+        return await self.__user_repository.get_user_valid_threads_by_user_id(
+            user_id, self.__valid_thread_period
+        )
 
     async def create_new_user_thread(self, user_id: str) -> ThreadModel:
         new_thread = ThreadModel(
@@ -43,7 +61,7 @@ class UserDomain(ChooseNotionDatasourceTagMixin):
         )
         await self.__user_repository.create_user(new_user)
         return new_user
-    
+
     async def save_user_notion_datasources(
         self,
         user_id: str,
@@ -61,9 +79,11 @@ class UserDomain(ChooseNotionDatasourceTagMixin):
             )
         await self.__notion_datasource_repo.upsert_datasources(new_datasources)
 
-    async def get_user_notion_datasources_taged(self, user_id: str) -> list[NotionDatasourceModel]:
+    async def get_user_notion_datasources_taged(
+        self, user_id: str
+    ) -> list[NotionDatasourceModel]:
         datasources = await self.__notion_datasource_repo.get_user_datasources(user_id)
         return datasources
-    
+
     async def select_all_users(self) -> list[UserModel]:
         return await self.__user_repository.get_all_users()

@@ -7,13 +7,18 @@ from domain import (
     ManagementPlanningDomain,
     CategoryDomain,
     MacroCategoryDomain,
-    TransactionDomain
+    TransactionDomain,
 )
 from dto.models.transaction_dto import TransactionType
 from repository import ManagementPeriodModel, CategoryModel, MacroCategoryModel
 from dto import PaginatedDataListDto
 from dto.models import ManagementPeriodDto, ManagementPlanningDto, TransactionDto
-from dto.aggregates import DashboardAggregate, PlanningAggregate, CategoryTransactionAggregate, MacroCategoryTransactionAggregate
+from dto.aggregates import (
+    DashboardAggregate,
+    PlanningAggregate,
+    CategoryTransactionAggregate,
+    MacroCategoryTransactionAggregate,
+)
 
 from controllers.request_models.management_period import ManagementPeriodFilter
 from controllers.request_models.management_planning import ManagementPlanningFilter
@@ -25,46 +30,54 @@ if TYPE_CHECKING:
 
 class ManagementPeriodApplication:
     def __init__(
-            self,
-            domain: ManagementPeriodDomain,
-            plannig_domain: ManagementPlanningDomain,
-            category_domain: CategoryDomain,
-            macro_category_domain: MacroCategoryDomain,
-            transaction_domain: TransactionDomain,
-        ) -> None:
-            self._domain = domain
-            self.plannig_domain = plannig_domain
-            self.category_domain = category_domain
-            self.transaction_domain = transaction_domain
-            self.macro_category_domain = macro_category_domain
+        self,
+        domain: ManagementPeriodDomain,
+        plannig_domain: ManagementPlanningDomain,
+        category_domain: CategoryDomain,
+        macro_category_domain: MacroCategoryDomain,
+        transaction_domain: TransactionDomain,
+    ) -> None:
+        self._domain = domain
+        self.plannig_domain = plannig_domain
+        self.category_domain = category_domain
+        self.transaction_domain = transaction_domain
+        self.macro_category_domain = macro_category_domain
 
     async def create(self, data: "ManagementPeriodRequest") -> ManagementPeriodModel:
         period = ManagementPeriodModel(**(data.model_dump()))
         return await self._domain.create(period)
 
-    async def update(self, period_id: UUID, data: "ManagementPeriodRequest") -> ManagementPeriodModel:
-        period =  ManagementPeriodModel(**(data.model_dump()))
+    async def update(
+        self, period_id: UUID, data: "ManagementPeriodRequest"
+    ) -> ManagementPeriodModel:
+        period = ManagementPeriodModel(**(data.model_dump()))
         period.id = period_id
         return await self._domain.update(period)
 
     async def delete(self, period_id: UUID, user_id: UUID) -> None:
         await self._domain.delete(period_id, user_id)
 
-    async def get_by_ids(self, period_ids: list[UUID], user_id: UUID) -> list[ManagementPeriodModel]:
+    async def get_by_ids(
+        self, period_ids: list[UUID], user_id: UUID
+    ) -> list[ManagementPeriodModel]:
         return await self._domain.get_by_ids(period_ids, user_id)
 
-    async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
+    async def get_by_filter(
+        self, filter: "ManagementPeriodFilter"
+    ) -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._domain.get_by_filter(filter)
 
-    async def get_current_period_resume(self, user_id: UUID, period_id: UUID | None) -> DashboardAggregate:
-        if(period_id == None):
+    async def get_current_period_resume(
+        self, user_id: UUID, period_id: UUID | None
+    ) -> DashboardAggregate:
+        if period_id == None:
             current_period: Any = await self.get_current_management_period(user_id)
         else:
             periods = await self._domain.get_by_ids([period_id], user_id)
-            current_period = periods[0] if len(periods)>0 else None
+            current_period = periods[0] if len(periods) > 0 else None
 
-        if (current_period == None):
-            raise Exception('No period found')
+        if current_period == None:
+            raise Exception("No period found")
 
         plans = await self.__get_management_plan(user_id, current_period.id)
         categories = await self.category_domain.get_by_user_id(user_id)
@@ -84,11 +97,19 @@ class ManagementPeriodApplication:
             macro_categories_by_id[str(macro.id)] = macro
 
         # Total de entradas
-        all_incomes = [transaction for transaction in transactions if transaction.type == TransactionType.INCOME]
+        all_incomes = [
+            transaction
+            for transaction in transactions
+            if transaction.type == TransactionType.INCOME
+        ]
         total_incomes = sum(income.amount_cents for income in all_incomes)
 
         # Total de saidas (Gastos)
-        all_expenses = [transaction for transaction in transactions if transaction.type == TransactionType.EXPENSE]
+        all_expenses = [
+            transaction
+            for transaction in transactions
+            if transaction.type == TransactionType.EXPENSE
+        ]
         total_expense = sum(expense.amount_cents for expense in all_expenses)
 
         # Total Planjeado
@@ -103,15 +124,21 @@ class ManagementPeriodApplication:
             key = str(expense.category_id)
             if not (key in expenses_by_category):
                 category = categories_by_id[key]
-                plan_for_category: ManagementPlanningDto | None = plans_by_category.get(key, None)
+                plan_for_category: ManagementPlanningDto | None = plans_by_category.get(
+                    key, None
+                )
                 aggregate = CategoryTransactionAggregate(
-                    category_id = cast(UUID, expense.category_id),
-                    total =  0,
-                    transactions =  [],
-                    category_name =  category.name,
-                    icon =  category.icon,
-                    plan_value =  plan_for_category.planned_value_cents if plan_for_category!=None else None,
-                    plan_name =  cast(str, plan_for_category.name) if plan_for_category!=None else None,
+                    category_id=cast(UUID, expense.category_id),
+                    total=0,
+                    transactions=[],
+                    category_name=category.name,
+                    icon=category.icon,
+                    plan_value=plan_for_category.planned_value_cents
+                    if plan_for_category != None
+                    else None,
+                    plan_name=cast(str, plan_for_category.name)
+                    if plan_for_category != None
+                    else None,
                 )
                 expenses_by_category[key] = aggregate
 
@@ -129,7 +156,7 @@ class ManagementPeriodApplication:
                     transactions=[],
                     total=0,
                     macro_category_name=macro_cat.name,
-                    icon=macro_cat.icon
+                    icon=macro_cat.icon,
                 )
                 expenses_by_macro_category[key] = macro_aggregate
             expenses_by_macro_category[key].transactions.append(expense)
@@ -142,71 +169,76 @@ class ManagementPeriodApplication:
             total_expenses_plan = expense_data.total if expense_data != None else 0
             category = categories_by_id[str(plan_item.category_id)]
             new_plan = PlanningAggregate(
-                plan_id = plan_item.id,
-                category_id = cast(UUID, plan_item.category_id),
-                plan_value_cents = plan_item.planned_value_cents,
-                total_expenses = total_expenses_plan,
-                total_available = plan_item.planned_value_cents - total_expenses_plan,
-                name = plan_item.name,
-                category_name = category.name,
-                category_icon =  category.icon,
-                transactions = expense_data.transactions if expense_data != None else [],
+                plan_id=plan_item.id,
+                category_id=cast(UUID, plan_item.category_id),
+                plan_value_cents=plan_item.planned_value_cents,
+                total_expenses=total_expenses_plan,
+                total_available=plan_item.planned_value_cents - total_expenses_plan,
+                name=plan_item.name,
+                category_name=category.name,
+                category_icon=category.icon,
+                transactions=expense_data.transactions if expense_data != None else [],
             )
 
             plan_aggregate.append(new_plan)
-            
 
         # Lista de Transacoes fora do planejamento
         plan_categories = set([str(plan_item.category_id) for plan_item in plans])
-        transactions_without_plan = [expense for expense in all_expenses if str(expense.category_id) not in plan_categories]
+        transactions_without_plan = [
+            expense
+            for expense in all_expenses
+            if str(expense.category_id) not in plan_categories
+        ]
 
         # Total fora do planejamento
-        total_expenses_out_plan = sum(expense.amount_cents for expense in transactions_without_plan)
+        total_expenses_out_plan = sum(
+            expense.amount_cents for expense in transactions_without_plan
+        )
 
         final_dashboard = DashboardAggregate(
             management_period_id=current_period.id,
-            start_period = cast(datetime, current_period.start_date),
-            end_period = cast(datetime, current_period.end_date),
-            total_incomes = total_incomes,
-            total_expense = total_expense,
-            total_plan = total_plan,
-            available_to_plan = available_to_plan,
-            total_expenses_out_plan = total_expenses_out_plan,
-            planning_aggregate = plan_aggregate,
+            start_period=cast(datetime, current_period.start_date),
+            end_period=cast(datetime, current_period.end_date),
+            total_incomes=total_incomes,
+            total_expense=total_expense,
+            total_plan=total_plan,
+            available_to_plan=available_to_plan,
+            total_expenses_out_plan=total_expenses_out_plan,
+            planning_aggregate=plan_aggregate,
             expense_by_category=expenses_by_category,
-            expense_by_macro_category=expenses_by_macro_category
+            expense_by_macro_category=expenses_by_macro_category,
         )
 
         return final_dashboard
 
-
     async def get_current_management_period(self, user_id: UUID) -> ManagementPeriodDto:
         management_filter = ManagementPeriodFilter(
-            page=1,
-            page_size=1,
-            order_start_date='desc',
-            user_id=user_id
+            page=1, page_size=1, order_start_date="desc", user_id=user_id
         )
         management_result = await self._domain.get_by_filter(management_filter)
         if len(management_result.list_data) == 0:
             raise ValueError("There is no management period to read")
-        
+
         return management_result.list_data[0]
-    
-    async def __get_management_plan(self, user_id:UUID, period_plan_id:UUID) -> list[ManagementPlanningDto]:
+
+    async def __get_management_plan(
+        self, user_id: UUID, period_plan_id: UUID
+    ) -> list[ManagementPlanningDto]:
         plan_filter = ManagementPlanningFilter(
-            management_period_id=[period_plan_id],
-            page_size=200,
-            user_id=user_id
+            management_period_id=[period_plan_id], page_size=200, user_id=user_id
         )
         plan_result = await self.plannig_domain.get_by_user_id(plan_filter)
         return plan_result.list_data
-    
-    async def __get_period_transactions(self, user_id:UUID, period_id: UUID) -> list[TransactionDto]:
+
+    async def __get_period_transactions(
+        self, user_id: UUID, period_id: UUID
+    ) -> list[TransactionDto]:
         transaction_filter = TransactionFilter(
-            management_period_id=[period_id],
-            user_id=user_id,
-            page_size=2000
+            management_period_id=[period_id], user_id=user_id, page_size=2000
         )
-        transactions_result = await self.transaction_domain.get_user_transactions_with_filter(transaction_filter)
+        transactions_result = (
+            await self.transaction_domain.get_user_transactions_with_filter(
+                transaction_filter
+            )
+        )
         return transactions_result.list_data

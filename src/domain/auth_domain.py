@@ -15,7 +15,7 @@ class AuthDomain:
 
     async def get_full_user_by_email(self, email: str) -> UserModel | None:
         return await self._repo.get_full_user_by_email(email)
-    
+
     async def get_base_user_by_email(self, email: str) -> UserDto | None:
         return await self._repo.get_base_user_by_email(email)
 
@@ -23,7 +23,9 @@ class AuthDomain:
         return await self._repo.get_user_by_id(user_id)
 
     async def create_user(self, name: str, email: str, password_hash: str) -> None:
-        user = UserModel(name=name, email=email, phone_number=email, password=password_hash)
+        user = UserModel(
+            name=name, email=email, phone_number=email, password=password_hash
+        )
         await self._repo.create_user(user)
 
     async def save_user(self, user: UserModel) -> None:

@@ -8,8 +8,8 @@ class PluggyAccountResponse(BaseModel):
     id: UUID
     user_id: UUID
     name: str | None
-    marketing_name: str| None
-    type: str| None
+    marketing_name: str | None
+    type: str | None
     complementary_data: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
@@ -19,12 +19,12 @@ class PluggyTransactionResponse(BaseModel):
     id: UUID
     user_id: UUID
     account_id: UUID
-    amount: float| None
+    amount: float | None
     balance: float | None
     category: str | None
-    description: str| None
-    status: str| None
-    type: str| None
+    description: str | None
+    status: str | None
+    type: str | None
     complementary_data: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
@@ -34,7 +34,7 @@ class PluggyCardBillResponse(BaseModel):
     id: UUID
     account_id: UUID
     user_id: UUID
-    total_amount: float| None
+    total_amount: float | None
     minimum_payment_amount: float | None
     complementary_data: Dict[str, Any]
 
@@ -45,10 +45,10 @@ class PluggyInvestmentResponse(BaseModel):
     id: UUID
     user_id: UUID
     code: str | None
-    name: str| None
-    type: str| None
+    name: str | None
+    type: str | None
     subtype: str | None
-    balance: float| None
+    balance: float | None
     complementary_data: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
@@ -61,7 +61,7 @@ class PluggyInvestmentTransactionResponse(BaseModel):
     amount: float | None
     value: float | None
     quantity: float | None
-    type: str| None
+    type: str | None
     movement_type: str | None
     description: str | None
     complementary_data: Dict[str, Any]
@@ -80,4 +80,3 @@ class PluggyLoanResponse(BaseModel):
     complementary_data: Dict[str, Any]
 
     model_config = ConfigDict(from_attributes=True)
-

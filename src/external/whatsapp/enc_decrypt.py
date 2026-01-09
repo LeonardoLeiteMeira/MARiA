@@ -31,22 +31,23 @@ extension: dict[str, str] = {
 
 
 def HKDF(key: bytes, length: int, appInfo: bytes = b"") -> bytes:
-    key = hmac.new(b"\0"*32, key, hashlib.sha256).digest()
+    key = hmac.new(b"\0" * 32, key, hashlib.sha256).digest()
     keyStream = b""
     keyBlock = b""
     blockIndex = 1
     while len(keyStream) < length:
         keyBlock = hmac.new(
             key,
-            msg=keyBlock+appInfo + (chr(blockIndex).encode("utf-8")),
-            digestmod=hashlib.sha256).digest()
+            msg=keyBlock + appInfo + (chr(blockIndex).encode("utf-8")),
+            digestmod=hashlib.sha256,
+        ).digest()
         blockIndex += 1
         keyStream += keyBlock
     return keyStream[:length]
 
 
 def AESUnpad(s: bytes) -> bytes:
-    return s[:-ord(s[len(s)-1:])]
+    return s[: -ord(s[len(s) - 1 :])]
 
 
 def AESDecrypt(key: bytes, ciphertext: bytes, iv: bytes) -> bytes:
@@ -55,7 +56,9 @@ def AESDecrypt(key: bytes, ciphertext: bytes, iv: bytes) -> bytes:
     return AESUnpad(plaintext)
 
 
-def decrypt(fileName: bytes | str, mediaKey: bytes, mediaType: str, output: str | None) -> bytes:
+def decrypt(
+    fileName: bytes | str, mediaKey: bytes, mediaType: str, output: str | None
+) -> bytes:
     mediaKeyExpanded = HKDF(mediaKey, 112, appInfo[mediaType])
     macKey = mediaKeyExpanded[48:80]
 
@@ -83,34 +86,23 @@ def decrypt(fileName: bytes | str, mediaKey: bytes, mediaType: str, output: str 
 
 if __name__ == "__main__":
     from optparse import OptionParser
-    parser = OptionParser(version='1')
+
+    parser = OptionParser(version="1")
     parser.add_option(
-        '-m',
-        '--mime',
-        dest='mediaType',
-        default='image',
-        help="media type of the encrypted file. Default 'image'"
+        "-m",
+        "--mime",
+        dest="mediaType",
+        default="image",
+        help="media type of the encrypted file. Default 'image'",
     )
     parser.add_option(
-        '-b',
-        '--base64',
-        dest='base64Key',
-        default=None,
-        help='media key in Base64'
+        "-b", "--base64", dest="base64Key", default=None, help="media key in Base64"
     )
     parser.add_option(
-        '-j',
-        '--hex',
-        dest='hexKey',
-        default=None,
-        help='media key in Hex'
+        "-j", "--hex", dest="hexKey", default=None, help="media key in Hex"
     )
     parser.add_option(
-        '-o',
-        '--output',
-        dest='output',
-        default=None,
-        help='path for the plaintext'
+        "-o", "--output", dest="output", default=None, help="path for the plaintext"
     )
     (options, args) = parser.parse_args()
 
@@ -120,8 +112,7 @@ if __name__ == "__main__":
     elif options.hexKey is not None:
         mediaKey = bytes.fromhex(options.hexKey)
     else:
-        print("You must specify the key in either "
-              "Base64 or Hex.\nUsage: decrypt.py -h")
+        print("You must specify the key in either Base64 or Hex.\nUsage: decrypt.py -h")
         sys.exit(1)
 
     if decrypt(fileName, mediaKey, options.mediaType, options.output):

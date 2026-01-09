@@ -15,14 +15,13 @@ class AuthRepository(BaseRepository):
         async with self.session() as session:
             res = await session.execute(stmt)
             return res.scalars().first()
-        
+
     async def get_base_user_by_email(self, email: str) -> UserDto | None:
         stmt = select(UserModel).where(UserModel.email == email)
         async with self.session() as session:
             res = await session.execute(stmt)
             full_user = res.scalars().first()
             return UserDto.model_validate(full_user)
-
 
     async def get_user_by_id(self, user_id: UUID) -> UserModel | None:
         stmt = select(UserModel).where(UserModel.id == user_id)

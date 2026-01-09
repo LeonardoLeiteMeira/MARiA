@@ -3,6 +3,8 @@ from config import get_settings
 from .message_service import MessageService
 
 settings = get_settings()
+
+
 class MessageServiceDev(MessageService):
     def __init__(self, instance: str) -> None:
         super().__init__(instance)
@@ -13,4 +15,4 @@ class MessageServiceDev(MessageService):
             print("Envio de mensagem ambiente te teste")
             print(f"{chat_id}: {message}")
             print("++++++++++++++++")
-            return 
+            return

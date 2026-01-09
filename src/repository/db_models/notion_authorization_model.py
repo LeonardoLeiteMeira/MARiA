@@ -11,6 +11,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from database.configs.base import Base
 from secrets_functions.secret_utils import custom_decrypt, custom_encrypt
 
+
 class OwnerType(enum.Enum):
     workspace = "workspace"
     user = "user"

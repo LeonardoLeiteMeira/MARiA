@@ -14,7 +14,13 @@ class GoToSupervisor(ToolInterface):
     description: str = "Util quando a tarefa é conlcuida, o assunto muda, o usuário pede que determinada ação seja cancelada, ou quando não se tem a capacidade de executar uma determinada tarefa - Então deve ser redirecionadao para o agente supervisor."
     args_schema: Type[BaseModel] = create_model(
         "GoToSupervisorInput",
-        justification=(str, Field(..., description="Justificativa do motivo pelo qual você está escolhendo ir para o supervisor. Frase curta e direta."))
+        justification=(
+            str,
+            Field(
+                ...,
+                description="Justificativa do motivo pelo qual você está escolhendo ir para o supervisor. Frase curta e direta.",
+            ),
+        ),
     )
     tool_type: ToolType = ToolType.AGENT_REDIRECT
 
@@ -22,5 +28,7 @@ class GoToSupervisor(ToolInterface):
         return cast(ToolMessage, None)
 
     @classmethod
-    async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'GoToSupervisor':
+    async def instantiate_tool(
+        cls, state: State, notion_tool: NotionTool | None
+    ) -> "GoToSupervisor":
         return GoToSupervisor()

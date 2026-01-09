@@ -11,7 +11,7 @@ import app.lifespan as lifespan_module
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///./test_auth.db"
 os.environ["DATABASE_CONNECTION_URI_MARIA_ASYNC"] = SQLALCHEMY_DATABASE_URL
-os.environ["NOTION_ENCRYPT_SECRET"] = 'uVchA0mszYV7ve0g3U6r5UgpNIXfW53U++rmowQEe1I='
+os.environ["NOTION_ENCRYPT_SECRET"] = "uVchA0mszYV7ve0g3U6r5UgpNIXfW53U++rmowQEe1I="
 
 if os.path.exists("test_auth.db"):
     os.remove("test_auth.db")
@@ -66,9 +66,7 @@ def test_signup_login_logout_and_protected_route():
         token = resp.json()["access_token"]
         assert token
 
-        resp = client.get(
-            "/test-auth", headers={"Authorization": f"Bearer {token}"}
-        )
+        resp = client.get("/test-auth", headers={"Authorization": f"Bearer {token}"})
         assert resp.status_code == 200
         assert resp.json()["detail"] == "success"
 
@@ -76,7 +74,5 @@ def test_signup_login_logout_and_protected_route():
         assert resp.status_code == 200
         assert resp.json()["detail"] == "revoked"
 
-        resp = client.get(
-            "/test-auth", headers={"Authorization": f"Bearer {token}"}
-        )
+        resp = client.get("/test-auth", headers={"Authorization": f"Bearer {token}"})
         assert resp.status_code == 401

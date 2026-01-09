@@ -8,7 +8,9 @@ class RecoverPasswordDomain:
     def __init__(self, repo: RecoverPasswordRepository):
         self._repo = repo
 
-    async def create_code(self, user_id: UUID, code: str, limit_date: datetime) -> RecoverPasswordModel:
+    async def create_code(
+        self, user_id: UUID, code: str, limit_date: datetime
+    ) -> RecoverPasswordModel:
         await self._repo.delete_by_user(user_id)
         recover_password = RecoverPasswordModel(
             user_id=user_id,

@@ -15,10 +15,14 @@ class ManagementPlanningDomain:
     def __init__(self, repo: ManagementPlanningRepository) -> None:
         self._repo = repo
 
-    async def create(self, planning: List[ManagementPlanningModel]) -> List[ManagementPlanningModel]:
+    async def create(
+        self, planning: List[ManagementPlanningModel]
+    ) -> List[ManagementPlanningModel]:
         return await self._repo.create(planning)
 
-    async def update(self, planning: ManagementPlanningModel) -> ManagementPlanningModel:
+    async def update(
+        self, planning: ManagementPlanningModel
+    ) -> ManagementPlanningModel:
         await self._repo.update(planning)
         return planning
 
@@ -26,8 +30,12 @@ class ManagementPlanningDomain:
         planning = ManagementPlanningModel(id=planning_id, user_id=user_id)
         await self._repo.delete(planning)
 
-    async def get_by_ids(self, planning_ids: list[UUID]) -> list[ManagementPlanningModel]:
+    async def get_by_ids(
+        self, planning_ids: list[UUID]
+    ) -> list[ManagementPlanningModel]:
         return await self._repo.get_by_ids(planning_ids)
 
-    async def get_by_user_id(self, filter: 'ManagementPlanningFilter') -> PaginatedDataListDto[ManagementPlanningDto]:
+    async def get_by_user_id(
+        self, filter: "ManagementPlanningFilter"
+    ) -> PaginatedDataListDto[ManagementPlanningDto]:
         return await self._repo.get_by_user_id(filter)
