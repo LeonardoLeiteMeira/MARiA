@@ -5,4 +5,14 @@
         "--strict"
     ],
     "mypy-type-checker.importStrategy": "fromEnvironment",
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "always",
+            "source.fixAll.ruff": "always"
+        }
+    },
+    "ruff.importStrategy": "fromEnvironment",
+    "ruff.lint.enable": true,
 }

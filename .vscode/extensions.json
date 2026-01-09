@@ -4,6 +4,7 @@
         "ms-python.python",
         "ms-python.mypy-type-checker",
         "ms-python.vscode-pylance",
-        "ms-python.debugpy"
+        "ms-python.debugpy",
+        "charliermarsh.ruff"
     ]
 }

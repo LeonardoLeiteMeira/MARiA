@@ -54,6 +54,7 @@ packages = [
 ipykernel = "^6.29.5"
 langgraph-checkpoint-sqlite = "^2.0.10"
 pytest = "^8.4.1"
+ruff = "^0.14.11"
 
 
 [tool.mypy]
@@ -61,6 +62,15 @@ warn_return_any = true
 ignore_missing_imports = false
 python_version = "3.12"
 strict = true
+
+[tool.ruff]
+line-length = 88
+exclude = [".git", "build", "dist"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
