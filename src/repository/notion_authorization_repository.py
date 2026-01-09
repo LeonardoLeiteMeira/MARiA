@@ -1,5 +1,4 @@
 from datetime import datetime
-
 from sqlalchemy import select, update
 
 from .base_repository import BaseRepository
@@ -7,12 +6,12 @@ from .db_models.notion_authorization_model import NotionAuthorizationModel
 
 
 class NotionAuthorizationRepository(BaseRepository):
-    async def create(self, auth: NotionAuthorizationModel):
+    async def create(self, auth: NotionAuthorizationModel) -> None:
         async with self.session() as session:
             session.add(auth)
             await session.commit()
 
-    async def update(self, auth: NotionAuthorizationModel):
+    async def update(self, auth: NotionAuthorizationModel) -> None:
         stmt = (
             update(NotionAuthorizationModel)
             .where(NotionAuthorizationModel.id == auth.id)

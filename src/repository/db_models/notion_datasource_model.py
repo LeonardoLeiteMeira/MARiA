@@ -20,5 +20,5 @@ class NotionDatasourceModel(Base):
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP,  default=datetime.now, onupdate=datetime.now)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self.table_name} - {self.tag} - {self.table_id} "

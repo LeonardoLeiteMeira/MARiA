@@ -11,4 +11,4 @@ class CategoryTransactionAggregate(BaseModel):
     category_name: str
     icon: str | None
     plan_value: float | None
-    plan_name: str | str
+    plan_name: str | None

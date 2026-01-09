@@ -3,7 +3,7 @@ from external.notion.enum import NotionDatasourceEnum
 
 
 class ChooseNotionDatasourceTagMixin:
-    def select_datasource_tag(self, datasource: NotionBaseDatasource) -> NotionDatasourceEnum | None:
+    def select_datasource_tag(self, datasource: NotionBaseDatasource) -> str | None:
         match (datasource.name):
             case 'Gestões' | 'Meses':
                 return NotionDatasourceEnum.MONTHS.value

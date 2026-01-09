@@ -1,12 +1,12 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from .custom_state import CustomState
-from typing import cast
+from typing import AsyncIterator, cast
 from database import BaseDatabase, seed_database, ensure_migrations
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state = cast(CustomState, app.state)
     app.state.database = BaseDatabase()
     await ensure_migrations()

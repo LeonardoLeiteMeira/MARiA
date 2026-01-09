@@ -1,13 +1,14 @@
-from collections.abc import Callable
+from collections.abc import Callable, Awaitable
+from typing import cast, Union
 
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 
 from application import NotionAuthorizationApplication
 
 
 class NotionAuthorizationController(APIRouter):
-    def __init__(self, app_dependency: Callable[[], NotionAuthorizationApplication]):
+    def __init__(self, app_dependency: Callable[[], Awaitable[NotionAuthorizationApplication]]):
         super().__init__()
 
         @self.get("/notion-authorization")
@@ -17,7 +18,7 @@ class NotionAuthorizationController(APIRouter):
             error: str | None = Query(None),
             error_description: str | None = Query(None),
             app: NotionAuthorizationApplication = Depends(app_dependency),
-        ):
+        ) ->  Response:
             if error:
                 print(f"OAuth error: {error}")
                 return JSONResponse(status_code=400, content={"detail": "OAuth error"})
@@ -26,7 +27,7 @@ class NotionAuthorizationController(APIRouter):
                 return JSONResponse(status_code=400, content={"detail": "Missing code"})
 
             try:
-                await app.authorize(code, state)
+                await app.authorize(code, cast(str, state))
             except Exception as ex:
                 print(f"Authorization failed: {ex}")
                 return JSONResponse(status_code=400, content={"detail": "Token exchange failed"})

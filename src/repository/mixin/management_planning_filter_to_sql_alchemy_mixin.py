@@ -8,8 +8,8 @@ class ManagementPlanningFilterToSqlAlchemyMixin:
     def apply_filters(
         self,
         query: Any,
-        filters: 'ManagementPlanningFilter',
-        ManagementPlanning: 'ManagementPlanningModel'
+        filters: Any,
+        ManagementPlanning: Any,
     ) -> Any:
         if filters.user_id is not None:
             query = query.where(ManagementPlanning.user_id == filters.user_id)
@@ -27,4 +27,3 @@ class ManagementPlanningFilterToSqlAlchemyMixin:
             query = query.where(ManagementPlanning.tags.in_(filters.tags))
 
         return query
-

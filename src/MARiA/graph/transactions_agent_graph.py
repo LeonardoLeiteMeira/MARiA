@@ -2,6 +2,7 @@ from langchain_core.messages import SystemMessage
 from langgraph.graph import StateGraph, END, START
 from langgraph.types import Command, interrupt
 from langchain_core.messages.tool import ToolMessage
+from typing import Any, Optional
 
 from external.notion import NotionFactory
 from ..agent_base import AgentBase
@@ -15,16 +16,16 @@ from ..tools import (TransactionOperationEnum, CreateNewIncome, CreateCard, Crea
 )
 
 class TransactionsAgentGraph:
-    def __init__(self):
-        self.agent: AgentBase = None
+    def __init__(self) -> None:
+        self.agent: Optional[AgentBase] = None
         self.prompt = "Voce é um agente que tem a função de gerenciar transações do usuário. Um agente supervisor te envia tarefas de acordo com necessidade. Sua função é usar suas tools para atingir o objetivo de acordo com o pedido recebido e retornar uma resposta para o usuário. Nunca invente informação, caso não esteja explicito pergunte ao usuário!"
-        self.__notion_factory: NotionFactory = None
+        self.__notion_factory: Optional[NotionFactory] = None
 
 
-    def set_notion_factory(self, notion_factory: NotionFactory):
+    def set_notion_factory(self, notion_factory: NotionFactory) -> None:
         self.__notion_factory = notion_factory
 
-    async def get_state_graph(self):
+    async def get_state_graph(self) -> StateGraph:
         state_graph = StateGraph(State)
 
         state_graph.add_node("select_operation", self.__select_operation)
@@ -54,8 +55,8 @@ class TransactionsAgentGraph:
 
         return state_graph
 
-    def __select_operation(self, state:State):
-        operation_type:TransactionOperationEnum = state['args'].get('operation_type')
+    def __select_operation(self, state: State) -> Command[str]:
+        operation_type: Any = state['args'].get('operation_type')
         base_tools = [AskUserData, GoToSupervisor]
         
         match (operation_type):
@@ -85,7 +86,9 @@ class TransactionsAgentGraph:
             goto='build_agent'
         )
 
-    async def __build_agent(self, state: State):
+    async def __build_agent(self, state: State) -> Command[str]:
+        assert self.__notion_factory is not None
+        assert self.agent is not None
         notion_user_data = self.__notion_factory.create_notion_user_data()
         notion_tool = self.__notion_factory.create_notion_tool()
         if not state.get("months"):
@@ -104,7 +107,9 @@ class TransactionsAgentGraph:
             goto='call_agent'
         )
         
-    async def __call_agent(self, state: State):
+    async def __call_agent(self, state: State) -> Command[str]:
+        assert self.agent is not None
+        assert self.agent.agent_with_tools is not None
         query = state['args'].get('query')
         # last_message = state["messages"][-1]
         
@@ -124,7 +129,7 @@ class TransactionsAgentGraph:
             update={"transactions_agent_messages": [result]}
         )
 
-    def __router(self, state: State):
+    def __router(self, state: State) -> str:
         # TODO Todas as chamadas aqgora sao tool call, entao nao precisa mais desse nodo
         if isinstance(state, list):
             ai_message = state[-1]
@@ -136,7 +141,8 @@ class TransactionsAgentGraph:
             return "tools"
         return END
     
-    async def __tool_node(self, state: State):
+    async def __tool_node(self, state: State) -> Command[str]:
+        assert self.agent is not None
         if messages := state.get("transactions_agent_messages", []):
             message = messages[-1]
         else:
@@ -167,16 +173,14 @@ class TransactionsAgentGraph:
             update={"transactions_agent_messages": outputs}
         )
 
-    async def __ask_user_data(self, state: State):
+    async def __ask_user_data(self, state: State) -> dict[str, Any]:
         messages = state["transactions_agent_messages"]
         ai_message = messages[-1]
         user_response = interrupt({"query": str(ai_message.tool_calls[0]['args'])})
         return {'transactions_agent_messages': [user_response]}
     
-    async def __go_to_supervisor(self, state: State):
-        Command(
-            goto=END,
-        )
+    async def __go_to_supervisor(self, state: State) -> Command[str]:
+        return Command(goto=END)
 
 
 # TODO: Onde parei

@@ -5,37 +5,40 @@ from MARiA.tools import ToolInterface
 from langchain_openai import ChatOpenAI
 from external.notion import NotionTool
 from MARiA.graph.state import State
+from typing import Any, Sequence
 
 from langchain.chat_models import init_chat_model
 
 
 class AgentBase:
-    def __init__(self, 
-            tools:list[ToolInterface],
-            model: str | None = None
-        ):
+    def __init__(
+        self,
+        tools: Sequence[type[Any]],
+        model: str | None = None,
+    ) -> None:
         self.model_name = model or "openai:gpt-4.1" 
-        self.tools = tools
-        self.tools_by_name = {}
-        self.agent = None
-        self.agent_with_tools = None
-        self.agent_with_structured_output = None
+        self.tools = list(tools)
+        self.tools_by_name: dict[str, ToolInterface] = {}
+        self.agent: Any | None = None
+        self.agent_with_tools: Any | None = None
+        self.agent_with_structured_output: Any | None = None
 
-    async def create_new_agent(self, state: State, notion_tool: NotionTool, force_tool_call: bool = False):
-        instanciated_tools = []
+    async def create_new_agent(self, state: State, notion_tool: NotionTool, force_tool_call: bool = False) -> None:
+        instanciated_tools: list[ToolInterface] = []
 
         for Tool in self.tools:
             tool_created = await Tool.instantiate_tool(state, notion_tool)
             self.tools_by_name[tool_created.name] = tool_created
             instanciated_tools.append(tool_created)
 
-        self.agent = init_chat_model(self.model_name, temperature=0.2)
+        agent = init_chat_model(self.model_name, temperature=0.2)
+        self.agent = agent
 
         tool_choice = 'any' if force_tool_call else None
 
-        self.agent_with_tools = self.agent.bind_tools(instanciated_tools, tool_choice=tool_choice)
+        self.agent_with_tools = agent.bind_tools(instanciated_tools, tool_choice=tool_choice)
 
-    async def set_structured_output(self, structured_model):
+    async def set_structured_output(self, structured_model: Any) -> None:
         if self.agent == None:
             raise ValueError("AgentBase - Agent not Initialized")
         

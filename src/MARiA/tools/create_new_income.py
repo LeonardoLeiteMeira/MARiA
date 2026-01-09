@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Optional, Type
-from langchain_core.messages.tool import ToolMessage
+from typing import Optional, Type, Any, cast
+from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from external.notion import NotionTool
 from external.notion.enum import UserDataTypes
@@ -14,17 +14,17 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 class CreateNewIncome(ToolInterface):
     name: str = "criar_nova_transacao_de_entrada"
     description: str = "Cria uma nova transação de entrada com os dados fornecidos - se o usuário não fornecer nenhum parâmetro, é necessário perguntar. Retorna a trasação criada."
-    args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] | None = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
-    def _run(self, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, *args: Any, **kwargs: Any) -> Any:
+        return None
 
 
     @classmethod
@@ -33,11 +33,11 @@ class CreateNewIncome(ToolInterface):
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
-        CardEnum = Enum(
+        CardEnum = Enum(  # type: ignore[misc]
             "CardEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
@@ -62,8 +62,14 @@ class CreateNewIncome(ToolInterface):
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: str | dict[Any, Any] | ToolCall,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
+            parms = cast(dict[str, Any], input)
             name = parms['args']['name']
             amount = parms['args']['amount']
             date = parms['args']['date']
@@ -76,14 +82,14 @@ class CreateNewIncome(ToolInterface):
 
             new_income = await self.__notion_tool.create_income(
                 name = name,
-                month_id = month_id,
+                month_id = cast(str, month_id),
                 amount = amount,
                 date = date,
-                card_id = card_id,
+                card_id = cast(str, card_id),
                 hasPaid = hasPaid,
             )
             return ToolMessage(
-                content=new_income,
+                content=cast(Any, new_income),
                 tool_call_id=parms['id'],
             )
         except Exception as e:

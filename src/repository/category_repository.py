@@ -14,7 +14,7 @@ class CategoryRepository(BaseRepository):
             await session.commit()
             return categories
 
-    async def update(self, category: CategoryModel):
+    async def update(self, category: CategoryModel) -> None:
         if category.id is None:
             raise Exception("category id is not defined")
 
@@ -39,7 +39,7 @@ class CategoryRepository(BaseRepository):
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, category: CategoryModel):
+    async def delete(self, category: CategoryModel) -> None:
         if category.id is None:
             raise Exception("category id is not defined")
         stmt = (

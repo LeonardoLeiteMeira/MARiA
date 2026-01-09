@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Optional, cast
 from langgraph.graph import StateGraph, END, START
 from langchain_core.messages import SystemMessage
 from langchain_core.messages.tool import ToolMessage
@@ -23,15 +23,15 @@ class MariaGraph:
         self.main_agent = agent
         self.prompt = initial_prompt
         self.__notion_factory = notion_factory
-        self.__notion_user_data = None
-        self.__notion_tool = None
-        self.__agent_with_tools = None
+        self.__notion_user_data: Optional[NotionUserData] = None
+        self.__notion_tool: Optional[NotionTool] = None
+        self.__agent_with_tools: Any = None
         self.__model_name = "openai:gpt-4.1" 
 
         self.__tools_by_name: dict[str, ToolInterface] = {}
-        self.__state_keys_cache_by_tool = {}
+        self.__state_keys_cache_by_tool: dict[str, tuple[str, ...]] = {}
 
-        self.__tools: list[ToolInterface] = [
+        self.__tools: list[type[ToolInterface]] = [
             #Tools do transaction agent
             CreateNewTransaction,
             SearchTransactionV2,
@@ -81,7 +81,9 @@ class MariaGraph:
         return state_graph
     
 
-    async def __create_agent(self, state: State):
+    async def __create_agent(self, state: State) -> None:
+        assert self.__notion_user_data is not None
+        assert self.__notion_tool is not None
         if not state.get("months"):
             state["months"] = await self.__notion_user_data.get_user_months()
 
@@ -108,7 +110,7 @@ class MariaGraph:
         agent = init_chat_model(self.__model_name, temperature=0.2)
         self.__agent_with_tools = agent.bind_tools(instanciated_tools)
     
-    async def __start_message(self, state: State):
+    async def __start_message(self, state: State) -> dict[str, Any]:
         messages = state["messages"]
         await self.__create_agent(state)
         if len(messages) != 0:
@@ -117,13 +119,13 @@ class MariaGraph:
         system = SystemMessage(self.prompt)
         return {**state, "messages": [system, state["user_input"]]}
 
-    async def main_maria_node(self, state: State):
+    async def main_maria_node(self, state: State) -> dict[str, Any]:
         """ Node with chatbot logic """
         messages = state["messages"]
         chain_output = await self.__agent_with_tools.ainvoke(messages)
         return {**state, "messages": [chain_output]}
     
-    def __router(self, state: State):
+    def __router(self, state: State) -> str:
         if messages := state.get("messages", []):
             ai_message = messages[-1]
         else:
@@ -132,7 +134,7 @@ class MariaGraph:
             return "tools"
         return END
 
-    async def __tool_node(self, state: State): # -> Command[Literal["main_maria_node", "transactions_agent"]]:
+    async def __tool_node(self, state: State) -> Command[str]:
         if messages := state.get("messages", []):
             message = messages[-1]
         else:
@@ -178,24 +180,26 @@ class MariaGraph:
                 )
 
 
+        updates: dict[str, Any] = {"messages": outputs, **state_updates}
         return Command(
             goto='main_maria_node',
-            update={"messages": outputs, **state_updates}
+            update=updates,
         )
 
     def __invalidate_state_cache(self, state: State, tool_name: str) -> dict[str, None]:
         keys_to_reset = self.__state_keys_cache_by_tool.get(tool_name)
         if not keys_to_reset:
             return {}
-        updates = {}
+        updates: dict[str, None] = {}
+        state_dict = cast(dict[str, Any], state)
         for key in keys_to_reset:
-            if key in state:
-                state[key] = None
+            if key in state_dict:
+                state_dict[key] = None
                 updates[key] = None
         return updates
     
 
-    def __create_state_keys_cache_by_tool(self):
+    def __create_state_keys_cache_by_tool(self) -> None:
         for tool in self.__tools_by_name.values():
             if isinstance(tool, CreateCard):
                 self.__state_keys_cache_by_tool[tool.name] = ("cards",)

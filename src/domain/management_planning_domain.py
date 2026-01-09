@@ -12,10 +12,10 @@ if TYPE_CHECKING:
 class ManagementPlanningDomain:
     """Domain layer for management planning operations."""
 
-    def __init__(self, repo: ManagementPlanningRepository):
+    def __init__(self, repo: ManagementPlanningRepository) -> None:
         self._repo = repo
 
-    async def create(self, planning: List[ManagementPlanningModel]) -> ManagementPlanningModel:
+    async def create(self, planning: List[ManagementPlanningModel]) -> List[ManagementPlanningModel]:
         return await self._repo.create(planning)
 
     async def update(self, planning: ManagementPlanningModel) -> ManagementPlanningModel:

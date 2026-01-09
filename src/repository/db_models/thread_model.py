@@ -13,5 +13,5 @@ class ThreadModel(Base):
     created_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now)
     updated_at:Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.now, onupdate=datetime.now) 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"Id:{self.id} - UserId{self.user_id}"

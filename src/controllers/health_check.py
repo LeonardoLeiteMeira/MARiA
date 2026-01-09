@@ -9,7 +9,9 @@ class HealthCheckController(APIRouter):
         super().__init__()
 
         @self.get("/")
-        async def health_check(message_application: MessageApplication = Depends(service_dependency_injected),):
+        async def health_check(
+            message_application: MessageApplication = Depends(service_dependency_injected),
+        ) -> JSONResponse:
             try:
                 is_health = await message_application.check_db_conn()
                 return JSONResponse(status_code=200, content={"status":is_health})

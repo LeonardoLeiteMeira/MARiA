@@ -27,8 +27,8 @@ class RedirectTransactionsAgent(ToolInterface):
     )
     tool_type: ToolType = ToolType.AGENT_REDIRECT
 
-    def _run(self, name: str, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, name: str, *args: object, **kwargs: object) -> ToolMessage | None:
+        return None
 
     @classmethod
     async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'RedirectTransactionsAgent':

@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Type
-from langchain_core.messages.tool import ToolMessage
+from typing import Any, Optional, Type, cast
+from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
@@ -15,17 +15,17 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 class CreateNewOutTransactionV2(ToolInterface):
     name: str = "criar_nova_transacao_de_saida"
     description: str = "Cria uma nova transação de saída com os dados fornecidos. Apenas categoria e macro-categoria sao opcionais! Retorna a trasação criada."
-    args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] | None = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
-    def _run(self, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, *args: object, **kwargs: object) -> ToolMessage | None:
+        return None
 
 
     @classmethod
@@ -36,19 +36,19 @@ class CreateNewOutTransactionV2(ToolInterface):
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
-        CardEnum = Enum(
+        CardEnum = Enum(  # type: ignore[misc]
             "CardEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        CategoriesEnum = Enum(
+        CategoriesEnum = Enum(  # type: ignore[misc]
             "CategoryEnum",
             {category["Name"].upper(): category["Name"] for category in categories},
         )
-        MacroCategoriesEnum = Enum(
+        MacroCategoriesEnum = Enum(  # type: ignore[misc]
             "macroCategoryEnum",
             {macro["Name"].upper(): macro["Name"] for macro in macroCategories},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
@@ -81,9 +81,15 @@ class CreateNewOutTransactionV2(ToolInterface):
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: str | dict[str, Any] | ToolCall,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
-            args_data = parms['args']
+            input_dict = cast(dict[str, Any], input)
+            args_data = input_dict['args']
             name = args_data['name']
             amount = args_data['amount']
             date = args_data['date']
@@ -109,11 +115,11 @@ class CreateNewOutTransactionV2(ToolInterface):
                 hasPaid
             )
             return ToolMessage(
-                content=new_transaction,
-                tool_call_id=parms['id'],
+                content=cast(str, new_transaction),
+                tool_call_id=input_dict['id'],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, parms['id'])
+            return self.handle_tool_exception(e, input_dict['id'])
         
 # if __name__ == "__main__":
 

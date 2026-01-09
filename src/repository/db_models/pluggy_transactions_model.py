@@ -54,8 +54,8 @@ class PluggyTransactionModel(BaseModel):
         nullable=False
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<PluggyTransactionModel(id={self.id}, user_id={self.user_id}, "
-            f"account_id={self.account_id}, transaction_id={self.transaction_id}, amount={self.amount})>"
+            f"account_id={self.account_id}, amount={self.amount})>"
         )

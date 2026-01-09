@@ -46,7 +46,7 @@ class PluggyInvestmentModel(BaseModel):
         nullable=False,
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<PluggyInvestmentModel(id={self.id}, user_id={self.user_id}, name={self.name}, type={self.type})>"
         )

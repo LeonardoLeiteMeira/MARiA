@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Type
-from langchain_core.messages.tool import ToolMessage
+from typing import Any, Optional, Type, cast
+from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field, PrivateAttr
 
@@ -13,17 +13,17 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 class SearchTransactionV2(ToolInterface):
     name: str = "buscar_transacoes_com_parametros"
     description: str = "Fazer busca de transacoes com base nas informacoes que o usuario passar. Use apenas as informações que o usuário passar, o que ele não passar deixe como None"
-    args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] | None = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
-    def _run(self, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, *args: object, **kwargs: object) -> ToolMessage | None:
+        return None
 
 
     @classmethod
@@ -38,23 +38,23 @@ class SearchTransactionV2(ToolInterface):
             transaction_types = [member.value for member in transaction_enum]
 
         from enum import Enum
-        CardEnum = Enum(
+        CardEnum = Enum(  # type: ignore[misc]
             "CardEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        CategoriesEnum = Enum(
+        CategoriesEnum = Enum(  # type: ignore[misc]
             "CategoryEnum",
             {category["Name"].upper(): category["Name"] for category in categories},
         )
-        MacroCategoriesEnum = Enum(
+        MacroCategoriesEnum = Enum(  # type: ignore[misc]
             "macroCategoryEnum",
             {macro["Name"].upper(): macro["Name"] for macro in macroCategories},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
-        TransactionTypeEnum = Enum(
+        TransactionTypeEnum = Enum(  # type: ignore[misc]
             "TransactionTypeEnum",
             {value.upper().replace(" ", "_"): value for value in transaction_types},
         )
@@ -95,18 +95,25 @@ class SearchTransactionV2(ToolInterface):
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: str | dict[str, Any] | ToolCall,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
-            name = parms['args'].get('name', None)
-            has_paid = parms['args'].get('has_paid', None)
-            card_account_enter = parms['args'].get('card_account_enter', None)
-            card_account_out = parms['args'].get('card_account_out', None)
-            category = parms['args'].get('category', None)
-            macro_category = parms['args'].get('macro_category', None)
-            month = parms['args'].get('month', None)
-            transaction_type = parms['args'].get('transaction_type', None)
-            cursor = parms['args'].get('cursor', None)
-            page_size = parms['args'].get('page_size', None)
+            input_dict = cast(dict[str, Any], input)
+            args_data = input_dict['args']
+            name = args_data.get('name', None)
+            has_paid = args_data.get('has_paid', None)
+            card_account_enter = args_data.get('card_account_enter', None)
+            card_account_out = args_data.get('card_account_out', None)
+            category = args_data.get('category', None)
+            macro_category = args_data.get('macro_category', None)
+            month = args_data.get('month', None)
+            transaction_type = args_data.get('transaction_type', None)
+            cursor = args_data.get('cursor', None)
+            page_size = args_data.get('page_size', None)
 
             month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
             card_account_enter_id = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, card_account_enter)
@@ -128,11 +135,11 @@ class SearchTransactionV2(ToolInterface):
             )
 
             return ToolMessage(
-                content=transactions,
-                tool_call_id=parms['id'],
+                content=cast(str, transactions),
+                tool_call_id=input_dict['id'],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, parms['id'])
+            return self.handle_tool_exception(e, input_dict['id'])
         
 # if __name__ == "__main__":
 

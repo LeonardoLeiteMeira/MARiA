@@ -16,7 +16,7 @@ class ManagementPlanningApplication:
     def __init__(self, domain: ManagementPlanningDomain):
         self._domain = domain
 
-    async def create(self, plan: List["ManagementPlanningRequest"]) -> ManagementPlanningModel:
+    async def create(self, plan: List["ManagementPlanningRequest"]) -> List[ManagementPlanningModel]:
         planning = [ManagementPlanningModel(**(data.model_dump())) for data in plan]
         return await self._domain.create(planning)
 

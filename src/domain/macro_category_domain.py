@@ -7,10 +7,10 @@ from repository import MacroCategoryRepository, MacroCategoryModel
 class MacroCategoryDomain:
     """Domain layer for macro category operations."""
 
-    def __init__(self, repo: MacroCategoryRepository):
+    def __init__(self, repo: MacroCategoryRepository) -> None:
         self._repo = repo
 
-    async def create(self, macros: List[MacroCategoryModel]) -> MacroCategoryModel:
+    async def create(self, macros: List[MacroCategoryModel]) -> List[MacroCategoryModel]:
         return await self._repo.create(macros)
 
     async def update(self, macro: MacroCategoryModel) -> MacroCategoryModel:

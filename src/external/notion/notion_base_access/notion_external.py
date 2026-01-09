@@ -1,21 +1,23 @@
+from typing import Any
+
 from notion_client import AsyncClient
 from ..models import NotionProperties, NotionBaseDatasource
 
 class NotionExternal:
     def __init__(self, notion_client: AsyncClient):
         self.notion_client = notion_client
-        self.cache = {}
+        self.cache: dict[str, str] = {}
 
     async def get_datasource(
         self,
         datasource_id: str,
-        filter_properties: list = None,
-        filter: dict = None,
-        sorts: list = [],
-        start_cursor: str = None,
+        filter_properties: list[Any] | None = None,
+        filter: dict[str, Any] | None = None,
+        sorts: list[Any] = [],
+        start_cursor: str | None = None,
         page_size: int = 30,
-    ) -> dict:
-        query = {
+    ) -> Any:
+        query: dict[str, Any] = {
             "data_source_id": datasource_id,
             "sorts": sorts,
             "start_cursor": start_cursor,
@@ -30,7 +32,7 @@ class NotionExternal:
         data = await self.notion_client.data_sources.query(**query)
         return data
 
-    async def get_page(self, page_id: str) -> dict:
+    async def get_page(self, page_id: str) -> Any:
         data = await self.notion_client.pages.retrieve(
             **{
                 "page_id": page_id
@@ -38,10 +40,10 @@ class NotionExternal:
         )
         return data
     
-    async def retrieve_datasource(self, datasource_id: str) -> dict:
+    async def retrieve_datasource(self, datasource_id: str) -> Any:
         return await self.notion_client.data_sources.retrieve(datasource_id)
     
-    async def create_page(self, page: dict) -> dict:
+    async def create_page(self, page: dict[str, Any]) -> dict[str, Any]:
         page["children"] = [{
                 "object": "block",
                 "heading_1": {
@@ -54,7 +56,7 @@ class NotionExternal:
         response = await self.notion_client.pages.create(**page)
         return await self.process_page_register(response)
 
-    async def process_datasource_registers(self, data) -> dict:
+    async def process_datasource_registers(self, data: dict[str, Any]) -> dict[str, Any]:
         full_data = {
             'has_more': data['has_more'],
             'next_cursor': data['next_cursor']
@@ -66,8 +68,8 @@ class NotionExternal:
         full_data['data'] = registers
         return full_data
     
-    async def process_page_register(self, page):
-        row = {}
+    async def process_page_register(self, page: dict[str, Any]) -> dict[str, Any]:
+        row: dict[str, Any] = {}
         row['id'] = page['id']
         for key, value in page['properties'].items():
             property = NotionProperties(key, value)

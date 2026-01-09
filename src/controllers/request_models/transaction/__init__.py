@@ -23,22 +23,21 @@ class TransactionRequest(BaseModel):
 
 
 class TransactionFilter(BaseModel):
-    user_id: UUID = None
-    tags: list[str] = None
-    destination_account_id: list[UUID] = None
-    source_account_id: list[UUID] = None
-    any_accounts_id: list[UUID] = None
-    management_period_id: list[UUID] = None
-    type: list[TransactionType] = None
-    macro_category_id: list[UUID] = None
-    category_id: list[UUID] = None
-    occurred_at_min: datetime = None
-    occurred_at_max: datetime = None
-    min_amount: float = None
-    max_amount: float = None
-    name: str = None
+    user_id: UUID | None = None
+    tags: list[str] | None = None
+    destination_account_id: list[UUID] | None = None
+    source_account_id: list[UUID] | None = None
+    any_accounts_id: list[UUID] | None = None
+    management_period_id: list[UUID] | None = None
+    type: list[TransactionType] | None = None
+    macro_category_id: list[UUID] | None = None
+    category_id: list[UUID] | None = None
+    occurred_at_min: datetime | None = None
+    occurred_at_max: datetime | None = None
+    min_amount: float | None = None
+    max_amount: float | None = None
+    name: str | None = None
     sort_order: Optional[Literal["asc", "desc"]] = "desc"
     page: int = 1
     page_size: int = 25
-
 

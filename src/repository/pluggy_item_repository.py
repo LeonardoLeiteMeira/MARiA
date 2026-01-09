@@ -12,7 +12,7 @@ from sqlalchemy import text, Column, String, Integer, select, update, delete, de
 import uuid
 
 class PluggyItemRepository(BaseRepository):
-    async def get_pluggy_item_by_item_id(self, item_id: str) -> PluggyItemModel | None:
+    async def get_pluggy_item_by_item_id(self, item_id: uuid.UUID) -> PluggyItemModel | None:
         stmt = (
             select(PluggyItemModel)
             .where(PluggyItemModel.id == item_id)
@@ -21,37 +21,37 @@ class PluggyItemRepository(BaseRepository):
             cursor = await session.execute(stmt)
             return cursor.scalars().first()
         
-    async def create_pluggy_item(self, new_pluggy_item: PluggyItemModel):
+    async def create_pluggy_item(self, new_pluggy_item: PluggyItemModel) -> None:
         async with self.session() as session:
             session.add(new_pluggy_item)
             await session.commit()
 
-    async def create_accounts(self, accounts: list[PluggyAccountModel]):
+    async def create_accounts(self, accounts: list[PluggyAccountModel]) -> None:
         async with self.session() as session:
             session.add_all(accounts)
             await session.commit()
 
-    async def create_transactions(self, transactions: list[PluggyTransactionModel]):
+    async def create_transactions(self, transactions: list[PluggyTransactionModel]) -> None:
         async with self.session() as session:
             session.add_all(transactions)
             await session.commit()
 
-    async def create_bills(self, bills: list[PluggyCardBillModel]):
+    async def create_bills(self, bills: list[PluggyCardBillModel]) -> None:
         async with self.session() as session:
             session.add_all(bills)
             await session.commit()
 
-    async def create_investments(self, investments: list[PluggyInvestmentModel]):
+    async def create_investments(self, investments: list[PluggyInvestmentModel]) -> None:
         async with self.session() as session:
             session.add_all(investments)
             await session.commit()
 
-    async def create_investment_transactions(self, transactions: list[PluggyInvestmentTransactionModel]):
+    async def create_investment_transactions(self, transactions: list[PluggyInvestmentTransactionModel]) -> None:
         async with self.session() as session:
             session.add_all(transactions)
             await session.commit()
 
-    async def create_loans(self, loans: list[PluggyLoanModel]):
+    async def create_loans(self, loans: list[PluggyLoanModel]) -> None:
         async with self.session() as session:
             session.add_all(loans)
             await session.commit()

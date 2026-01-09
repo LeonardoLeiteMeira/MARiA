@@ -16,12 +16,12 @@ from .mixin import ManagementPeriodFilterToSqlAlchemyMixin
 
 
 class ManagementPeriodRepository(BaseRepository, ManagementPeriodFilterToSqlAlchemyMixin):
-    async def create(self, management_period: ManagementPeriodModel):
+    async def create(self, management_period: ManagementPeriodModel) -> None:
         async with self.session() as session:
             session.add(management_period)
             await session.commit()
 
-    async def update(self, management_period: ManagementPeriodModel):
+    async def update(self, management_period: ManagementPeriodModel) -> None:
         if management_period.id is None:
             raise Exception("management period id is not defined")
 
@@ -45,7 +45,7 @@ class ManagementPeriodRepository(BaseRepository, ManagementPeriodFilterToSqlAlch
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, management_period: ManagementPeriodModel):
+    async def delete(self, management_period: ManagementPeriodModel) -> None:
         if management_period.id is None:
             raise Exception("management period id is not defined")
         stmt = (

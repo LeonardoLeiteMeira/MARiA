@@ -27,13 +27,13 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data: Any):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
     def _run(self, *args: Any, **kwargs: Any) -> Any:
-        pass
+        return None
 
 
     @classmethod
@@ -44,19 +44,19 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
-        CardEnum = Enum(
+        CardEnum = Enum(  # type: ignore[misc]
             "CardEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        CategoriesEnum = Enum(
+        CategoriesEnum = Enum(  # type: ignore[misc]
             "CategoryEnum",
             {category["Name"].upper(): category["Name"] for category in categories},
         )
-        MacroCategoriesEnum = Enum(
+        MacroCategoriesEnum = Enum(  # type: ignore[misc]
             "macroCategoryEnum",
             {macro["Name"].upper(): macro["Name"] for macro in macroCategories},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
@@ -97,10 +97,15 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, input: Union[str, dict, ToolCall], config: Optional[RunnableConfig] = None, **kwargs: Any) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: Union[str, dict[str, Any], ToolCall],
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
-            input_dict: dict = cast(dict, input)
-            args_data: dict = cast(dict, input_dict['args'])
+            input_dict: dict[str, Any] = cast(dict[str, Any], input)
+            args_data: dict[str, Any] = cast(dict[str, Any], input_dict['args'])
 
             validation_result = self.__validate_transaction_data(args_data, input_dict['id'])
 
@@ -152,7 +157,7 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
         except Exception as e:
             return self.handle_tool_exception(e, input_dict['id'])
         
-    def __validate_transaction_data(self, args_data: dict, call_id: str) -> ToolMessage | None:
+    def __validate_transaction_data(self, args_data: dict[str, Any], call_id: str) -> ToolMessage | None:
         name = args_data.get('name')
         amount = args_data.get('amount')
         month = args_data.get('month')
@@ -206,10 +211,10 @@ Cada tipo de transação deve ter seus dados ideias para manter a consistencia d
                     )
             case _:
                 return ToolMessage(
-                    content={
+                    content=cast(str, {
                         'status': 'Error',
-                        'error_message': f"Invalid transaction type."
-                    },
+                        'error_message': "Invalid transaction type."
+                    }),
                     tool_call_id=call_id,
                 )
 

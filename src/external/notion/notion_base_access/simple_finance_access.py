@@ -1,6 +1,7 @@
 from enum import Enum
 from datetime import datetime
 import urllib.parse
+from typing import Any, cast
 
 from ..enum import NotionDatasourceEnum, GlobalTransactionType
 from .base_template_access import BaseTemplateAccessInterface
@@ -12,16 +13,22 @@ class TransactionType(str, Enum):
     PAY_CREDIT_CARD = 'Pagar fatura cartão'
 
 class SimpleFinanceAccess(BaseTemplateAccessInterface):
-    def get_transaction_enum(self):
+    def get_transaction_enum(self) -> type[Enum]:
         return TransactionType
 
-    async def get_transactions(self, cursor: str = None, page_size: int = None, filter: dict = None, properties: list = None) -> dict:
+    async def get_transactions(
+        self,
+        cursor: str | None = None,
+        page_size: int | None = None,
+        filter: dict[str, Any] | None = None,
+        properties: list[Any] | None = None,
+    ) -> dict[str, Any]:
         if properties!= None:
             properties = [urllib.parse.unquote(id) for id in properties]
         data = await self.notion_external.get_datasource(
             self.datasources[NotionDatasourceEnum.TRANSACTIONS.value]['id'],
             start_cursor=cursor,
-            page_size=page_size,
+            page_size=cast(int, page_size),
             filter=filter,
             filter_properties=properties,
             sorts=[
@@ -34,20 +41,20 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_datasource_registers(data)
     
     async def new_get_transactions(
-            self,
-            name: str|None,
-            has_paid: bool|None,
-            card_account_enter_id: str|None,
-            card_account_out_id: str|None,
-            category_id: str|None,
-            macro_category_id: str|None,
-            month_id: str|None,
-            transaction_type: str|None,
-            cursor: str| None,
-            page_size: int
-        ) -> dict:
+        self,
+        name: str | None,
+        has_paid: bool | None,
+        card_account_enter_id: str | None,
+        card_account_out_id: str | None,
+        category_id: str | None,
+        macro_category_id: str | None,
+        month_id: str | None,
+        transaction_type: str | None,
+        cursor: str | None,
+        page_size: int | None,
+    ) -> dict[str, Any]:
         datasource_id = self.datasources[NotionDatasourceEnum.TRANSACTIONS.value]['id']
-        filter = {"and": []}
+        filter: dict[str, Any] = {"and": []}
 
         if name is not None:
             name_filter = {"property": "Name","title": {"contains": name}}
@@ -80,7 +87,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         data = await self.notion_external.get_datasource(
             datasource_id=datasource_id,
             start_cursor=cursor,
-            page_size=page_size,
+            page_size=cast(int, page_size),
             filter=filter,
             sorts=[
                 {
@@ -93,7 +100,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_datasource_registers(data)
 
     
-    async def get_months_by_year(self, year:int|None, property_ids: list[str] = []) -> dict:
+    async def get_months_by_year(self, year: int | None, property_ids: list[str] = []) -> dict[str, Any] | None:
         try:
             full_properties = await self.__get_properties(NotionDatasourceEnum.MONTHS)
             title_property_id = self.__get_title_property_from_schema(full_properties)
@@ -111,9 +118,10 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             return await self.notion_external.process_datasource_registers(data)
         except Exception as e:
             print(e)
+        return None
 
     
-    async def get_current_month(self) -> dict:
+    async def get_current_month(self) -> dict[str, Any]:
         data = await self.notion_external.get_datasource(
             self.datasources[NotionDatasourceEnum.MONTHS.value]['id'],
             filter={
@@ -128,7 +136,17 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         return await self.notion_external.process_datasource_registers(data)
     
     
-    async def create_out_transaction(self, name: str, month_id:str, amount: float, date:str, card_id:str, category_id:str | None, macro_category_id:str | None, status: bool = True)-> dict:
+    async def create_out_transaction(
+        self,
+        name: str,
+        month_id: str,
+        amount: float,
+        date: str,
+        card_id: str,
+        category_id: str | None,
+        macro_category_id: str | None,
+        status: bool = True,
+    ) -> dict[str, Any]:
         return await self.create_new_transaction(
             name=name,
             month_id=month_id,
@@ -141,7 +159,15 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             status=status
         )
        
-    async def create_in_transaction(self, name:str, month_id:str, amount:float, date:str, card_id:str, status: bool = True)-> dict:
+    async def create_in_transaction(
+        self,
+        name: str,
+        month_id: str,
+        amount: float,
+        date: str,
+        card_id: str,
+        status: bool = True,
+    ) -> dict[str, Any]:
         return await self.create_new_transaction(
             name=name,
             month_id=month_id,
@@ -152,7 +178,16 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
             transaction_type=GlobalTransactionType.INCOME,
         )
 
-    async def create_transfer_transaction(self, name:str, month_id:str, amount:str, date:str, account_id_in:str, account_id_out:str, status: bool = True)-> dict:
+    async def create_transfer_transaction(
+        self,
+        name: str,
+        month_id: str,
+        amount: float,
+        date: str,
+        account_id_in: str,
+        account_id_out: str,
+        status: bool = True,
+    ) -> dict[str, Any]:
         return await self.create_new_transaction(
             name=name,
             month_id=month_id,
@@ -166,12 +201,12 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
 
     async def create_planning(
             self,
-            name,
-            month_id,
-            category_id,
-            amount,
-            text 
-        )-> dict:
+            name: str,
+            month_id: str,
+            category_id: str,
+            amount: Any,
+            text: str,
+        ) -> dict[str, Any]:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -186,7 +221,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         }
         return await self.notion_external.create_page(page)
 
-    async def create_card(self, name: str, initial_balance: float)-> dict:
+    async def create_card(self, name: str, initial_balance: float) -> dict[str, Any]:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -205,7 +240,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         }
         return await self.notion_external.create_page(page)
 
-    async def create_month(self, name: str, start_date:str, finish_date:str)-> dict:
+    async def create_month(self, name: str, start_date: str, finish_date: str) -> dict[str, Any]:
         page = {
             "parent": {
                 "type": "data_source_id",
@@ -222,7 +257,7 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         }
         return await self.notion_external.create_page(page)
 
-    async def get_planning_by_month(self, month_id) -> dict:
+    async def get_planning_by_month(self, month_id: str) -> dict[str, Any]:
         datasource_id = self.datasources[NotionDatasourceEnum.PLANNING.value]['id']
         data = await self.notion_external.get_datasource(
             datasource_id,
@@ -234,25 +269,25 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         )
         return await self.notion_external.process_datasource_registers(data)
     
-    async def get_accounts_with_balance(self) -> dict:
+    async def get_accounts_with_balance(self) -> dict[str, Any]:
         balance_id = await self.get_property_id_from_datasource_by_property_name(NotionDatasourceEnum.CARDS, 'Saldo')
         if balance_id is None:
             raise ValueError("It's not possible to identify balance column. Contact admin!")
         return await self.get_simple_data(datasource=NotionDatasourceEnum.CARDS, property_ids=[balance_id])
     
     async def create_new_transaction(
-            self,
-            name: str,
-            month_id: str,
-            amount: float,
-            date: str,
-            transaction_type: GlobalTransactionType,
-            enter_account_id: str|None = None, 
-            debit_account_id: str|None = None, 
-            category_id: str| None = None, 
-            macro_category_id: str| None = None, 
-            status: bool = True
-        )-> dict:
+        self,
+        name: str,
+        month_id: str,
+        amount: float,
+        date: str,
+        transaction_type: GlobalTransactionType,
+        enter_account_id: str | None = None,
+        debit_account_id: str | None = None,
+        category_id: str | None = None,
+        macro_category_id: str | None = None,
+        status: bool = True,
+    ) -> dict[str, Any]:
         template_transaction_type = self.__convert_global_transaction_type(transaction_type)
         properties = {
             **({"Name": {"title": [{"text": {"content": name}}]}} if name is not None else {}),
@@ -271,8 +306,8 @@ class SimpleFinanceAccess(BaseTemplateAccessInterface):
         }
         return await self.notion_external.create_page(page)
     
-    def __convert_global_transaction_type(self,transaction_type: GlobalTransactionType) -> TransactionType:
-        match(transaction_type):
+    def __convert_global_transaction_type(self, transaction_type: GlobalTransactionType) -> TransactionType:
+        match (transaction_type):
             case GlobalTransactionType.INCOME:
                 return TransactionType.INCOME
             case GlobalTransactionType.OUTCOME:

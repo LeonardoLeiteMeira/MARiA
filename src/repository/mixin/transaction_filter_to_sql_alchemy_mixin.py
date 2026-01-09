@@ -11,8 +11,8 @@ class TransactionFilterToSqlAlchemyMixin:
     def apply_transaction_filters(
         self,
         query: Any,
-        filters: 'TransactionFilter',
-        Transaction: 'TransactionModel'
+        filters: Any,
+        Transaction: Any,
     ) -> Any:
         if filters.user_id is not None:
             query = query.where(Transaction.user_id == filters.user_id)

@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Optional, Type
-from langchain_core.messages.tool import ToolMessage
+from typing import Optional, Type, Any, cast
+from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
@@ -15,17 +15,17 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 class CreateNewPlanning(ToolInterface):
     name: str = "criar_novo_planejamento"
     description: str = "Criar um novo planejamento associado um mes. Retorna os planejamentos criados."
-    args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] | None = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
-    def _run(self, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, *args: Any, **kwargs: Any) -> Any:
+        return None
 
 
     @classmethod
@@ -34,16 +34,16 @@ class CreateNewPlanning(ToolInterface):
         categories = get_state_records_by_type(state, UserDataTypes.CATEGORIES)
 
         from enum import Enum
-        CategoriesEnum = Enum(
+        CategoriesEnum = Enum(  # type: ignore[misc]
             "CategoryEnum",
             {category["Name"].upper(): category["Name"] for category in categories},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
 
-        InputModelUnit = create_model(
+        InputModelUnit: type[BaseModel] = create_model(
             "CreateNewOutTransactionInputDynamic",
             name=(str | None, Field(..., description="Apenas um nome para identificar. Constuma ser o mesmo valor da categoria, mas pode ser outra da preferencia.")),
             category=(
@@ -60,7 +60,7 @@ class CreateNewPlanning(ToolInterface):
 
         InputModel = create_model(
             "CreateNewOutTransactionInputDynamic",
-            plans=(list[InputModelUnit], Field(..., description="Lista de planejamentos a serem criados"))
+            plans=(list[InputModelUnit], Field(..., description="Lista de planejamentos a serem criados"))  # type: ignore[valid-type]
         )
 
 
@@ -68,8 +68,14 @@ class CreateNewPlanning(ToolInterface):
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: str | dict[Any, Any] | ToolCall,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
+            parms = cast(dict[str, Any], input)
             plans = parms['args']['plans']
 
             if not isinstance(plans, list):
@@ -78,7 +84,7 @@ class CreateNewPlanning(ToolInterface):
                     tool_call_id=parms['id'],
                 )
             
-            plans_created = []
+            plans_created: list[dict[str, Any]] = []
             
             for plan in plans:
                 name = plan['name']
@@ -94,15 +100,15 @@ class CreateNewPlanning(ToolInterface):
                 plans_created.append(
                     await self.__notion_tool.create_plan(
                         name,
-                        month_id,
-                        category_id,
+                        cast(str, month_id),
+                        cast(str, category_id),
                         amount,
                         text
                     )
                 ) 
 
             return ToolMessage(
-                content=plans_created,
+                content=cast(list[str | dict[Any, Any]], plans_created),
                 tool_call_id=parms['id'],
             )
         except Exception as e:

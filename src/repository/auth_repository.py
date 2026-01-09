@@ -1,6 +1,5 @@
 from sqlalchemy import select
 from uuid import UUID
-
 from dto.models.user_dto import UserDto
 
 from .base_repository import BaseRepository
@@ -22,7 +21,7 @@ class AuthRepository(BaseRepository):
         async with self.session() as session:
             res = await session.execute(stmt)
             full_user = res.scalars().first()
-            return UserDto.model_validate(full_user) 
+            return UserDto.model_validate(full_user)
 
 
     async def get_user_by_id(self, user_id: UUID) -> UserModel | None:

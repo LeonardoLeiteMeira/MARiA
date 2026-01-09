@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from langchain_core.tools import BaseTool
-from typing import Optional, Type
-from langchain_core.messages.tool import ToolMessage
+from typing import Any, Optional, Type, cast
+from langchain_core.messages.tool import ToolMessage, ToolCall
 from langchain_core.runnables import RunnableConfig
 from pydantic import create_model, Field
 from pydantic import PrivateAttr
@@ -16,17 +16,17 @@ from MARiA.tools.state_utils import get_data_id_from_state, get_state_records_by
 class CreateNewTransfer(ToolInterface):
     name: str = "criar_nova_transferencia"
     description: str = "Criar uma nova transferencia entre constas ou cartoes do usuario. Usao para pagar cartoes de credito tambem, com uma transferencia de uma conta corrente para um cartao de credito. Retorna a trasação criada."
-    args_schema: Type[BaseModel] = None
+    args_schema: Type[BaseModel] | None = None
     __state: State = PrivateAttr()
     __notion_tool: NotionTool = PrivateAttr()
 
-    def __init__(self, state: State, notion_tool: NotionTool, **data):
+    def __init__(self, state: State, notion_tool: NotionTool, **data: Any) -> None:
         super().__init__(**data)
         self.__state = state
         self.__notion_tool = notion_tool
 
-    def _run(self, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, *args: object, **kwargs: object) -> ToolMessage | None:
+        return None
 
 
     @classmethod
@@ -35,15 +35,15 @@ class CreateNewTransfer(ToolInterface):
         months = get_state_records_by_type(state, UserDataTypes.MONTHS)
 
         from enum import Enum
-        EnterInEnum = Enum(
+        EnterInEnum = Enum(  # type: ignore[misc]
             "CardInEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        OutOfEnum = Enum(
+        OutOfEnum = Enum(  # type: ignore[misc]
             "CardInEnum",
             {card["Name"].upper(): card["Name"] for card in cards},
         )
-        MonthsEnum = Enum(
+        MonthsEnum = Enum(  # type: ignore[misc]
             "MonthEnum",
             {month["Name"].upper(): month["Name"] for month in months},
         )
@@ -72,15 +72,21 @@ class CreateNewTransfer(ToolInterface):
         tool.args_schema = InputModel
         return tool
 
-    async def ainvoke(self, parms:dict, config: Optional[RunnableConfig] = None, *args, **kwargs) -> ToolMessage:
+    async def ainvoke(
+        self,
+        input: str | dict[str, Any] | ToolCall,
+        config: Optional[RunnableConfig] = None,
+        **kwargs: Any,
+    ) -> ToolMessage:
         try:
-            name = parms['args']['name']
-            amount = parms['args']['amount']
-            date = parms['args']['date']
-            hasPaid = parms['args']['hasPaid']
-            enter_in = parms['args']['enter_in']
-            out_of = parms['args']['out_of']
-            month = parms['args']['month']
+            input_dict = cast(dict[str, Any], input)
+            name = input_dict['args']['name']
+            amount = input_dict['args']['amount']
+            date = input_dict['args']['date']
+            hasPaid = input_dict['args']['hasPaid']
+            enter_in = input_dict['args']['enter_in']
+            out_of = input_dict['args']['out_of']
+            month = input_dict['args']['month']
 
             month_id = get_data_id_from_state(self.__state, UserDataTypes.MONTHS, month)
             enter_in = get_data_id_from_state(self.__state, UserDataTypes.CARDS_AND_ACCOUNTS, enter_in)
@@ -96,11 +102,11 @@ class CreateNewTransfer(ToolInterface):
                 hasPaid
             )
             return ToolMessage(
-                content=new_transfer,
-                tool_call_id=parms['id'],
+                content=cast(str, new_transfer),
+                tool_call_id=input_dict['id'],
             )
         except Exception as e:
-            return self.handle_tool_exception(e, parms['id'])
+            return self.handle_tool_exception(e, input_dict['id'])
         
 # if __name__ == "__main__":
 

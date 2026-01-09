@@ -46,7 +46,7 @@ class PluggyLoanModel(BaseModel):
         nullable=False,
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<PluggyLoanModel(id={self.id}, user_id={self.user_id}, contract_number={self.contract_number})>"
         )

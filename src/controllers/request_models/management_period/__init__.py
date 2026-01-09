@@ -11,11 +11,11 @@ class ManagementPeriodRequest(BaseModel):
     end_date: datetime | None = None
 
 class ManagementPeriodFilter(BaseModel):
-    user_id: UUID = None
-    start_date_max: datetime = None
-    start_date_min: datetime = None
-    end_date_max: datetime = None
-    end_date_min: datetime = None
+    user_id: UUID | None = None
+    start_date_max: datetime | None = None
+    start_date_min: datetime | None = None
+    end_date_max: datetime | None = None
+    end_date_min: datetime | None = None
     order_start_date: Optional[Literal['desc', 'asc']] = 'desc'
     page: int = 1
     page_size: int = 25

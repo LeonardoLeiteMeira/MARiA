@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Type
+from typing import Any, Type, cast
 from langchain_core.messages.tool import ToolMessage
 from pydantic import create_model, Field
 
@@ -18,8 +18,8 @@ class AskUserData(ToolInterface):
     )
     tool_type: ToolType = ToolType.AGENT_REDIRECT
 
-    def _run(self, name: str, *args, **kwargs) -> ToolMessage:
-        pass
+    def _run(self, name: str, *args: Any, **kwargs: Any) -> ToolMessage:
+        return cast(ToolMessage, None)
 
     @classmethod
     async def instantiate_tool(cls, state: State, notion_tool: NotionTool | None) -> 'AskUserData':

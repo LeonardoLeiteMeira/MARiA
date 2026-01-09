@@ -1,13 +1,14 @@
 # This code came from https://github.com/sh4dowb/whatsapp-media-decrypt.git
 
-from Crypto.Cipher import AES
+import base64
 import hashlib
 import hmac
-import base64
 import sys
+from typing import cast
+from Crypto.Cipher import AES
 
 
-appInfo = {
+appInfo: dict[str, bytes] = {
     "image": b"WhatsApp Image Keys",
     "video": b"WhatsApp Video Keys",
     "audio": b"WhatsApp Audio Keys",
@@ -21,7 +22,7 @@ appInfo = {
     "audio/wav": b"WhatsApp Audio Keys",
 }
 
-extension = {
+extension: dict[str, str] = {
     "image": "jpg",
     "video": "mp4",
     "audio": "ogg",
@@ -29,7 +30,7 @@ extension = {
 }
 
 
-def HKDF(key, length, appInfo=b""):
+def HKDF(key: bytes, length: int, appInfo: bytes = b"") -> bytes:
     key = hmac.new(b"\0"*32, key, hashlib.sha256).digest()
     keyStream = b""
     keyBlock = b""
@@ -44,21 +45,21 @@ def HKDF(key, length, appInfo=b""):
     return keyStream[:length]
 
 
-def AESUnpad(s):
+def AESUnpad(s: bytes) -> bytes:
     return s[:-ord(s[len(s)-1:])]
 
 
-def AESDecrypt(key, ciphertext, iv):
+def AESDecrypt(key: bytes, ciphertext: bytes, iv: bytes) -> bytes:
     cipher = AES.new(key, AES.MODE_CBC, iv)
     plaintext = cipher.decrypt(ciphertext)
     return AESUnpad(plaintext)
 
 
-def decrypt(fileName, mediaKey, mediaType, output):
+def decrypt(fileName: bytes | str, mediaKey: bytes, mediaType: str, output: str | None) -> bytes:
     mediaKeyExpanded = HKDF(mediaKey, 112, appInfo[mediaType])
     macKey = mediaKeyExpanded[48:80]
 
-    mediaData = fileName
+    mediaData = cast(bytes, fileName)
     # mediaData = open(fileName, "rb").read()
 
     file = mediaData[:-10]

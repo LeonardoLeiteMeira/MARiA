@@ -1,5 +1,4 @@
 from uuid import UUID
-
 from sqlalchemy import delete, select
 
 from .base_repository import BaseRepository

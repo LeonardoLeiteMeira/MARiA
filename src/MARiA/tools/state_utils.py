@@ -15,7 +15,7 @@ STATE_KEY_BY_TYPE: dict[UserDataTypes, str] = {
 }
 
 
-def _get_state_section(state: State, key: str | None) -> dict | None:
+def _get_state_section(state: State, key: str | None) -> dict[str, Any] | None:
     if not key:
         return None
     section = state.get(key)
@@ -47,5 +47,5 @@ def get_data_id_from_state(state: State, data_type: UserDataTypes, register_name
     return None
 
 
-def get_state_section_by_type(state: State, data_type: UserDataTypes) -> dict | None:
+def get_state_section_by_type(state: State, data_type: UserDataTypes) -> dict[str, Any] | None:
     return _get_state_section(state, STATE_KEY_BY_TYPE.get(data_type))

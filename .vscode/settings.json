@@ -1,0 +1,8 @@
+{
+    "mypy-type-checker.cwd": "${workspaceFolder}",
+    "mypy-type-checker.args": [
+        "--config-file=pyproject.toml",
+        "--strict"
+    ],
+    "mypy-type-checker.importStrategy": "fromEnvironment",
+}

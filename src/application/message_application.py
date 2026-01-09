@@ -1,3 +1,5 @@
+from typing import Any
+
 from domain import UserDomain
 from MARiA import MariaInteraction
 from external.whatsapp import MessageService
@@ -12,7 +14,7 @@ class MessageApplication:
         self.__maria = maria
         self.__message_service = message_service
 
-    async def new_message(self, message_data:dict):
+    async def new_message(self, message_data: dict[str, Any]) -> None:
         try:
             print(f"Debug new message event: {str(message_data)}")
             is_new_message = self.__message_service.is_event_a_new_message(message_data)
@@ -49,8 +51,8 @@ class MessageApplication:
             })
             raise ex
 
-    async def send_auth_link(self, user: UserModel, chat_id: str):
-        link = self.__get_auth_link(user.id)
+    async def send_auth_link(self, user: UserModel, chat_id: str) -> None:
+        link = self.__get_auth_link(str(user.id))
         name = user.name
         await self.__message_service.send_message(
             chat_id,
@@ -66,7 +68,7 @@ class MessageApplication:
         base_url = f"https://www.notion.so/install-integration?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&state={user_id}"
         return base_url
     
-    async def check_db_conn(self):
+    async def check_db_conn(self) -> bool:
         data = await self.__user_domain.select_all_users()
         if(len(data) > 0):
             return True;

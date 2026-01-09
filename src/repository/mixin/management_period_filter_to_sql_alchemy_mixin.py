@@ -9,8 +9,8 @@ class ManagementPeriodFilterToSqlAlchemyMixin:
     def apply_filters(
         self,
         query: Any,
-        filters: 'ManagementPeriodFilter',
-        ManagementPeriod: 'ManagementPeriodModel'
+        filters: Any,
+        ManagementPeriod: Any,
     ) -> Any:
         if filters.user_id is not None:
             query = query.where(ManagementPeriod.user_id == filters.user_id)

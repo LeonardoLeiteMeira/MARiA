@@ -1,11 +1,11 @@
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 
 from fastapi import Depends, HTTPException, Request
 
 from application.auth_application import AuthApplication
 
 
-def create_jwt_dependency(app_dependency: Callable[[], AuthApplication]):
+def create_jwt_dependency(app_dependency: Callable[[], AuthApplication]) -> Callable[..., Awaitable[None]]:
     async def jwt_dependency(
         request: Request,
         app: AuthApplication = Depends(app_dependency),

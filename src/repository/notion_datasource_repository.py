@@ -2,17 +2,16 @@ from .base_repository import BaseRepository
 from .db_models.notion_datasource_model import NotionDatasourceModel
 
 from datetime import datetime
-
 from sqlalchemy import select, update
 
 
 class NotionDatasourceRepository(BaseRepository):
-    async def create_new_datasources(self, new_datasources: list[NotionDatasourceModel]):
+    async def create_new_datasources(self, new_datasources: list[NotionDatasourceModel]) -> None:
         async with self.session() as session:
             session.add_all(new_datasources)
             await session.commit()
 
-    async def upsert_datasources(self, datasources: list[NotionDatasourceModel]):
+    async def upsert_datasources(self, datasources: list[NotionDatasourceModel]) -> None:
         async with self.session() as session:
             for datasource in datasources:
                 stmt = (
@@ -46,5 +45,4 @@ class NotionDatasourceRepository(BaseRepository):
                 .where(NotionDatasourceModel.tag != None)
             )
             cursor = await session.execute(stmt)
-            datasources = cursor.scalars().all()
-            return datasources
+            return list(cursor.scalars().all())

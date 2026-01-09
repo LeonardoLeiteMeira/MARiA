@@ -8,12 +8,12 @@ from .db_models.account_model import AccountModel
 
 
 class AccountRepository(BaseRepository):
-    async def create(self, account: AccountModel):
+    async def create(self, account: AccountModel) -> None:
         async with self.session() as session:
             session.add(account)
             await session.commit()
 
-    async def update(self, account: AccountModel):
+    async def update(self, account: AccountModel) -> None:
         if account.id is None:
             raise Exception("account id is not defined")
 
@@ -38,7 +38,7 @@ class AccountRepository(BaseRepository):
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, account: AccountModel):
+    async def delete(self, account: AccountModel) -> None:
         if account.id is None:
             raise Exception("account id is not defined")
         stmt = (

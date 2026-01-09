@@ -1,5 +1,6 @@
+from datetime import datetime
 from uuid import UUID
-from typing import TYPE_CHECKING, Dict, List
+from typing import TYPE_CHECKING, Any, Dict, List, cast
 
 from domain import (
     ManagementPeriodDomain,
@@ -30,7 +31,7 @@ class ManagementPeriodApplication:
             category_domain: CategoryDomain,
             macro_category_domain: MacroCategoryDomain,
             transaction_domain: TransactionDomain,
-        ):
+        ) -> None:
             self._domain = domain
             self.plannig_domain = plannig_domain
             self.category_domain = category_domain
@@ -50,14 +51,14 @@ class ManagementPeriodApplication:
         await self._domain.delete(period_id, user_id)
 
     async def get_by_ids(self, period_ids: list[UUID], user_id: UUID) -> list[ManagementPeriodModel]:
-        return await self._domain.get_by_ids(period_ids)
+        return await self._domain.get_by_ids(period_ids, user_id)
 
     async def get_by_filter(self, filter: 'ManagementPeriodFilter') -> PaginatedDataListDto[ManagementPeriodDto]:
         return await self._domain.get_by_filter(filter)
 
     async def get_current_period_resume(self, user_id: UUID, period_id: UUID | None) -> DashboardAggregate:
         if(period_id == None):
-            current_period = await self.get_current_management_period(user_id)
+            current_period: Any = await self.get_current_management_period(user_id)
         else:
             periods = await self._domain.get_by_ids([period_id], user_id)
             current_period = periods[0] if len(periods)>0 else None
@@ -102,15 +103,15 @@ class ManagementPeriodApplication:
             key = str(expense.category_id)
             if not (key in expenses_by_category):
                 category = categories_by_id[key]
-                plan = plans_by_category.get(key, None)
+                plan_for_category: ManagementPlanningDto | None = plans_by_category.get(key, None)
                 aggregate = CategoryTransactionAggregate(
-                    category_id = expense.category_id,
+                    category_id = cast(UUID, expense.category_id),
                     total =  0,
                     transactions =  [],
                     category_name =  category.name,
                     icon =  category.icon,
-                    plan_value =  plan.planned_value_cents if plan!=None else None,
-                    plan_name =  plan.name if plan!=None else None,
+                    plan_value =  plan_for_category.planned_value_cents if plan_for_category!=None else None,
+                    plan_name =  cast(str, plan_for_category.name) if plan_for_category!=None else None,
                 )
                 expenses_by_category[key] = aggregate
 
@@ -124,7 +125,7 @@ class ManagementPeriodApplication:
             if not (key in expenses_by_macro_category):
                 macro_cat = macro_categories_by_id[key]
                 macro_aggregate = MacroCategoryTransactionAggregate(
-                    macro_category_id=expense.macro_category_id,
+                    macro_category_id=cast(UUID, expense.macro_category_id),
                     transactions=[],
                     total=0,
                     macro_category_name=macro_cat.name,
@@ -136,17 +137,17 @@ class ManagementPeriodApplication:
 
         # Total gasto de cada planejamento
         plan_aggregate: List[PlanningAggregate] = []
-        for plan in plans:
-            expense_data = expenses_by_category.get(str(plan.category_id), None)
+        for plan_item in plans:
+            expense_data = expenses_by_category.get(str(plan_item.category_id), None)
             total_expenses_plan = expense_data.total if expense_data != None else 0
-            category = categories_by_id[str(plan.category_id)]
+            category = categories_by_id[str(plan_item.category_id)]
             new_plan = PlanningAggregate(
-                plan_id = plan.id,
-                category_id = plan.category_id,
-                plan_value_cents = plan.planned_value_cents,
+                plan_id = plan_item.id,
+                category_id = cast(UUID, plan_item.category_id),
+                plan_value_cents = plan_item.planned_value_cents,
                 total_expenses = total_expenses_plan,
-                total_available = plan.planned_value_cents - total_expenses_plan,
-                name = plan.name,
+                total_available = plan_item.planned_value_cents - total_expenses_plan,
+                name = plan_item.name,
                 category_name = category.name,
                 category_icon =  category.icon,
                 transactions = expense_data.transactions if expense_data != None else [],
@@ -156,7 +157,7 @@ class ManagementPeriodApplication:
             
 
         # Lista de Transacoes fora do planejamento
-        plan_categories = set([str(plan.category_id) for plan in plans])
+        plan_categories = set([str(plan_item.category_id) for plan_item in plans])
         transactions_without_plan = [expense for expense in all_expenses if str(expense.category_id) not in plan_categories]
 
         # Total fora do planejamento
@@ -164,8 +165,8 @@ class ManagementPeriodApplication:
 
         final_dashboard = DashboardAggregate(
             management_period_id=current_period.id,
-            start_period = current_period.start_date,
-            end_period = current_period.end_date,
+            start_period = cast(datetime, current_period.start_date),
+            end_period = cast(datetime, current_period.end_date),
             total_incomes = total_incomes,
             total_expense = total_expense,
             total_plan = total_plan,

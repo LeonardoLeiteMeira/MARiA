@@ -37,8 +37,8 @@ class PluggyAccountModel(BaseModel):
         nullable=False
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<PluggyAccountModel(id={self.id}, user_id={self.user_id}, "
-            f"account_id={self.account_id}, name={self.name}, marketing_name={self.marketing_name})>"
+            f"name={self.name}, marketing_name={self.marketing_name})>"
         )

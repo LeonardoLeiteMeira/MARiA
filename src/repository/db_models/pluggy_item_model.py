@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Any
 
 from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID, JSONB, ARRAY
@@ -20,7 +21,7 @@ class PluggyItemModel(BaseModel):
         ForeignKey("users.id"),
         nullable=False
     )
-    connector: Mapped[dict] = mapped_column(
+    connector: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False
     )
@@ -28,7 +29,7 @@ class PluggyItemModel(BaseModel):
         ARRAY(String),
         nullable=False
     )
-    complementary_data: Mapped[dict] = mapped_column(
+    complementary_data: Mapped[dict[str, Any]] = mapped_column(
         JSONB,
         nullable=False
     )
@@ -60,11 +61,11 @@ class PluggyItemModel(BaseModel):
         nullable=False
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<UserItemModel(id={self.id}, user_id={self.user_id}, status={self.status})>"
     
     @classmethod
-    def from_request_body(cls, data: dict, user_id:str) -> 'PluggyItemModel':
+    def from_request_body(cls, data: dict[str, Any], user_id: str) -> 'PluggyItemModel':
         item = PluggyItemModel()
         item.id = data['item']['id']
         item.user_id = uuid.UUID(user_id)

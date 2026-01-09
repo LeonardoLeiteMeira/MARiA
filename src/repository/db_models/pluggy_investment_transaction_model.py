@@ -55,7 +55,7 @@ class PluggyInvestmentTransactionModel(BaseModel):
         nullable=False,
     )
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"<PluggyInvestmentTransactionModel(id={self.id}, investment_id={self.investment_id}, amount={self.amount})>"
         )

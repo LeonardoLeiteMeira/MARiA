@@ -4,10 +4,10 @@ from .message_service import MessageService
 
 settings = get_settings()
 class MessageServiceDev(MessageService):
-    def __init__(self, instance: str):
+    def __init__(self, instance: str) -> None:
         super().__init__(instance)
 
-    async def send_message(self, chat_id:str, message: str):
+    async def send_message(self, chat_id: str, message: str) -> None:
         if not settings.is_production:
             print("++++++++++++++++")
             print("Envio de mensagem ambiente te teste")

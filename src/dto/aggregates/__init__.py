@@ -5,9 +5,9 @@ from .macro_category_transaction_aggregate import MacroCategoryTransactionAggreg
 from .accout_with_balance_aggregate import AccountWithBalanceAggregate
 
 __all__ = [
-    DashboardAggregate,
-    PlanningAggregate,
-    CategoryTransactionAggregate,
-    MacroCategoryTransactionAggregate,
-    AccountWithBalanceAggregate
+    "DashboardAggregate",
+    "PlanningAggregate",
+    "CategoryTransactionAggregate",
+    "MacroCategoryTransactionAggregate",
+    "AccountWithBalanceAggregate",
 ]

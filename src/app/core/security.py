@@ -1,7 +1,8 @@
 import os
+from typing import Any, cast
 
-from jose import jwt
-from passlib.context import CryptContext
+from jose import jwt  # type: ignore[import-untyped]
+from passlib.context import CryptContext  # type: ignore[import-untyped]
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "CHANGE_ME")
 ALGORITHM = "HS256"
@@ -11,17 +12,18 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 def hash_password(password: str) -> str:
-    return pwd_context.hash(password)
+    return str(pwd_context.hash(password))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return bool(pwd_context.verify(plain, hashed))
 
 
-def decode_token(token: str) -> dict:
-    from jose.exceptions import JWTError
+def decode_token(token: str) -> dict[str, Any]:
+    from jose.exceptions import JWTError  # type: ignore[import-untyped]
 
     try:
-        return jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        decoded = jwt.decode(token, JWT_SECRET_KEY, algorithms=[ALGORITHM])
+        return cast(dict[str, Any], decoded)
     except JWTError as exc:
         raise ValueError("Invalid token") from exc

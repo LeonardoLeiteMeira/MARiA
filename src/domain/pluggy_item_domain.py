@@ -11,7 +11,7 @@ from repository import (
 )
 
 class PluggyItemDomain:
-    def __init__(self, repository: PluggyItemRepository):
+    def __init__(self, repository: PluggyItemRepository) -> None:
         self.__repository = repository
 
     async def create_if_not_exist(self, pluggy_item: PluggyItemModel) -> PluggyItemModel | None:
@@ -22,22 +22,25 @@ class PluggyItemDomain:
         else:
             return None
         
-    async def create_accounts(self, accounts: list[PluggyAccountModel]):
+    async def create_accounts(self, accounts: list[PluggyAccountModel]) -> None:
         await self.__repository.create_accounts(accounts)
 
-    async def create_transactions(self, transactions: list[PluggyTransactionModel]):
+    async def create_transactions(self, transactions: list[PluggyTransactionModel]) -> None:
         await self.__repository.create_transactions(transactions)
 
-    async def create_bills(self, bills: list[PluggyCardBillModel]):
+    async def create_bills(self, bills: list[PluggyCardBillModel]) -> None:
         await self.__repository.create_bills(bills)
 
-    async def create_investments(self, investments: list[PluggyInvestmentModel]):
+    async def create_investments(self, investments: list[PluggyInvestmentModel]) -> None:
         await self.__repository.create_investments(investments)
 
-    async def create_investment_transactions(self, transactions: list[PluggyInvestmentTransactionModel]):
+    async def create_investment_transactions(
+        self,
+        transactions: list[PluggyInvestmentTransactionModel],
+    ) -> None:
         await self.__repository.create_investment_transactions(transactions)
 
-    async def create_loans(self, loans: list[PluggyLoanModel]):
+    async def create_loans(self, loans: list[PluggyLoanModel]) -> None:
         await self.__repository.create_loans(loans)
 
     async def get_accounts(self, user_id: uuid.UUID) -> list[PluggyAccountModel]:

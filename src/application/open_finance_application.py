@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from typing import TypedDict
+from typing import Any, TypedDict, cast
 import uuid
 
 from domain import PluggyItemDomain
@@ -21,12 +21,12 @@ class ApiKeyControll(TypedDict):
     key: str
 
 class OpenFinanceApplication:
-    def __init__(self, pluggy_item_domain: PluggyItemDomain, pluggy_auth_loader: PluggyAuthLoader):
+    def __init__(self, pluggy_item_domain: PluggyItemDomain, pluggy_auth_loader: PluggyAuthLoader) -> None:
         self.__pluggy_item_domain = pluggy_item_domain
         self.__pluggy_auth_loader = pluggy_auth_loader
         self.__pluggy_api_key: ApiKeyControll | None = None
 
-    async def create_new_item(self, pluggy_item: PluggyItemModel):
+    async def create_new_item(self, pluggy_item: PluggyItemModel) -> None:
         updated_pluggy_item = await self.__pluggy_item_domain.create_if_not_exist(pluggy_item)
         if not updated_pluggy_item:
             return
@@ -40,7 +40,7 @@ class OpenFinanceApplication:
                 case 'LOANS':
                     await self.load_loan(updated_pluggy_item)
 
-    async def load_accounts(self, updated_pluggy_item: PluggyItemModel):
+    async def load_accounts(self, updated_pluggy_item: PluggyItemModel) -> None:
         api_key = await self.__get_api_key()
         item_id = str(updated_pluggy_item.id)
         accounts = []
@@ -63,7 +63,7 @@ class OpenFinanceApplication:
         await self.load_transactions(created_accounts, item_id)
         await self.load_credit_card_bills(created_accounts)
 
-    async def load_transactions(self, accounts: list[PluggyAccountModel], item_id: str):
+    async def load_transactions(self, accounts: list[PluggyAccountModel], item_id: str) -> None:
         api_key = await self.__get_api_key()
         all_account_transactions = []
         for acc in accounts:
@@ -92,7 +92,7 @@ class OpenFinanceApplication:
         
 
 
-    async def load_credit_card_bills(self, accounts: list[PluggyAccountModel]):
+    async def load_credit_card_bills(self, accounts: list[PluggyAccountModel]) -> None:
         api_key = await self.__get_api_key()
         all_bills = []
         for acc in accounts:
@@ -106,7 +106,7 @@ class OpenFinanceApplication:
             for bill in bills:
                 bill_model = PluggyCardBillModel()
                 bill_model.id = bill['id']
-                bill_model.account_id = account_id
+                bill_model.account_id = cast(uuid.UUID, account_id)
                 bill_model.user_id = acc.user_id
                 bill_model.total_amount = bill['totalAmount']
                 bill_model.minimum_payment_amount = bill['minimumPaymentAmount']
@@ -119,7 +119,7 @@ class OpenFinanceApplication:
             await self.__pluggy_item_domain.create_bills(all_bills)
 
 
-    async def load_investiments(self, updated_pluggy_item: PluggyItemModel):
+    async def load_investiments(self, updated_pluggy_item: PluggyItemModel) -> None:
         api_key = await self.__get_api_key()
         item_id = str(updated_pluggy_item.id)
         investments_data = []
@@ -147,7 +147,7 @@ class OpenFinanceApplication:
             await self.__pluggy_item_domain.create_investments(investments)
             await self.load_investiments_transactions(investments)
 
-    async def load_investiments_transactions(self, investments: list[PluggyInvestmentModel]):
+    async def load_investiments_transactions(self, investments: list[PluggyInvestmentModel]) -> None:
         api_key = await self.__get_api_key()
         all_transactions: list[PluggyInvestmentTransactionModel] = []
         for inv in investments:
@@ -177,7 +177,7 @@ class OpenFinanceApplication:
         if all_transactions:
             await self.__pluggy_item_domain.create_investment_transactions(all_transactions)
 
-    async def load_loan(self, updated_pluggy_item: PluggyItemModel):
+    async def load_loan(self, updated_pluggy_item: PluggyItemModel) -> None:
         api_key = await self.__get_api_key()
         item_id = str(updated_pluggy_item.id)
         loans_data = []
@@ -223,10 +223,10 @@ class OpenFinanceApplication:
     async def get_loans(self, user_id: uuid.UUID) -> list[PluggyLoanModel]:
         return await self.__pluggy_item_domain.get_loans(user_id)
 
-    async def __get_api_key(self):
+    async def __get_api_key(self) -> str:
         date_now = datetime.now()
         if self.__pluggy_api_key == None or date_now - self.__pluggy_api_key['created_at'] > timedelta(minutes=30):
-            api_key = await self.__pluggy_auth_loader.get_api_key()
+            api_key = cast(str, await self.__pluggy_auth_loader.get_api_key())
             self.__pluggy_api_key = {
                 'created_at': datetime.now(),
                 'key': api_key
@@ -244,7 +244,7 @@ class OpenFinanceApplication:
 
 
     # Codigo gerado pelo chat
-    async def handle_webhook(self, payload: dict):
+    async def handle_webhook(self, payload: dict[str, Any]) -> None:
         event = payload.get("event")
         print(f"Webhook recebido: {event}")
 
@@ -262,7 +262,7 @@ class OpenFinanceApplication:
             case _:
                 print(f"Evento não tratado: {event}")
 
-    async def handle_transactions_created(self, payload: dict):
+    async def handle_transactions_created(self, payload: dict[str, Any]) -> None:
         link = payload.get("createdTransactionsLink")
         if not link:
             print("createdTransactionsLink ausente no payload")
@@ -278,7 +278,7 @@ class OpenFinanceApplication:
         for tx in transactions:
             print(f"Nova transação: {tx['description']} R$ {tx['amount']}")
 
-    async def handle_transactions_updated(self, payload: dict):
+    async def handle_transactions_updated(self, payload: dict[str, Any]) -> None:
         tx_ids = payload.get("transactionIds", [])
         if not tx_ids:
             print("Nenhuma transação atualizada")
@@ -296,9 +296,8 @@ class OpenFinanceApplication:
         for tx in updated:
             print(f"Atualizada: {tx['id']} - {tx['description']}")
 
-    async def handle_transactions_deleted(self, payload: dict):
+    async def handle_transactions_deleted(self, payload: dict[str, Any]) -> None:
         tx_ids = payload.get("transactionIds", [])
         print(f"{len(tx_ids)} transações deletadas: {tx_ids}")
         # Remover do banco de dados local
-
 

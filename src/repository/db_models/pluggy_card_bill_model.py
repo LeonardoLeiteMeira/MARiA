@@ -41,5 +41,5 @@ class PluggyCardBillModel(BaseModel):
 
 
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"<PluggyCardBillModel(id={self.id}, user_id={self.user_id}, status={self.account_id})>"

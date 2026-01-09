@@ -8,13 +8,13 @@ from .db_models.macro_category_model import MacroCategoryModel
 
 
 class MacroCategoryRepository(BaseRepository):
-    async def create(self, macro_categories: List[MacroCategoryModel]):
+    async def create(self, macro_categories: List[MacroCategoryModel]) -> List[MacroCategoryModel]:
         async with self.session() as session:
             session.add_all(macro_categories)
             await session.commit()
             return macro_categories
 
-    async def update(self, macro_category: MacroCategoryModel):
+    async def update(self, macro_category: MacroCategoryModel) -> None:
         if macro_category.id is None:
             raise Exception("macro category id is not defined")
 
@@ -38,7 +38,7 @@ class MacroCategoryRepository(BaseRepository):
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, macro_category: MacroCategoryModel):
+    async def delete(self, macro_category: MacroCategoryModel) -> None:
         if macro_category.id is None:
             raise Exception("macro category id is not defined")
         stmt = (

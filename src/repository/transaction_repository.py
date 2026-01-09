@@ -15,12 +15,12 @@ if TYPE_CHECKING:
     from controllers.request_models.transaction import TransactionFilter
 
 class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
-    async def create(self, transaction: TransactionModel):
+    async def create(self, transaction: TransactionModel) -> None:
         async with self.session() as session:
             session.add(transaction)
             await session.commit()
 
-    async def update(self, transaction: TransactionModel):
+    async def update(self, transaction: TransactionModel) -> None:
         if transaction.id is None:
             raise Exception("transaction id is not defined")
 
@@ -44,7 +44,7 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, transaction: TransactionModel):
+    async def delete(self, transaction: TransactionModel) -> None:
         if transaction.id is None:
             raise Exception("transaction id is not defined")
         stmt = (
@@ -89,14 +89,14 @@ class TransactionRepository(BaseRepository, TransactionFilterToSqlAlchemyMixin):
 
         transaction_list_dto = [TransactionDto.model_validate(model) for model in transaction_list]
 
-        transaction_list_dto = PaginatedDataListDto(
+        paginated_list = PaginatedDataListDto(
             total_count=total_count,
             page_size=len(transaction_list),
             page=filter.page,
             list_data=transaction_list_dto
         )
 
-        return transaction_list_dto
+        return paginated_list
     
     async def sum_transactions_amount_by_filter(self, filter: "TransactionFilter") -> float:
         stmt = select(func.coalesce(func.sum(TransactionModel.amount_cents), 0))

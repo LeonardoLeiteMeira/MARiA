@@ -2,7 +2,9 @@ from datetime import datetime, timedelta, timezone
 import secrets
 import uuid
 from uuid import UUID
-from jose import jwt
+from typing import Any, cast
+
+from jose import jwt  # type: ignore[import-untyped]
 
 from dto.models.user_dto import UserDto
 from dto.models.auth_user_dto import AuthUserDto
@@ -25,7 +27,7 @@ class AuthApplication:
         domain: AuthDomain,
         message_service: MessageService,
         recover_password_domain: RecoverPasswordDomain,
-    ):
+    ) -> None:
         self._domain = domain
         self.__mensage_service = message_service
         self._recover_password_domain = recover_password_domain
@@ -55,7 +57,7 @@ class AuthApplication:
         expires = datetime.fromtimestamp(payload["exp"], tz=timezone.utc)
         await self._domain.revoke_token(payload["jti"], expires)
 
-    async def validate_token(self, token: str):
+    async def validate_token(self, token: str) -> Any:
         payload = decode_token(token)
         if await self._domain.is_token_revoked(payload["jti"]):
             raise ValueError("Token revoked")
@@ -64,7 +66,7 @@ class AuthApplication:
             raise ValueError("User not found")
         return user
 
-    def _create_access_token(self, user) -> str:
+    def _create_access_token(self, user: Any) -> str:
         to_encode = {
             "sub": user.email,
             "user_id": str(user.id),
@@ -72,7 +74,7 @@ class AuthApplication:
             "exp": datetime.now(timezone.utc)
             + timedelta(minutes=ACCESS_TOKEN_MINUTES),
         }
-        return jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM)
+        return cast(str, jwt.encode(to_encode, JWT_SECRET_KEY, algorithm=ALGORITHM))
     
     async def get_recover_code(self, user_email: str) -> None:
         user = await self._domain.get_full_user_by_email(user_email)
@@ -99,7 +101,7 @@ class AuthApplication:
             message=message,
         )
 
-    async def update_password_by_code(self, user_email: str, code: str, new_password: str):
+    async def update_password_by_code(self, user_email: str, code: str, new_password: str) -> None:
         user = await self._domain.get_full_user_by_email(user_email)
         if not user:
             raise ValueError("User not found")

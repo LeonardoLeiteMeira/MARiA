@@ -20,7 +20,7 @@ class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSql
             await session.commit()
             return planning
 
-    async def update(self, planning: ManagementPlanningModel):
+    async def update(self, planning: ManagementPlanningModel) -> None:
         if planning.id is None:
             raise Exception("management planning id is not defined")
 
@@ -44,7 +44,7 @@ class ManagementPlanningRepository(BaseRepository, ManagementPlanningFilterToSql
             await session.execute(stmt)
             await session.commit()
 
-    async def delete(self, planning: ManagementPlanningModel):
+    async def delete(self, planning: ManagementPlanningModel) -> None:
         if planning.id is None:
             raise Exception("management planning id is not defined")
         stmt = (
