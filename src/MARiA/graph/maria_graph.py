@@ -41,7 +41,6 @@ class MariaGraph:
             # Tools do transaction agent
             CreateNewTransaction,
             SearchTransactionV2,
-            # TODO Apagar essas tools
             # =====
             CreateCard,
             CreateNewMonth,
