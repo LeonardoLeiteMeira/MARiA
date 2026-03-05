@@ -40,12 +40,7 @@ class MariaInteraction:
 
             compiled = state_graph.compile(checkpointer=checkpointer)
             snapshot = await compiled.aget_state(config, subgraphs=True)
-
-            interrupts = tuple(
-                intr
-                for task in getattr(snapshot, "tasks", ())
-                for intr in getattr(task, "interrupts", ())
-            )
+            interrupts = self.__collect_interrupts(snapshot)
 
             if interrupts:
                 cmd: Command[Any] = Command(resume=user_input_with_name)
@@ -56,11 +51,28 @@ class MariaInteraction:
                     config=config,
                     debug=True,
                 )
-            messages = result["messages"]
+            # ====================
+            #TODO Verificar nos teste se essa primeira opcao ja funciona...
+            # result_interrupts = self.__collect_interrupts_from_result(result)
+            # if question := self.__extract_interrupt_question(result_interrupts):
+            #     return question
 
-        # TODO WIP Multi-agent quando for interrupt nao posso pegar a ultima mensagem, tenho que pegar a query do interrupt
-        resp = cast(str, messages[-1].content)
-        return resp
+            # ... assim nao precisa dessa segunda opcao, que é mais custosa
+            post_invoke_snapshot = await compiled.aget_state(config, subgraphs=True)
+            pending_interrupts = self.__collect_interrupts(post_invoke_snapshot)
+            if question := self.__extract_interrupt_question(pending_interrupts):
+                return question
+            # ====================
+
+            if not isinstance(result, dict):
+                raise ValueError("Invalid graph result type.")
+
+            messages = result.get("messages", [])
+            if not messages:
+                raise ValueError("No messages found in graph result.")
+
+            resp = cast(str, messages[-1].content)
+            return resp
 
     async def __get_current_thread(self, user_id: str) -> ThreadModel:
         user_threads = await self.__user_domain.get_user_valid_thread(user_id)
@@ -81,3 +93,38 @@ class MariaInteraction:
         notion_tool = notion_factory.create_notion_tool()
 
         return (notion_user_data, notion_tool)
+
+    def __collect_interrupts(self, snapshot: Any) -> tuple[Any, ...]:
+        if snapshot_interrupts := getattr(snapshot, "interrupts", None):
+            return tuple(snapshot_interrupts)
+        return tuple(
+            intr
+            for task in getattr(snapshot, "tasks", ())
+            for intr in getattr(task, "interrupts", ())
+        )
+
+    def __collect_interrupts_from_result(self, result: Any) -> tuple[Any, ...]:
+        if not isinstance(result, dict):
+            return ()
+        raw_interrupts = result.get("__interrupt__")
+        if raw_interrupts is None:
+            return ()
+        if isinstance(raw_interrupts, tuple):
+            return raw_interrupts
+        if isinstance(raw_interrupts, list):
+            return tuple(raw_interrupts)
+        return ()
+
+    def __extract_interrupt_question(self, interrupts: tuple[Any, ...]) -> str | None:
+        if not interrupts:
+            return None
+        payload = getattr(interrupts[0], "value", None)
+        # TODO verificar o tipo certo para evitar esses ifs
+        if isinstance(payload, dict):
+            if question := payload.get("question"):
+                return str(question)
+            if query := payload.get("query"):
+                return str(query)
+        if isinstance(payload, str):
+            return payload
+        return None

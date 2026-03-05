@@ -1,14 +1,15 @@
 from typing import Any, Optional, cast
 
 from langchain.chat_models import init_chat_model
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages.tool import ToolMessage
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import Command
+from langgraph.types import Command, interrupt
 
 from external.notion import NotionFactory, NotionTool, NotionUserData
 
 from ..tools import (
+    AskUserData,
     CreateCard,
     CreateNewMonth,
     CreateNewPlanning,
@@ -33,11 +34,13 @@ class MariaGraph:
         self.__notion_tool: Optional[NotionTool] = None
         self.__agent_with_tools: Any = None
         self.__model_name = "openai:gpt-4.1"
+        self.__graph_nodes: set[str] = set()
 
         self.__tools_by_name: dict[str, ToolInterface] = {}
         self.__state_keys_cache_by_tool: dict[str, tuple[str, ...]] = {}
 
         self.__tools: list[type[ToolInterface]] = [
+            AskUserData,
             # Tools do transaction agent
             CreateNewTransaction,
             SearchTransactionV2,
@@ -69,10 +72,18 @@ class MariaGraph:
         state_graph.add_node("start_node", self.__start_message)
         state_graph.add_node("main_maria_node", self.main_maria_node)
         state_graph.add_node("tools", self.__tool_node)
+        state_graph.add_node("ask_user_interrupt", self.__ask_user_interrupt)
         # state_graph.add_node("transactions_agent", transactions_agent)
+        self.__graph_nodes = {
+            "start_node",
+            "main_maria_node",
+            "tools",
+            "ask_user_interrupt",
+        }
 
         state_graph.add_edge(START, "start_node")
         state_graph.add_edge("start_node", "main_maria_node")
+        state_graph.add_edge("ask_user_interrupt", "main_maria_node")
         state_graph.add_conditional_edges(
             "main_maria_node", self.__router, {"tools": "tools", END: END}
         )
@@ -124,6 +135,8 @@ class MariaGraph:
     async def main_maria_node(self, state: State) -> dict[str, Any]:
         """Node with chatbot logic"""
         messages = state["messages"]
+        if self.__agent_with_tools is None:
+            await self.__create_agent(state)
         chain_output = await self.__agent_with_tools.ainvoke(messages)
         return {**state, "messages": [chain_output]}
 
@@ -157,13 +170,37 @@ class MariaGraph:
                     continue
 
                 tool_type = tool_to_call.tool_type
-                if tool_type == ToolType.AGENT_REDIRECT:
+                if tool_type == ToolType.HUMAN_INTERRUPT:
+                    question = self.__extract_interrupt_question(tool_call.get("args"))
                     return Command(
-                        goto=tool_call["name"],
+                        goto="ask_user_interrupt",
                         update={
                             "messages": [
                                 ToolMessage(
-                                    content=f"Transferido para {tool_call['name']}",
+                                    content=f"Pergunta ao usuário: {question}",
+                                    tool_call_id=tool_call["id"],
+                                )
+                            ],
+                            "pending_interrupt_question": question,
+                            "pending_interrupt_tool_call_id": tool_call["id"],
+                        },
+                    )
+                if tool_type == ToolType.AGENT_REDIRECT:
+                    handoff_target = tool_call["name"]
+                    if handoff_target not in self.__graph_nodes:
+                        outputs.append(
+                            ToolMessage(
+                                content=f"HANDOFF TARGET {handoff_target} NOT REGISTERED",
+                                tool_call_id=tool_call["id"],
+                            )
+                        )
+                        continue
+                    return Command(
+                        goto=handoff_target,
+                        update={
+                            "messages": [
+                                ToolMessage(
+                                    content=f"Transferido para {handoff_target}",
                                     tool_call_id=tool_call["id"],
                                 )
                             ],
@@ -191,6 +228,33 @@ class MariaGraph:
             goto="main_maria_node",
             update=updates,
         )
+
+    async def __ask_user_interrupt(self, state: State) -> dict[str, Any]:
+        question = state.get("pending_interrupt_question")
+        if not question:
+            raise ValueError("No pending interrupt question found in state.")
+
+        payload: dict[str, Any] = {"question": question}
+        if tool_call_id := state.get("pending_interrupt_tool_call_id"):
+            payload["tool_call_id"] = tool_call_id
+
+        user_response = interrupt(payload)
+        return {
+            "messages": [HumanMessage(str(user_response))],
+            "pending_interrupt_question": None,
+            "pending_interrupt_tool_call_id": None,
+        }
+
+    def __extract_interrupt_question(self, tool_args: Any) -> str:
+        # TODO verificar o tipo certo para evitar esses ifs
+        if isinstance(tool_args, dict):
+            if question := tool_args.get("question"):
+                return str(question)
+            if query := tool_args.get("query"):
+                return str(query)
+        if isinstance(tool_args, str):
+            return tool_args
+        return "Pode detalhar melhor os dados que faltam para continuar?"
 
     def __invalidate_state_cache(self, state: State, tool_name: str) -> dict[str, None]:
         keys_to_reset = self.__state_keys_cache_by_tool.get(tool_name)

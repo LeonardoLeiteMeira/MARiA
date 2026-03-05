@@ -14,3 +14,5 @@ class State(TypedDict):
     macroCategories: NotRequired[dict[str, Any] | None]
     months: NotRequired[dict[str, Any] | None]
     transaction_types: NotRequired[list[str] | None]
+    pending_interrupt_question: NotRequired[str | None]
+    pending_interrupt_tool_call_id: NotRequired[str | None]
