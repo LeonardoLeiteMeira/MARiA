@@ -22,10 +22,6 @@ certificatesResolvers:
       storage: "/letsencrypt/acme.json"
       tlsChallenge: {}
 
-providers:
-  docker:
-    exposedByDefault: false
-
 api:
   dashboard: true
   insecure: false

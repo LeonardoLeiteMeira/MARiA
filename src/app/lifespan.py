@@ -10,7 +10,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state = cast(CustomState, app.state)
     app.state.database = BaseDatabase()
     await ensure_migrations()
-    await seed_database(app.state.database)
+    # await seed_database(app.state.database)
     yield
 
     await app.state.database.dispose()
