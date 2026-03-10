@@ -28,8 +28,8 @@ async def seed_database(base_db: BaseDatabase) -> None:
 
         insert_stmt = text(
             """
-            INSERT INTO users (id, name, email, phone_number, created_at, updated_at)
-            VALUES (:id, :name, :email, :phone_number, now(), now())
+            INSERT INTO users (id, name, email, phone_number, created_at, updated_at, enabled)
+            VALUES (:id, :name, :email, :phone_number, now(), now(), true)
             """
         )
         await session.execute(
@@ -39,6 +39,7 @@ async def seed_database(base_db: BaseDatabase) -> None:
                 "name": DEFAULT_USER["name"],
                 "email": DEFAULT_USER["email"],
                 "phone_number": DEFAULT_USER["phone_number"],
+                "enabled": True,
             },
         )
         await session.commit()

@@ -6,8 +6,14 @@ entryPoints:
         entryPoint:
           to: websecure
           scheme: https
+
   websecure:
     address: ":443"
+    transport:
+      respondingTimeouts:
+        readTimeout: 30s
+        writeTimeout: 30s
+        idleTimeout: 60s
 
 certificatesResolvers:
   le:
@@ -19,5 +25,35 @@ certificatesResolvers:
 providers:
   docker:
     exposedByDefault: false
+
 api:
   dashboard: true
+  insecure: false
+
+log:
+  level: INFO
+
+accessLog:
+  filePath: "/var/log/traefik/access.log"
+  bufferingSize: 100
+
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 50
+        burst: 100
+
+    conn-limit:
+      inFlightReq:
+        amount: 100
+
+    secure-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 31536000
