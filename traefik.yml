@@ -15,6 +15,10 @@ entryPoints:
     #     writeTimeout: 30s
     #     idleTimeout: 60s
 
+providers:
+  docker:
+    exposedByDefault: false
+
 certificatesResolvers:
   le:
     acme:
