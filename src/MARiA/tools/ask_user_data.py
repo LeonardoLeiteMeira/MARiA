@@ -24,7 +24,7 @@ class AskUserData(ToolInterface):
             ),
         ),
     )
-    tool_type: ToolType = ToolType.AGENT_REDIRECT
+    tool_type: ToolType = ToolType.HUMAN_INTERRUPT
 
     def _run(self, name: str, *args: Any, **kwargs: Any) -> ToolMessage:
         return cast(ToolMessage, None)

@@ -144,6 +144,19 @@ class TransactionsAgentGraph:
             tool_to_call = self.agent.tools_by_name[tool_call["name"]]
 
             tool_type = tool_to_call.tool_type
+            if tool_type == ToolType.HUMAN_INTERRUPT:
+                return Command(
+                    goto="ask_user_data",
+                    update={
+                        "messages": [
+                            ToolMessage(
+                                content=f"Pergunta ao usuário: {tool_call['args']}",
+                                tool_call_id=tool_call["id"],
+                            )
+                        ],
+                        "args": tool_call["args"],
+                    },
+                )
             if tool_type == ToolType.AGENT_REDIRECT:
                 return Command(
                     goto=tool_call["name"],
@@ -166,9 +179,14 @@ class TransactionsAgentGraph:
         return Command(goto=END, update={"transactions_agent_messages": outputs})
 
     async def __ask_user_data(self, state: State) -> dict[str, Any]:
-        messages = state["transactions_agent_messages"]
-        ai_message = messages[-1]
-        user_response = interrupt({"query": str(ai_message.tool_calls[0]["args"])})
+        question = None
+        if args := state.get("args"):
+            question = args.get("question") or args.get("query")
+        if not question:
+            messages = state["transactions_agent_messages"]
+            ai_message = messages[-1]
+            question = str(ai_message.tool_calls[0]["args"])
+        user_response = interrupt({"question": str(question)})
         return {"transactions_agent_messages": [user_response]}
 
     async def __go_to_supervisor(self, state: State) -> Command[str]:
