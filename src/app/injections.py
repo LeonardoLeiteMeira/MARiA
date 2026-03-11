@@ -79,7 +79,7 @@ def create_notion_factory() -> Callable[[], NotionFactory]:
 
 def create_message_service() -> Callable[[], MessageService]:
     def dependency() -> MessageService:
-        instance = "maria"
+        instance = "MARiA"
         if settings.is_production:
             return MessageService(instance)
         else:
