@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Optional, cast
 
 from langchain.chat_models import init_chat_model
@@ -5,9 +6,11 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_core.messages.tool import ToolMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
+from pydantic import BaseModel, Field
 
 from external.notion import NotionFactory, NotionTool, NotionUserData
 
+from ..prompts import prompt_route_classifier, prompt_simple_response_node
 from ..tools import (
     AskUserData,
     CreateCard,
@@ -26,6 +29,11 @@ from ..tools import (
 from .state import State
 
 
+class RouteClassifierOutput(BaseModel):
+    domain: str = Field(..., description="SIMPLE, OPERACIONAL ou ANALITICO.")
+    confidence: float = Field(..., ge=0.0, le=1.0)
+
+
 class MariaGraph:
     def __init__(self, initial_prompt: str, notion_factory: NotionFactory):
         self.prompt = initial_prompt
@@ -34,6 +42,9 @@ class MariaGraph:
         self.__notion_tool: Optional[NotionTool] = None
         self.__agent_with_tools: Any = None
         self.__model_name = "openai:gpt-4.1"
+        self.__classifier_model_name = "openai:gpt-4.1-mini"
+        self.__simple_response_model_name = "openai:gpt-4.1"
+        self.__route_confidence_threshold = 0.60
         self.__graph_nodes: set[str] = set()
 
         self.__tools_by_name: dict[str, ToolInterface] = {}
@@ -61,6 +72,9 @@ class MariaGraph:
     ) -> StateGraph:
         self.__notion_user_data = notion_user_data
         self.__notion_tool = notion_tool
+        self.__agent_with_tools = None
+        self.__tools_by_name = {}
+        self.__state_keys_cache_by_tool = {}
 
         # transaction_agent = TransactionsAgentGraph()
         # transaction_agent.set_notion_factory(self.__notion_factory)
@@ -70,19 +84,32 @@ class MariaGraph:
         state_graph = StateGraph(State)
 
         state_graph.add_node("start_node", self.__start_message)
+        state_graph.add_node("classify_request", self.__classify_request)
+        state_graph.add_node("simple_response_node", self.__simple_response_node)
         state_graph.add_node("main_maria_node", self.main_maria_node)
         state_graph.add_node("tools", self.__tool_node)
         state_graph.add_node("ask_user_interrupt", self.__ask_user_interrupt)
         # state_graph.add_node("transactions_agent", transactions_agent)
         self.__graph_nodes = {
             "start_node",
+            "classify_request",
+            "simple_response_node",
             "main_maria_node",
             "tools",
             "ask_user_interrupt",
         }
 
         state_graph.add_edge(START, "start_node")
-        state_graph.add_edge("start_node", "main_maria_node")
+        state_graph.add_edge("start_node", "classify_request")
+        state_graph.add_conditional_edges(
+            "classify_request",
+            self.__route_after_classification,
+            {
+                "simple_response_node": "simple_response_node",
+                "main_maria_node": "main_maria_node",
+            },
+        )
+        state_graph.add_edge("simple_response_node", END)
         state_graph.add_edge("ask_user_interrupt", "main_maria_node")
         state_graph.add_conditional_edges(
             "main_maria_node", self.__router, {"tools": "tools", END: END}
@@ -95,6 +122,8 @@ class MariaGraph:
     async def __create_agent(self, state: State) -> None:
         assert self.__notion_user_data is not None
         assert self.__notion_tool is not None
+        self.__tools_by_name = {}
+        self.__state_keys_cache_by_tool = {}
         if not state.get("months"):
             state["months"] = await self.__notion_user_data.get_user_months()
 
@@ -124,20 +153,73 @@ class MariaGraph:
         self.__agent_with_tools = agent.bind_tools(instanciated_tools)
 
     async def __start_message(self, state: State) -> dict[str, Any]:
-        messages = state["messages"]
-        await self.__create_agent(state)
-        if len(messages) != 0:
-            return {"messages": [state["user_input"]]}
+        return {"messages": [state["user_input"]]}
 
-        system = SystemMessage(self.prompt)
-        return {**state, "messages": [system, state["user_input"]]}
+    async def __classify_request(self, state: State) -> dict[str, Any]:
+        route_fallback: dict[str, Any] = {
+            "route_domain": "SIMPLE",
+            "route_confidence": None,
+            "route_decision": "fallback_simple",
+        }
+
+        try:
+            classifier = init_chat_model(self.__classifier_model_name, temperature=0)
+            classifier_with_structured_output = classifier.with_structured_output(
+                RouteClassifierOutput
+            )
+
+            user_input = state.get("user_input")
+            if user_input is None:
+                return route_fallback
+
+            result = await classifier_with_structured_output.ainvoke(
+                [SystemMessage(prompt_route_classifier), user_input]
+            )
+
+            result = cast(RouteClassifierOutput, result)
+
+            domain = str(result.domain).strip().upper()
+            confidence = float(result.confidence)
+
+            if domain not in {"SIMPLE", "OPERACIONAL", "ANALITICO"} or confidence < self.__route_confidence_threshold:
+                return {
+                    "route_domain": "SIMPLE",
+                    "route_confidence": confidence,
+                    "route_decision": "fallback_simple",
+                }
+
+            return {
+                "route_domain": domain,
+                "route_confidence": confidence,
+                "route_decision": "classified",
+            }
+        except Exception:
+            return route_fallback
+
+    def __route_after_classification(self, state: State) -> str:
+        route_domain = str(state.get("route_domain", "SIMPLE")).upper()
+        if route_domain == "SIMPLE":
+            return "simple_response_node"
+        if route_domain in {"OPERACIONAL", "ANALITICO"}:
+            return "main_maria_node"
+        return "simple_response_node"
+
+    async def __simple_response_node(self, state: State) -> dict[str, Any]:
+        messages = state.get("messages", [])
+        simple_model = init_chat_model(self.__simple_response_model_name, temperature=0.2)
+        chain_output = await simple_model.ainvoke(
+            [SystemMessage(prompt_simple_response_node), *messages]
+        )
+        return {**state, "messages": [chain_output]}
 
     async def main_maria_node(self, state: State) -> dict[str, Any]:
         """Node with chatbot logic"""
-        messages = state["messages"]
+        messages = state.get("messages", [])
         if self.__agent_with_tools is None:
             await self.__create_agent(state)
-        chain_output = await self.__agent_with_tools.ainvoke(messages)
+        chain_output = await self.__agent_with_tools.ainvoke(
+            [SystemMessage(self.prompt), *messages]
+        )
         return {**state, "messages": [chain_output]}
 
     def __router(self, state: State) -> str:

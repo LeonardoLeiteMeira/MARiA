@@ -8,6 +8,9 @@ class State(TypedDict):
     transactions_agent_messages: Annotated[list[Any], add_messages]
     user_input: str
     args: dict[str, Any]
+    route_domain: NotRequired[str]
+    route_confidence: NotRequired[float | None]
+    route_decision: NotRequired[str]
 
     cards: NotRequired[dict[str, Any] | None]
     categories: NotRequired[dict[str, Any] | None]
