@@ -28,6 +28,7 @@ from domain import (
     RecoverPasswordDomain,
     TransactionDomain,
     UserDomain,
+    UserLongTermMemoryDomain,
 )
 from external.notion import NotionFactory
 from external.pluggy import PluggyAuthLoader
@@ -63,6 +64,7 @@ from repository import (
     RecoverPasswordRepository,
     TransactionRepository,
     UserRepository,
+    UserLongTermMemoryRepository,
 )
 
 from .custom_state import CustomState
@@ -109,11 +111,20 @@ def create_agente_base() -> Callable[[], AgentBase]:
     return dependency
 
 
-def create_maria_graph() -> Callable[[], MariaGraph]:
+def create_maria_graph(
+    appState: CustomState,
+) -> Callable[[], MariaGraph]:
     def dependency(
         notion_factory: NotionFactory = Depends(create_notion_factory()),
+        user_long_term_memory_domain: UserLongTermMemoryDomain = Depends(
+            create_user_long_term_memory_domain(appState)
+        ),
     ) -> MariaGraph:
-        return MariaGraph(prompt_main_agent, notion_factory)
+        return MariaGraph(
+            prompt_main_agent,
+            notion_factory,
+            user_long_term_memory_domain,
+        )
 
     return dependency
 
@@ -121,6 +132,15 @@ def create_maria_graph() -> Callable[[], MariaGraph]:
 def create_user_repository(appState: CustomState) -> Callable[[], UserRepository]:
     def dependency() -> UserRepository:
         return UserRepository(appState.database)
+
+    return dependency
+
+
+def create_user_long_term_memory_repository(
+    appState: CustomState,
+) -> Callable[[], UserLongTermMemoryRepository]:
+    def dependency() -> UserLongTermMemoryRepository:
+        return UserLongTermMemoryRepository(appState.database)
 
     return dependency
 
@@ -155,6 +175,19 @@ def create_user_domain(appState: CustomState) -> Callable[[], UserDomain]:
     return dependency
 
 
+def create_user_long_term_memory_domain(
+    appState: CustomState,
+) -> Callable[[], UserLongTermMemoryDomain]:
+    def dependency(
+        repo: UserLongTermMemoryRepository = Depends(
+            create_user_long_term_memory_repository(appState)
+        ),
+    ) -> UserLongTermMemoryDomain:
+        return UserLongTermMemoryDomain(repo)
+
+    return dependency
+
+
 def create_pluggy_item_domain(appState: CustomState) -> Callable[[], PluggyItemDomain]:
     def dep(
         repo: PluggyItemRepository = Depends(create_pluggy_item_repository(appState)),
@@ -168,7 +201,7 @@ def create_maria_interaction(
     appState: CustomState,
 ) -> Callable[[], Awaitable[MariaInteraction]]:
     async def dependency(
-        maria_graph: MariaGraph = Depends(create_maria_graph()),
+        maria_graph: MariaGraph = Depends(create_maria_graph(appState)),
         user_domain: UserDomain = Depends(create_user_domain(appState)),
         checkpoint_manager: Any = Depends(get_checkpointer_manager),
     ) -> MariaInteraction:

@@ -47,22 +47,18 @@ class MariaInteraction:
                 result = await compiled.ainvoke(cmd, config=config, debug=True)
             else:
                 result = await compiled.ainvoke(
-                    {"user_input": HumanMessage(user_input_with_name)},
+                    {
+                        "user_input": HumanMessage(user_input_with_name),
+                        "user_id": str(user.id),
+                    },
                     config=config,
                     debug=True,
                 )
-            # ====================
-            #TODO Verificar nos teste se essa primeira opcao ja funciona...
-            # result_interrupts = self.__collect_interrupts_from_result(result)
-            # if question := self.__extract_interrupt_question(result_interrupts):
-            #     return question
 
-            # ... assim nao precisa dessa segunda opcao, que é mais custosa
             post_invoke_snapshot = await compiled.aget_state(config, subgraphs=True)
             pending_interrupts = self.__collect_interrupts(post_invoke_snapshot)
             if question := self.__extract_interrupt_question(pending_interrupts):
                 return question
-            # ====================
 
             if not isinstance(result, dict):
                 raise ValueError("Invalid graph result type.")
@@ -102,18 +98,6 @@ class MariaInteraction:
             for task in getattr(snapshot, "tasks", ())
             for intr in getattr(task, "interrupts", ())
         )
-
-    def __collect_interrupts_from_result(self, result: Any) -> tuple[Any, ...]:
-        if not isinstance(result, dict):
-            return ()
-        raw_interrupts = result.get("__interrupt__")
-        if raw_interrupts is None:
-            return ()
-        if isinstance(raw_interrupts, tuple):
-            return raw_interrupts
-        if isinstance(raw_interrupts, list):
-            return tuple(raw_interrupts)
-        return ()
 
     def __extract_interrupt_question(self, interrupts: tuple[Any, ...]) -> str | None:
         if not interrupts:
