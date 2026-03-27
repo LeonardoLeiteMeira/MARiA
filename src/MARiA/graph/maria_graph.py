@@ -1,5 +1,6 @@
 import asyncio
 from typing import Any, Optional, cast
+from collections.abc import Awaitable, Callable
 
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -8,9 +9,15 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 from pydantic import BaseModel, Field
 
+from domain import UserLongTermMemoryDomain
 from external.notion import NotionFactory, NotionTool, NotionUserData
 
-from ..prompts import prompt_route_classifier, prompt_simple_response_node
+from ..prompts import (
+    build_main_agent_prompt,
+    prompt_memory_validator_node,
+    prompt_route_classifier,
+    prompt_simple_response_node,
+)
 from ..tools import (
     AskUserData,
     CreateCard,
@@ -22,10 +29,12 @@ from ..tools import (
     GetMonthData,
     GetPlanByMonth,
     ReadUserBaseData,
+    RequestSaveMemory,
     SearchTransactionV2,
     ToolInterface,
     ToolType,
 )
+from ..tools.manage_user_memory import ManageUserMemory
 from .state import State
 
 
@@ -35,14 +44,21 @@ class RouteClassifierOutput(BaseModel):
 
 
 class MariaGraph:
-    def __init__(self, initial_prompt: str, notion_factory: NotionFactory):
+    def __init__(
+        self,
+        initial_prompt: str,
+        notion_factory: NotionFactory,
+        user_long_term_memory_domain: UserLongTermMemoryDomain,
+    ):
         self.prompt = initial_prompt
         self.__notion_factory = notion_factory
+        self.__user_long_term_memory_domain = user_long_term_memory_domain
         self.__notion_user_data: Optional[NotionUserData] = None
         self.__notion_tool: Optional[NotionTool] = None
         self.__agent_with_tools: Any = None
         self.__model_name = "openai:gpt-4.1"
         self.__classifier_model_name = "openai:gpt-4.1-mini"
+        self.__memory_validator_model_name = "openai:gpt-4.1-mini"
         self.__simple_response_model_name = "openai:gpt-4.1"
         self.__route_confidence_threshold = 0.60
         self.__graph_nodes: set[str] = set()
@@ -52,6 +68,7 @@ class MariaGraph:
 
         self.__tools: list[type[ToolInterface]] = [
             AskUserData,
+            RequestSaveMemory,
             # Tools do transaction agent
             CreateNewTransaction,
             SearchTransactionV2,
@@ -84,23 +101,30 @@ class MariaGraph:
         state_graph = StateGraph(State)
 
         state_graph.add_node("start_node", self.__start_message)
+        state_graph.add_node(
+            "load_long_term_memory_node", self.__load_long_term_memory_node
+        )
         state_graph.add_node("classify_request", self.__classify_request)
         state_graph.add_node("simple_response_node", self.__simple_response_node)
         state_graph.add_node("main_maria_node", self.main_maria_node)
         state_graph.add_node("tools", self.__tool_node)
         state_graph.add_node("ask_user_interrupt", self.__ask_user_interrupt)
+        state_graph.add_node("memory_validator_node", self.__memory_validator_node)
         # state_graph.add_node("transactions_agent", transactions_agent)
         self.__graph_nodes = {
             "start_node",
+            "load_long_term_memory_node",
             "classify_request",
             "simple_response_node",
             "main_maria_node",
             "tools",
             "ask_user_interrupt",
+            "memory_validator_node",
         }
 
         state_graph.add_edge(START, "start_node")
-        state_graph.add_edge("start_node", "classify_request")
+        state_graph.add_edge("start_node", "load_long_term_memory_node")
+        state_graph.add_edge("load_long_term_memory_node", "classify_request")
         state_graph.add_conditional_edges(
             "classify_request",
             self.__route_after_classification,
@@ -110,7 +134,7 @@ class MariaGraph:
             },
         )
         state_graph.add_edge("simple_response_node", END)
-        state_graph.add_edge("ask_user_interrupt", "main_maria_node")
+        state_graph.add_edge("ask_user_interrupt", "memory_validator_node")
         state_graph.add_conditional_edges(
             "main_maria_node", self.__router, {"tools": "tools", END: END}
         )
@@ -124,19 +148,29 @@ class MariaGraph:
         assert self.__notion_tool is not None
         self.__tools_by_name = {}
         self.__state_keys_cache_by_tool = {}
+
+        notion_data_calls: dict[str, Callable[[], Awaitable[dict[str, Any]]]] = {}
         if not state.get("months"):
-            state["months"] = await self.__notion_user_data.get_user_months()
+            notion_data_calls['months'] = self.__notion_user_data.get_user_months
 
         if not state.get("cards"):
-            state["cards"] = await self.__notion_user_data.get_user_cards()
+            notion_data_calls['cards'] = self.__notion_user_data.get_user_cards
 
         if not state.get("categories"):
-            state["categories"] = await self.__notion_user_data.get_user_categories()
+            notion_data_calls['categories'] = self.__notion_user_data.get_user_categories
 
         if not state.get("macroCategories"):
-            state[
-                "macroCategories"
-            ] = await self.__notion_user_data.get_user_macro_categories()
+            notion_data_calls['macroCategories'] = self.__notion_user_data.get_user_macro_categories
+
+        if notion_data_calls:
+            notion_data_results: list[dict[str, Any]] = await asyncio.gather(
+                *(call() for call in notion_data_calls.values())
+            )
+
+            state_dict = cast(dict[str, Any], state)
+            for key, result in zip(notion_data_calls.keys(), notion_data_results):
+                state_dict[key] = result
+
 
         if not state.get("transaction_types"):
             transaction_enum = self.__notion_tool.ger_transaction_types()
@@ -154,6 +188,18 @@ class MariaGraph:
 
     async def __start_message(self, state: State) -> dict[str, Any]:
         return {"messages": [state["user_input"]]}
+
+    async def __load_long_term_memory_node(self, state: State) -> dict[str, Any]:
+        if "long_term_memory" in state:
+            return {}
+
+        memory_tool = self.__create_manage_user_memory_tool(state)
+        tool_result = await memory_tool.ainvoke(
+            {"args": {"action": "read"}, "id": "load_long_term_memory"}
+        )
+        return {
+            "long_term_memory": self.__extract_memory_from_tool_result(tool_result, {})
+        }
 
     async def __classify_request(self, state: State) -> dict[str, Any]:
         route_fallback: dict[str, Any] = {
@@ -217,8 +263,9 @@ class MariaGraph:
         messages = state.get("messages", [])
         if self.__agent_with_tools is None:
             await self.__create_agent(state)
+        prompt = build_main_agent_prompt(self.prompt, state.get("long_term_memory"))
         chain_output = await self.__agent_with_tools.ainvoke(
-            [SystemMessage(self.prompt), *messages]
+            [SystemMessage(prompt), *messages]
         )
         return {**state, "messages": [chain_output]}
 
@@ -236,8 +283,11 @@ class MariaGraph:
             message = messages[-1]
         else:
             raise ValueError("No message found in input")
-        outputs = []
-        state_updates: dict[str, None] = {}
+        outputs: list[ToolMessage] = []
+        state_updates: dict[str, Any] = {}
+        pending_memory_intent_description: str | None = None
+        pending_memory_tool_call_id: str | None = None
+
         for tool_call in message.tool_calls:
             try:
                 tool_to_call = self.__tools_by_name.get(tool_call["name"])
@@ -258,6 +308,7 @@ class MariaGraph:
                         goto="ask_user_interrupt",
                         update={
                             "messages": [
+                                *outputs,
                                 ToolMessage(
                                     content=f"Pergunta ao usuário: {question}",
                                     tool_call_id=tool_call["id"],
@@ -281,6 +332,7 @@ class MariaGraph:
                         goto=handoff_target,
                         update={
                             "messages": [
+                                *outputs,
                                 ToolMessage(
                                     content=f"Transferido para {handoff_target}",
                                     tool_call_id=tool_call["id"],
@@ -289,6 +341,12 @@ class MariaGraph:
                             "args": tool_call["args"],
                         },
                     )
+                if tool_type == ToolType.MEMORY_SIGNAL:
+                    pending_memory_intent_description = str(
+                        tool_call.get("args", {}).get("description", "")
+                    )
+                    pending_memory_tool_call_id = tool_call["id"]
+                    continue
 
                 tool_result = await tool_to_call.ainvoke(
                     {"args": tool_call["args"], "id": tool_call["id"]}
@@ -305,7 +363,18 @@ class MariaGraph:
                     )
                 )
 
-        updates: dict[str, Any] = {"messages": outputs, **state_updates}
+        updates: dict[str, Any] = {**state_updates}
+        if outputs:
+            updates["messages"] = outputs
+
+        if pending_memory_intent_description and pending_memory_tool_call_id:
+            updates["pending_memory_intent_description"] = pending_memory_intent_description
+            updates["pending_memory_tool_call_id"] = pending_memory_tool_call_id
+            return Command(
+                goto="memory_validator_node",
+                update=updates,
+            )
+
         return Command(
             goto="main_maria_node",
             update=updates,
@@ -325,7 +394,48 @@ class MariaGraph:
             "messages": [HumanMessage(str(user_response))],
             "pending_interrupt_question": None,
             "pending_interrupt_tool_call_id": None,
+            "question_from_interrupt": payload["question"],
+            "answer_from_interrupt": user_response
         }
+
+    async def __memory_validator_node(self, state: State) -> Command[str]:
+        memory_input = self.__build_memory_validator_input(state)
+        memory_update: dict[str, Any] = {
+            "pending_memory_intent_description": None,
+            "pending_memory_tool_call_id": None,
+        }
+
+        if memory_input is None:
+            return self.__build_memory_validator_command(state, memory_update)
+
+        memory_tool = self.__create_manage_user_memory_tool(state)
+        memory_agent = init_chat_model(
+            self.__memory_validator_model_name,
+            temperature=0,
+        ).bind_tools([memory_tool])
+
+        chain_output = await memory_agent.ainvoke(
+            [
+                SystemMessage(self.__build_memory_validator_prompt(state)),
+                HumanMessage(memory_input),
+            ]
+        )
+
+        current_memory = dict(state.get("long_term_memory", {}))
+        if hasattr(chain_output, "tool_calls"):
+            for tool_call in chain_output.tool_calls:
+                if tool_call["name"] != memory_tool.name:
+                    continue
+
+                tool_result = await memory_tool.ainvoke(
+                    {"args": tool_call["args"], "id": tool_call["id"]}
+                )
+                current_memory = self.__extract_memory_from_tool_result(
+                    tool_result, current_memory
+                )
+
+        memory_update["long_term_memory"] = current_memory
+        return self.__build_memory_validator_command(state, memory_update)
 
     def __extract_interrupt_question(self, tool_args: Any) -> str:
         # TODO verificar o tipo certo para evitar esses ifs
@@ -337,6 +447,62 @@ class MariaGraph:
         if isinstance(tool_args, str):
             return tool_args
         return "Pode detalhar melhor os dados que faltam para continuar?"
+
+    def __build_memory_validator_command(
+        self, state: State, update: dict[str, Any]
+    ) -> Command[str]:
+        if pending_memory_tool_call_id := state.get("pending_memory_tool_call_id"):
+            update["messages"] = [
+                ToolMessage(
+                    content="Memory intent evaluated.",
+                    tool_call_id=pending_memory_tool_call_id,
+                )
+            ]
+        return Command(goto="main_maria_node", update=update)
+
+    def __build_memory_validator_input(self, state: State) -> str | None:
+        if pending_memory_intent_description := state.get(
+            "pending_memory_intent_description"
+        ):
+            return pending_memory_intent_description
+        
+        if question_interrupt := state.get(
+            "question_from_interrupt"
+        ):
+            answer = state.get("answer_from_interrupt", "")
+            return f"Question made: '{question_interrupt}'. Answer from user: '{answer}'"
+
+        return None
+
+    def __build_memory_validator_prompt(self, state: State) -> str:
+        current_memory = state.get("long_term_memory", {})
+        if not current_memory:
+            memory_section = "Memória atual do usuário:\n- Nenhuma memória salva."
+        else:
+            rendered_memory = "\n".join(
+                f"- {key}: {value}"
+                for key, value in sorted(current_memory.items(), key=lambda item: item[0])
+            )
+            memory_section = f"Memória atual do usuário:\n{rendered_memory}"
+
+        return f"{prompt_memory_validator_node.strip()}\n\n{memory_section}"
+
+    def __create_manage_user_memory_tool(self, state: State) -> ManageUserMemory:
+        return ManageUserMemory(state, self.__user_long_term_memory_domain)
+
+    def __extract_memory_from_tool_result(
+        self,
+        tool_result: ToolMessage,
+        fallback: dict[str, str],
+    ) -> dict[str, str]:
+        artifact = getattr(tool_result, "artifact", None)
+        if not isinstance(artifact, dict):
+            return dict(fallback)
+
+        normalized_memory: dict[str, str] = {}
+        for key, value in artifact.items():
+            normalized_memory[str(key)] = str(value)
+        return normalized_memory
 
     def __invalidate_state_cache(self, state: State, tool_name: str) -> dict[str, None]:
         keys_to_reset = self.__state_keys_cache_by_tool.get(tool_name)

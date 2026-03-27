@@ -19,8 +19,10 @@ from .db_models.management_planning_model import ManagementPlanningModel
 from .db_models.account_model import AccountModel, AccountType
 from .db_models.transaction_model import TransactionModel
 from .db_models.recover_password_model import RecoverPasswordModel
+from .db_models.user_long_term_memory_model import UserLongTermMemoryModel
 from .notion_authorization_repository import NotionAuthorizationRepository
 from .user_repository import UserRepository
+from .user_long_term_memory_repository import UserLongTermMemoryRepository
 from .notion_datasource_repository import NotionDatasourceRepository
 from .auth_repository import AuthRepository
 from .pluggy_item_repository import PluggyItemRepository
@@ -59,7 +61,9 @@ __all__ = [
     "AccountType",
     "TransactionModel",
     "RecoverPasswordModel",
+    "UserLongTermMemoryModel",
     "RecoverPasswordRepository",
+    "UserLongTermMemoryRepository",
     "ManagementPeriodRepository",
     "CategoryRepository",
     "MacroCategoryRepository",
